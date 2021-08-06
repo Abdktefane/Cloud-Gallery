@@ -23,7 +23,7 @@ class GraduatePageLoader extends StatelessWidget {
   Widget build(BuildContext context) {
     return LoadingPage(
       isLoading: isLoading,
-      loadingWidget: GraduateLoader(),
+      loadingWidget: const Center(child: GraduateLoader()),
       animationDuration: animationDuration,
       barrierColor: barrierColor,
       child: child,
@@ -51,7 +51,7 @@ class GraduateMobxPageLoader<T extends BaseViewmodel> extends StatelessWidget {
       viewmodel: viewmodel,
       animationDuration: animationDuration,
       barrierColor: barrierColor,
-      loadingWidget: GraduateLoader(),
+      loadingWidget: const Center(child: GraduateLoader()),
       child: child,
     );
   }

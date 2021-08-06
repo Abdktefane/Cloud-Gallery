@@ -44,30 +44,34 @@ class LoginDataSourceImpl extends LoginDataSource {
         );
 
   @override
-  Future<NetworkResult<BaseResponseModel<LoginResponseModel>?>> login(
-          {required String email, required String password}) =>
+  Future<NetworkResult<BaseResponseModel<LoginResponseModel>?>> login({
+    required String email,
+    required String password,
+  }) =>
       request(
         method: METHOD.POST,
         endpoint: EndPoints.login,
-        withAuth: true,
+        withAuth: false,
         mapper: BaseResponseModel.fromJson(LoginResponseModel.fromJson),
         data: {
-          email: email,
-          password: password,
+          'email': email,
+          'password': password,
         },
       );
 
   @override
-  Future<NetworkResult<BaseResponseModel<LoginResponseModel>?>> register(
-          {required String email, required String password}) =>
+  Future<NetworkResult<BaseResponseModel<LoginResponseModel>?>> register({
+    required String email,
+    required String password,
+  }) =>
       request(
         method: METHOD.POST,
-        endpoint: EndPoints.login,
-        withAuth: true,
+        endpoint: EndPoints.register,
+        withAuth: false,
         mapper: BaseResponseModel.fromJson(LoginResponseModel.fromJson),
         data: {
-          email: email,
-          password: password,
+          'email': email,
+          'password': password,
         },
       );
 }

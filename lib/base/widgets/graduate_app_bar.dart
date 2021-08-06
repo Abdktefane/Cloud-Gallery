@@ -1,8 +1,12 @@
+import 'package:core_sdk/utils/constants.dart';
 import 'package:core_sdk/utils/extensions/build_context.dart';
+import 'package:core_sdk/utils/widgets/reveal_route.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
+import 'package:graduation_project/features/settings/presentation/pages/settings_page.dart';
+import 'package:supercharged/supercharged.dart';
 
 class GraduateAppBar extends StatelessWidget implements PreferredSizeWidget {
   const GraduateAppBar({
@@ -42,10 +46,12 @@ class GraduateAppBar extends StatelessWidget implements PreferredSizeWidget {
             leading: title != null || appViewModel!.appBarParams!.showBackButton
                 ? IconButton(
                     icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => appViewModel!.popRoute(
-                      context,
-                      onBackPressed: appViewModel!.appBarParams!.onBackPressed,
-                    ),
+                    onPressed: title != null
+                        ? () => context.pop()
+                        : () => appViewModel!.popRoute(
+                              context,
+                              onBackPressed: appViewModel!.appBarParams!.onBackPressed,
+                            ),
                   )
                 : null,
 
@@ -53,23 +59,27 @@ class GraduateAppBar extends StatelessWidget implements PreferredSizeWidget {
             actionsIconTheme: const IconThemeData(color: GREY),
             iconTheme: const IconThemeData(color: Colors.black),
             bottom: appViewModel!.appBarParams!.bottom,
-            actions: title != null ? null : null,
-            // : appViewModel.appBarParams.showNotificationIcon
-            //     ? [
-            //         Observer(
-            //           builder: (_) {
-            //             return navigationButtonWithCount(
-            //               context,
-            //               icon: Icons.notifications,
-            //               count: appViewModel.notificationsCount,
-            //               onPressed: () => context.cupertinoPushPage(
-            //                 NotificationsPage(appViewModel: appViewModel),
-            //               ),
-            //             );
-            //           },
-            //         )
-            //       ]
-            //     : null,
+            actions: title != null
+                ? null
+                : [
+                    IconButton(
+                      icon: const Icon(Icons.settings_outlined, size: 24.0, color: TEXT_COLOR),
+                      onPressed: () {
+                        context.navigator.push(
+                          RevealRoute(
+                            maxRadius: context.fullHeight * 2,
+                            centerAlignment:
+                                appViewModel!.language == LANGUAGE_ARABIC ? Alignment.topLeft : Alignment.topRight,
+                            centerOffset: const Offset(0, 0),
+                            minRadius: 0,
+                            page: const SettingsPage(),
+                            transitionDuration: 800.milliseconds,
+                            reverseTransitionDuration: 400.milliseconds,
+                          ),
+                        );
+                      },
+                    ),
+                  ],
           ),
         );
       },

@@ -30,7 +30,7 @@ abstract class _RegisterViewmodelBase extends BaseViewmodel with Store {
 
   @action
   void register({required String email, required String password}) => futureWrapper(
-        () => _registerRepository.login(email: email, password: password).whenSuccess(
+        () => _registerRepository.register(email: email, password: password).whenSuccess(
               (res) => getContext(
                 (context) => context.pushNamedAndRemoveUntil(BasePage.route, (_) => false),
               ),

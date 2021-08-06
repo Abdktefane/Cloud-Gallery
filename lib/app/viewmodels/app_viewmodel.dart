@@ -38,7 +38,10 @@ abstract class _AppViewmodelBase extends BaseViewmodel with Store {
   ObservableFuture<String?>? languageFuture;
 
   @observable
-  AppBarParams? appBarParams;
+  ObservableFuture<bool>? logoutResult;
+
+  @observable
+  AppBarParams? appBarParams = const AppBarParams(title: 'lbl_home', onBackPressed: null);
 
   @observable
   PageIndex pageIndex = PageIndex.home;
@@ -94,6 +97,17 @@ abstract class _AppViewmodelBase extends BaseViewmodel with Store {
       appBarHistory.clear();
       pushRoute(AppBarParams(title: getAppBarTitle(pageIndex), onBackPressed: null));
     }
+  }
+
+  @action
+  void logout({VoidCallback? onSuccess}) {
+    logoutResult = futureWrapper(
+      () => _prefsRepository.clearUserData().then((_) {
+        onSuccess?.call();
+        return true;
+      }),
+      catchBlock: (err) => showSnack(err ?? '', duration: 2.seconds),
+    );
   }
 }
 

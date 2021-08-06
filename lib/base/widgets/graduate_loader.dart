@@ -10,7 +10,7 @@ class GraduateLoader extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
+      children: const [
         SpinKitThreeBounce(color: PRIMARY, size: 24.0),
       ],
     );

@@ -39,6 +39,21 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
     });
   }
 
+  final _$logoutResultAtom = Atom(name: '_AppViewmodelBase.logoutResult');
+
+  @override
+  ObservableFuture<bool>? get logoutResult {
+    _$logoutResultAtom.reportRead();
+    return super.logoutResult;
+  }
+
+  @override
+  set logoutResult(ObservableFuture<bool>? value) {
+    _$logoutResultAtom.reportWrite(value, super.logoutResult, () {
+      super.logoutResult = value;
+    });
+  }
+
   final _$appBarParamsAtom = Atom(name: '_AppViewmodelBase.appBarParams');
 
   @override
@@ -128,9 +143,21 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
   }
 
   @override
+  void logout({VoidCallback? onSuccess}) {
+    final _$actionInfo = _$_AppViewmodelBaseActionController.startAction(
+        name: '_AppViewmodelBase.logout');
+    try {
+      return super.logout(onSuccess: onSuccess);
+    } finally {
+      _$_AppViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 languageFuture: ${languageFuture},
+logoutResult: ${logoutResult},
 appBarParams: ${appBarParams},
 pageIndex: ${pageIndex},
 languageLoading: ${languageLoading},

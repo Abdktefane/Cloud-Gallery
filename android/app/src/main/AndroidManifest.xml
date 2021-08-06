@@ -2,7 +2,9 @@
     package="com.example.graduation_project">
    <application
         android:label="Graduation Project"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="${usesCleartextTraffic}"
+        >
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"

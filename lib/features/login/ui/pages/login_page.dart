@@ -6,11 +6,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
+import 'package:graduation_project/base/utils/validators.dart';
 import 'package:graduation_project/base/widgets/graduate_gradient_button.dart';
+import 'package:graduation_project/base/widgets/graduate_loader.dart';
 import 'package:graduation_project/base/widgets/graduate_page_loader.dart';
 import 'package:graduation_project/base/widgets/graduate_text_field.dart';
 import 'package:graduation_project/features/login/viewmodels/login_viewmodel.dart';
 import 'package:graduation_project/features/register/presentation/pages/register_page.dart';
+import 'package:graduation_project/features/splash/ui/pages/splash_page.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -66,25 +69,21 @@ class _LoginPageState extends MobxState<LoginPage, LoginViewmodel> {
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(
+                  const Padding(
+                    padding: EdgeInsets.only(
                       top: 30,
                       bottom: 5,
                     ),
-                    child: Text(
-                      context.translate('lbl_welcome_to_graduate'),
-                      style: context.textTheme.headline1!
-                          .copyWith(fontSize: 26, letterSpacing: 0.3, foreground: Paint()..shader = linearGradient),
-                    ),
+                    child: GraduateIcon(),
                   ),
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 40),
-                    child: SvgPicture.asset('assets/images/slogan.svg'),
-                  ),
+                  // Padding(
+                  //   padding: const EdgeInsets.only(bottom: 40),
+                  //   child: SvgPicture.asset('assets/images/slogan.svg'),
+                  // ),
                   GraduateTextField(
                     context: context,
                     hintText: 'lbl_email',
-                    validator: (value) => value,
+                    validator: (value) => emailValidator(context: context, email: value ?? ''),
                     textEditingController: _userNameController,
                     // return emailValidator(context: context, email: value ?? '');
                   ),
@@ -96,7 +95,8 @@ class _LoginPageState extends MobxState<LoginPage, LoginViewmodel> {
                       textEditingController: _passwordController,
                       context: context,
                       hintText: 'lbl_password',
-                      validator: (value) => value,
+                      validator: (value) => passwordValidator(context: context, password: value ?? ''),
+
                       // return passwordValidator(context: context, password: value ?? '');
                       isSuffixIcon: true,
                       useObscure: true,

@@ -12,6 +12,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
+const String baseUrl2 = 'http://192.168.1.106:3000';
+
 final GetIt getIt = GetIt.I;
 
 @InjectableInit(
@@ -24,7 +26,7 @@ Future<GetIt?> inject({String? environment}) async => $inject(getIt, environment
 @module
 abstract class AppModule {
   @Named('ApiBaseUrl')
-  String get baseUrl => 'https://test/api/';
+  String get baseUrl => '$baseUrl2/api';
 
   BaseOptions dioOption(@Named('ApiBaseUrl') String baseUrl) => BaseOptions(
         baseUrl: baseUrl,
@@ -50,7 +52,7 @@ abstract class AppModule {
     BaseOptions option,
     Logger logger,
     PrefsRepository tokenRepository,
-    @Named('RefreshTokenUrl') String refreshTokenUrl,
+    // @Named('RefreshTokenUrl') String refreshTokenUrl,
   ) {
     final dio = Dio(option);
     return dio
