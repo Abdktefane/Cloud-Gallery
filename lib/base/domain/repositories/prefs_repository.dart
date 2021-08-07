@@ -20,6 +20,9 @@ abstract class PrefsRepository {
   int? get siteId;
   Future<bool> setSiteId(int siteId);
 
+  List<String>? get uploadedFiles;
+  Future<bool> setUploadedFiles(List<String> uploadedFiles);
+
   // ProfileModel? get profile;
   // Future<bool> setProfile(ProfileModel? profile);
 

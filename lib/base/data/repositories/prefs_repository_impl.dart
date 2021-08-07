@@ -50,6 +50,12 @@ class PrefsRepositoryImpl implements PrefsRepository {
   @override
   Future<bool> setBaseUrl(String baseUrl) => _prefs.setString(PreferencesKeys.API_BASE_URL, baseUrl);
 
+  @override
+  List<String>? get uploadedFiles => _prefs.getStringList(_UPLOADED_FILES_KEY);
+
+  @override
+  Future<bool> setUploadedFiles(List<String> uploadedFiles) => _prefs.setStringList(_UPLOADED_FILES_KEY, uploadedFiles);
+
   // @override
   // Future<bool> setProfile(ProfileModel? profile) =>
   //     _prefs.setString(PreferencesKeys.USER_PROFILE, json.encode(profile!.toJson()));
@@ -69,5 +75,8 @@ class PrefsRepositoryImpl implements PrefsRepository {
     await _prefs.remove(PreferencesKeys.CUSTOMER_PROFILE);
     await _prefs.remove(PreferencesKeys.IS_DEVICE_REGISTERED);
     await _prefs.remove(PreferencesKeys.FB_USER_TOKEN);
+    await _prefs.remove(_UPLOADED_FILES_KEY);
   }
 }
+
+const String _UPLOADED_FILES_KEY = 'graduate_uploaded_files_key';
