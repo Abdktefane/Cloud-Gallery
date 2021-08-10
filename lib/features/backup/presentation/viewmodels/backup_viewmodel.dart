@@ -1,14 +1,10 @@
 import 'package:core_sdk/data/viewmodels/base_viewmodel.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
-import 'package:core_sdk/utils/extensions/string.dart';
+import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/domain/interactors/interactors.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_observer.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobx/mobx.dart';
-import 'package:rxdart/rxdart.dart';
-import 'package:supercharged/supercharged.dart';
-
-import 'package:graduation_project/base/domain/repositories/common_repository.dart';
-import 'package:graduation_project/base/domain/usecases/image_loader_interactor.dart';
-import 'package:graduation_project/features/backup/presentation/viewmodels/backup_image_ui_model.dart';
 
 part 'backup_viewmodel.g.dart';
 
@@ -16,38 +12,28 @@ part 'backup_viewmodel.g.dart';
 class BackupViewmodel extends _BackupViewmodelBase with _$BackupViewmodel {
   BackupViewmodel(
     Logger logger,
-    CommonRepository _commonRepository,
-    ImageLoaderInteractor _imageLoaderInteractor,
-  ) : super(logger, _commonRepository, _imageLoaderInteractor);
+    ImageObserver imageSyncInteractor,
+  ) : super(logger, imageSyncInteractor);
 }
 
 abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
   _BackupViewmodelBase(
     Logger logger,
-    this._commonRepository,
-    this._imageLoaderInteractor,
+    this._imageObserver,
   ) : super(logger) {
-    _imageLoaderInteractor.observe().map((it) => BackupImageUIModel.fromAsset(image: it)).listen(_addRaw);
-    _imageLoaderInteractor(pageNumber);
+    images = _imageObserver.asObservable();
+    _imageObserver(1);
   }
-  final CommonRepository _commonRepository;
-  final ImageLoaderInteractor _imageLoaderInteractor;
-  int pageNumber = 0;
+
+  final ImageObserver _imageObserver;
 
   //* OBSERVERS *//
+
   @observable
-  ObservableList<BackupImageUIModel>? images;
+  ObservableStream<List<Backup>>? images;
 
   //* COMPUTED *//
 
   //* ACTIONS *//
 
-  @action
-  void _addRaw(BackupImageUIModel raw) => images?.add(raw);
-
-  @action
-  void fetchLocalImages() {
-    pageNumber++;
-    _imageLoaderInteractor(pageNumber);
-  }
 }

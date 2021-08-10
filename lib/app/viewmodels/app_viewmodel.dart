@@ -1,10 +1,14 @@
+import 'dart:ffi';
+
 import 'package:core_sdk/utils/constants.dart';
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/extensions/mobx.dart';
 import 'package:core_sdk/utils/nav_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/app/viewmodels/app_bar_params.dart';
+import 'package:graduation_project/app/viewmodels/graduate_viewmodel.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_sync_interactor.dart';
 import 'package:mobx/mobx.dart';
 import 'package:injectable/injectable.dart';
 import 'package:core_sdk/utils/extensions/string.dart';
@@ -24,14 +28,23 @@ enum PageIndex {
 
 @injectable
 class AppViewmodel extends _AppViewmodelBase with _$AppViewmodel {
-  AppViewmodel(Logger logger, PrefsRepository prefsRepository) : super(logger, prefsRepository);
+  AppViewmodel(
+    Logger logger,
+    PrefsRepository prefsRepository,
+    ImageSyncInteractor imageSyncInteractor,
+  ) : super(logger, prefsRepository, imageSyncInteractor);
 }
 
-abstract class _AppViewmodelBase extends BaseViewmodel with Store {
-  _AppViewmodelBase(Logger logger, this._prefsRepository) : super(logger);
+abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
+  _AppViewmodelBase(
+    Logger logger,
+    this._prefsRepository,
+    this._imageSyncInteractor,
+  ) : super(logger);
 
   PrefsRepository _prefsRepository;
   NavStack<AppBarParams?> appBarHistory = NavStack<AppBarParams?>();
+  final ImageSyncInteractor _imageSyncInteractor;
 
   //* OBSERVERS *//
   @observable
@@ -57,7 +70,9 @@ abstract class _AppViewmodelBase extends BaseViewmodel with Store {
 
   @action
   void changeLanguage(String locale, {bool refreshConstants = true}) {
-    if (locale == language) return;
+    if (locale == language) {
+      return;
+    }
     if (!refreshConstants) {
       languageFuture = ObservableFuture(_prefsRepository.setApplicationLanguage(locale).then((_) {
         return locale;
@@ -109,6 +124,11 @@ abstract class _AppViewmodelBase extends BaseViewmodel with Store {
       catchBlock: (err) => showSnack(err ?? '', duration: 2.seconds),
     );
   }
+
+  void syncImages() {
+    print('syncImages called in appviewmodel');
+    collect(_imageSyncInteractor(Void));
+  }
 }
 
 String getAppBarTitle(PageIndex pageIndex) {
@@ -125,3 +145,11 @@ String getAppBarTitle(PageIndex pageIndex) {
       return 'not_exist';
   }
 }
+
+
+// mixin Test on GraduateViewmodel{
+//   extension Tes on int{
+
+//   }
+// }
+

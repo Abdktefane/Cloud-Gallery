@@ -47,6 +47,7 @@ class BackupImageUIModel extends Equatable {
     AssetEntity? image,
     UploadStatus? status,
   }) {
+    // image?.thumbData
     return BackupImageUIModel(
       image: image ?? this.image,
       status: status ?? this.status,

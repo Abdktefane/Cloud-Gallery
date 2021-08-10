@@ -8,28 +8,42 @@ import 'package:core_sdk/utils/Fimber/Logger.dart' as _i7;
 import 'package:dio/dio.dart' as _i3;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
+import 'package:moor/isolate.dart' as _i28;
 import 'package:shared_preferences/shared_preferences.dart' as _i5;
 
-import '../../base/data/datasources/common_datasource.dart' as _i14;
-import '../../base/data/repositories/common_repository_impl.dart' as _i16;
-import '../../base/domain/repositories/common_repository.dart' as _i15;
+import '../../base/data/datasources/common_datasource.dart' as _i15;
+import '../../base/data/db/database_transaction_runner.dart' as _i8;
+import '../../base/data/db/di/db_module.dart' as _i31;
+import '../../base/data/db/graduate_db.dart' as _i9;
+import '../../base/data/repositories/common_repository_impl.dart' as _i17;
+import '../../base/domain/repositories/common_repository.dart' as _i16;
 import '../../base/domain/repositories/prefs_repository.dart' as _i4;
+import '../../base/utils/image_saver.dart' as _i29;
+import '../../features/backup/data/mappers/backup_mapper.dart' as _i23;
+import '../../features/backup/data/repositories/backups_repository_impl.dart'
+    as _i21;
+import '../../features/backup/data/stores/backup_datasource.dart' as _i22;
+import '../../features/backup/domain/interactors/image_observer.dart' as _i24;
+import '../../features/backup/domain/interactors/image_sync_interactor.dart'
+    as _i25;
+import '../../features/backup/domain/repositorires/backups_repository.dart'
+    as _i20;
 import '../../features/backup/presentation/viewmodels/backup_viewmodel.dart'
-    as _i19;
+    as _i27;
 import '../../features/home/presentation/viewmodels/home_viewmodel.dart'
-    as _i17;
-import '../../features/login/data/datasources/login_datasource.dart' as _i9;
-import '../../features/login/data/repositories/login_repository_impl.dart'
-    as _i11;
-import '../../features/login/domain/repositories/login_repository.dart' as _i10;
-import '../../features/login/viewmodels/login_viewmodel.dart' as _i12;
-import '../../features/recommend/presentation/viewmodels/recommend_viewmodel.dart'
     as _i18;
+import '../../features/login/data/datasources/login_datasource.dart' as _i10;
+import '../../features/login/data/repositories/login_repository_impl.dart'
+    as _i12;
+import '../../features/login/domain/repositories/login_repository.dart' as _i11;
+import '../../features/login/viewmodels/login_viewmodel.dart' as _i13;
+import '../../features/recommend/presentation/viewmodels/recommend_viewmodel.dart'
+    as _i19;
 import '../../features/register/presentation/viewmodels/register_viewmodel.dart'
-    as _i13;
+    as _i14;
 import '../../features/splash/viewmodels/splash_viewmodel.dart' as _i6;
-import '../viewmodels/app_viewmodel.dart' as _i8;
-import 'injection_container.dart' as _i20;
+import '../viewmodels/app_viewmodel.dart' as _i26;
+import 'injection_container.dart' as _i30;
 
 const String _prod = 'prod';
 // ignore_for_file: unnecessary_lambdas
@@ -39,6 +53,7 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
     {String? environment, _i2.EnvironmentFilter? environmentFilter}) async {
   final gh = _i2.GetItHelper(get, environment, environmentFilter);
   final appModule = _$AppModule();
+  final graduateDBModule = _$GraduateDBModule();
   gh.factory<String>(() => appModule.baseUrl, instanceName: 'ApiBaseUrl');
   gh.factory<_i3.BaseOptions>(
       () => appModule.dioOption(get<String>(instanceName: 'ApiBaseUrl')));
@@ -47,38 +62,59 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       registerFor: {_prod});
   gh.factory<_i6.SplashViewmodel>(
       () => _i6.SplashViewmodel(get<_i7.Logger>(), get<_i4.PrefsRepository>()));
-  gh.factory<_i8.AppViewmodel>(
-      () => _i8.AppViewmodel(get<_i7.Logger>(), get<_i4.PrefsRepository>()));
-  gh.lazySingleton<_i9.LoginDataSource>(() => _i9.LoginDataSourceImpl(
+  gh.factory<_i8.DatabaseTransactionRunner>(
+      () => _i8.DatabaseTransactionRunner(get<_i9.GraduateDB>()));
+  gh.lazySingleton<_i10.LoginDataSource>(() => _i10.LoginDataSourceImpl(
       client: get<_i3.Dio>(),
       prefsRepository: get<_i4.PrefsRepository>(),
       logger: get<_i7.Logger>()));
-  gh.lazySingleton<_i10.LoginRepository>(() => _i11.LoginRepositoryImpl(
-      get<_i9.LoginDataSource>(),
+  gh.lazySingleton<_i11.LoginRepository>(() => _i12.LoginRepositoryImpl(
+      get<_i10.LoginDataSource>(),
       get<_i7.Logger>(),
       get<_i4.PrefsRepository>()));
-  gh.factory<_i12.LoginViewmodel>(() =>
-      _i12.LoginViewmodel(get<_i7.Logger>(), get<_i10.LoginRepository>()));
-  gh.factory<_i13.RegisterViewmodel>(() =>
-      _i13.RegisterViewmodel(get<_i7.Logger>(), get<_i10.LoginRepository>()));
-  gh.lazySingleton<_i14.CommonDataSource>(() => _i14.CommonDataSourceImpl(
+  gh.factory<_i13.LoginViewmodel>(() =>
+      _i13.LoginViewmodel(get<_i7.Logger>(), get<_i11.LoginRepository>()));
+  gh.factory<_i14.RegisterViewmodel>(() =>
+      _i14.RegisterViewmodel(get<_i7.Logger>(), get<_i11.LoginRepository>()));
+  gh.lazySingleton<_i15.CommonDataSource>(() => _i15.CommonDataSourceImpl(
       client: get<_i3.Dio>(),
       prefsRepository: get<_i4.PrefsRepository>(),
       logger: get<_i7.Logger>()));
-  gh.lazySingleton<_i15.CommonRepository>(
-      () => _i16.CommonRepositoryImpl(get<_i14.CommonDataSource>()));
-  gh.factory<_i17.HomeViewmodel>(() =>
-      _i17.HomeViewmodel(get<_i7.Logger>(), get<_i15.CommonRepository>()));
-  gh.factory<_i18.RecommendViewmodel>(() =>
-      _i18.RecommendViewmodel(get<_i7.Logger>(), get<_i15.CommonRepository>()));
-  gh.factory<_i19.BackupViewmodel>(() =>
-      _i19.BackupViewmodel(get<_i7.Logger>(), get<_i15.CommonRepository>()));
+  gh.lazySingleton<_i16.CommonRepository>(
+      () => _i17.CommonRepositoryImpl(get<_i15.CommonDataSource>()));
+  gh.factory<_i18.HomeViewmodel>(() =>
+      _i18.HomeViewmodel(get<_i7.Logger>(), get<_i16.CommonRepository>()));
+  gh.factory<_i19.RecommendViewmodel>(() =>
+      _i19.RecommendViewmodel(get<_i7.Logger>(), get<_i16.CommonRepository>()));
+  gh.lazySingleton<_i20.BackupsRepository>(() => _i21.BackupsRepositoryImpl(
+      get<_i15.CommonDataSource>(),
+      get<_i22.BackupsStore>(),
+      get<_i23.BackupMapper>()));
+  gh.factory<_i24.ImageObserver>(
+      () => _i24.ImageObserver(get<_i20.BackupsRepository>()));
+  gh.factory<_i25.ImageSyncInteractor>(
+      () => _i25.ImageSyncInteractor(get<_i20.BackupsRepository>()));
+  gh.factory<_i26.AppViewmodel>(() => _i26.AppViewmodel(get<_i7.Logger>(),
+      get<_i4.PrefsRepository>(), get<_i25.ImageSyncInteractor>()));
+  gh.factory<_i27.BackupViewmodel>(
+      () => _i27.BackupViewmodel(get<_i7.Logger>(), get<_i24.ImageObserver>()));
+  gh.singleton<_i23.BackupMapper>(_i23.BackupMapper());
   gh.singleton<_i7.Logger>(appModule.logger());
+  await gh.singletonAsync<_i28.MoorIsolate>(
+      () => graduateDBModule.getMoorIsolate(),
+      preResolve: true);
   await gh.singletonAsync<_i5.SharedPreferences>(() => appModule.getPrefs(),
       preResolve: true);
+  await gh.singletonAsync<_i9.GraduateDB>(
+      () => graduateDBModule.getDb(get<_i28.MoorIsolate>()),
+      preResolve: true);
+  gh.singleton<_i22.BackupsStore>(_i22.BackupDao(get<_i9.GraduateDB>()));
   gh.singleton<_i3.Dio>(appModule.dio(get<_i5.SharedPreferences>(),
       get<_i3.BaseOptions>(), get<_i7.Logger>(), get<_i4.PrefsRepository>()));
+  gh.singleton<_i29.ImageSaver>(_i29.ImageSaver(get<_i4.PrefsRepository>()));
   return get;
 }
 
-class _$AppModule extends _i20.AppModule {}
+class _$AppModule extends _i30.AppModule {}
+
+class _$GraduateDBModule extends _i31.GraduateDBModule {}

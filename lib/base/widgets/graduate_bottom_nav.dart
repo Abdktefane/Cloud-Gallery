@@ -22,30 +22,31 @@ class GraduateBottomNavigationBar extends StatelessWidget {
           onTap: (int index) => appViewModel!.navigateTo(PageIndex.values[index]),
           selectedLabelStyle: const TextStyle(
             fontSize: 12.0,
+            // foreground: Paint()..shader = linearGradient,
           ),
           unselectedLabelStyle: const TextStyle(fontSize: 10.0),
           showSelectedLabels: true,
           showUnselectedLabels: true,
-          selectedItemColor: ACCENT,
+          selectedItemColor: Colors.black,
           unselectedItemColor: GREY,
           items: [
             bottomNavigationBarTile(
               title: context.translate(getAppBarTitle(PageIndex.home)),
               index: PageIndex.home.index,
               child: const Icon(Icons.search, size: 20.0, color: GREY),
-              activeChild: const Icon(Icons.search, size: 20.0, color: ACCENT),
+              activeChild: const Icon(Icons.search, size: 20.0, color: Colors.black),
             ),
             bottomNavigationBarTile(
               title: context.translate(getAppBarTitle(PageIndex.recommendation)),
               index: PageIndex.recommendation.index,
               child: const Icon(Icons.recommend, size: 20.0, color: GREY),
-              activeChild: const Icon(Icons.recommend, size: 20.0, color: ACCENT),
+              activeChild: const Icon(Icons.recommend, size: 20.0, color: Colors.black),
             ),
             bottomNavigationBarTile(
               title: context.translate(getAppBarTitle(PageIndex.backup)),
               index: PageIndex.backup.index,
               child: const Icon(Icons.backup, size: 20.0, color: GREY),
-              activeChild: const Icon(Icons.backup, size: 20.0, color: ACCENT),
+              activeChild: const Icon(Icons.backup, size: 20.0, color: Colors.black),
             ),
           ],
         );
