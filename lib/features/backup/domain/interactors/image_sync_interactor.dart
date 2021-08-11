@@ -4,6 +4,10 @@ import 'package:graduation_project/features/backup/domain/repositorires/backups_
 import 'package:injectable/injectable.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+const int _BUFFER_SIZE = 250;
+const int _PAGE_SIZE = 50;
+const Duration _CASHE_DURATION = Duration(seconds: 5);
+
 @injectable
 class ImageSyncInteractor extends Interactor<void> {
   ImageSyncInteractor(this._backupsRepository);
@@ -34,7 +38,6 @@ class ImageSyncInteractor extends Interactor<void> {
     }
   }
 
-  // TODO(abd): measure performance diff between db batch vs db pagination in insert (add buffer each 250 image or 500)
   // TODO(abd): save last time sync happen and if it's more than 12 hour ask workmanager to do sync with power constraint and support foreground service
   // TODO(abd): find solve to mobx null stram value
   // TODO(abd): isolate for networking to upload backup to server
@@ -43,19 +46,34 @@ class ImageSyncInteractor extends Interactor<void> {
   // TODO(abd): find solve to pagination reactive stram
   // TODO(abd): find best arch to support multiple isolate (read moor code)
   Future<void> _syncFolder(AssetPathEntity folder) async {
-    print('sync folder:${folder.name},count:${folder.assetCount}');
-    const pageSize = 50;
-    int page = 0;
-    bool canLoadMore = true;
+    final lastSyncTimeObject = await _backupsRepository.getLastSync();
+    final DateTime? lastSyncDate = lastSyncTimeObject?.lastSyncDate;
 
-    while (canLoadMore) {
-      final images = await folder.getAssetListPaged(page, pageSize);
-      if (images.isNullOrEmpty) {
-        return;
+    if (lastSyncDate == null || DateTime.now().difference(lastSyncDate) > _CASHE_DURATION) {
+      print('sync folder:${folder.name},count:${folder.assetCount}');
+      final List<AssetEntity> imagesBuffer = [];
+      int page = 0;
+      bool canLoadMore = true;
+
+      while (canLoadMore) {
+        final images = await folder.getAssetListPaged(page, _PAGE_SIZE);
+        if (images.isNullOrEmpty) {
+          break;
+        }
+        imagesBuffer.addAll(images);
+        if (imagesBuffer.length >= _BUFFER_SIZE) {
+          _backupsRepository.addNewImages(imagesBuffer);
+          imagesBuffer.clear();
+        }
+        page++;
+        canLoadMore = images.length == _PAGE_SIZE;
       }
-      _backupsRepository.addNewImages(images);
-      page++;
-      canLoadMore = images.length == pageSize;
+      if (imagesBuffer.isNotEmpty) {
+        _backupsRepository.addNewImages(imagesBuffer);
+      }
+      _backupsRepository.saveLastSync(DateTime.now());
+    } else {
+      print('sync image cancelled due to time constraint lastSyncDate:$lastSyncDate');
     }
   }
 }

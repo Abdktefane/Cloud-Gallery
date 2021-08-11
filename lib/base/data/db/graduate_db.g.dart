@@ -334,12 +334,195 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
       const EnumIndexConverter<BackupStatus>(BackupStatus.values);
 }
 
+class LastSyncRequest extends DataClass implements Insertable<LastSyncRequest> {
+  final int id;
+  final DateTime? lastSyncDate;
+  LastSyncRequest({required this.id, this.lastSyncDate});
+  factory LastSyncRequest.fromData(
+      Map<String, dynamic> data, GeneratedDatabase db,
+      {String? prefix}) {
+    final effectivePrefix = prefix ?? '';
+    return LastSyncRequest(
+      id: const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      lastSyncDate: const DateTimeType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}last_sync_date']),
+    );
+  }
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    if (!nullToAbsent || lastSyncDate != null) {
+      map['last_sync_date'] = Variable<DateTime?>(lastSyncDate);
+    }
+    return map;
+  }
+
+  LastSyncRequestsCompanion toCompanion(bool nullToAbsent) {
+    return LastSyncRequestsCompanion(
+      id: Value(id),
+      lastSyncDate: lastSyncDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastSyncDate),
+    );
+  }
+
+  factory LastSyncRequest.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return LastSyncRequest(
+      id: serializer.fromJson<int>(json['id']),
+      lastSyncDate: serializer.fromJson<DateTime?>(json['lastSyncDate']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= moorRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'lastSyncDate': serializer.toJson<DateTime?>(lastSyncDate),
+    };
+  }
+
+  LastSyncRequest copyWith({int? id, DateTime? lastSyncDate}) =>
+      LastSyncRequest(
+        id: id ?? this.id,
+        lastSyncDate: lastSyncDate ?? this.lastSyncDate,
+      );
+  @override
+  String toString() {
+    return (StringBuffer('LastSyncRequest(')
+          ..write('id: $id, ')
+          ..write('lastSyncDate: $lastSyncDate')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => $mrjf($mrjc(id.hashCode, lastSyncDate.hashCode));
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LastSyncRequest &&
+          other.id == this.id &&
+          other.lastSyncDate == this.lastSyncDate);
+}
+
+class LastSyncRequestsCompanion extends UpdateCompanion<LastSyncRequest> {
+  final Value<int> id;
+  final Value<DateTime?> lastSyncDate;
+  const LastSyncRequestsCompanion({
+    this.id = const Value.absent(),
+    this.lastSyncDate = const Value.absent(),
+  });
+  LastSyncRequestsCompanion.insert({
+    this.id = const Value.absent(),
+    this.lastSyncDate = const Value.absent(),
+  });
+  static Insertable<LastSyncRequest> custom({
+    Expression<int>? id,
+    Expression<DateTime?>? lastSyncDate,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (lastSyncDate != null) 'last_sync_date': lastSyncDate,
+    });
+  }
+
+  LastSyncRequestsCompanion copyWith(
+      {Value<int>? id, Value<DateTime?>? lastSyncDate}) {
+    return LastSyncRequestsCompanion(
+      id: id ?? this.id,
+      lastSyncDate: lastSyncDate ?? this.lastSyncDate,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (lastSyncDate.present) {
+      map['last_sync_date'] = Variable<DateTime?>(lastSyncDate.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LastSyncRequestsCompanion(')
+          ..write('id: $id, ')
+          ..write('lastSyncDate: $lastSyncDate')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $LastSyncRequestsTable extends LastSyncRequests
+    with TableInfo<$LastSyncRequestsTable, LastSyncRequest> {
+  final GeneratedDatabase _db;
+  final String? _alias;
+  $LastSyncRequestsTable(this._db, [this._alias]);
+  final VerificationMeta _idMeta = const VerificationMeta('id');
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
+      'id', aliasedName, false,
+      typeName: 'INTEGER',
+      requiredDuringInsert: false,
+      defaultConstraints: 'PRIMARY KEY AUTOINCREMENT',
+      defaultValue: const Constant(0));
+  final VerificationMeta _lastSyncDateMeta =
+      const VerificationMeta('lastSyncDate');
+  late final GeneratedColumn<DateTime?> lastSyncDate =
+      GeneratedColumn<DateTime?>('last_sync_date', aliasedName, true,
+          typeName: 'INTEGER', requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [id, lastSyncDate];
+  @override
+  String get aliasedName => _alias ?? 'last_sync_requests';
+  @override
+  String get actualTableName => 'last_sync_requests';
+  @override
+  VerificationContext validateIntegrity(Insertable<LastSyncRequest> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('last_sync_date')) {
+      context.handle(
+          _lastSyncDateMeta,
+          lastSyncDate.isAcceptableOrUnknown(
+              data['last_sync_date']!, _lastSyncDateMeta));
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LastSyncRequest map(Map<String, dynamic> data, {String? tablePrefix}) {
+    return LastSyncRequest.fromData(data, _db,
+        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+  }
+
+  @override
+  $LastSyncRequestsTable createAlias(String alias) {
+    return $LastSyncRequestsTable(_db, alias);
+  }
+}
+
 abstract class _$GraduateDB extends GeneratedDatabase {
   _$GraduateDB(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$GraduateDB.connect(DatabaseConnection c) : super.connect(c);
   late final $BackupsTable backups = $BackupsTable(this);
+  late final $LastSyncRequestsTable lastSyncRequests =
+      $LastSyncRequestsTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities => [backups];
+  List<DatabaseSchemaEntity> get allSchemaEntities =>
+      [backups, lastSyncRequests];
 }

@@ -1,11 +1,12 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'backup_datasource.dart';
+part of 'last_sync_requrest_store.dart';
 
 // **************************************************************************
 // DaoGenerator
 // **************************************************************************
 
-mixin _$BackupDaoMixin on DatabaseAccessor<GraduateDB> {
-  $BackupsTable get backups => attachedDatabase.backups;
+mixin _$LastSyncRequestStoreImplMixin on DatabaseAccessor<GraduateDB> {
+  $LastSyncRequestsTable get lastSyncRequests =>
+      attachedDatabase.lastSyncRequests;
 }

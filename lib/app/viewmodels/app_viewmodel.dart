@@ -7,6 +7,7 @@ import 'package:core_sdk/utils/nav_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/app/viewmodels/app_bar_params.dart';
 import 'package:graduation_project/app/viewmodels/graduate_viewmodel.dart';
+import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_sync_interactor.dart';
 import 'package:mobx/mobx.dart';
@@ -59,12 +60,18 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   @observable
   PageIndex pageIndex = PageIndex.home;
 
+  @observable
+  InvokeStatus imageSyncStatus = const InvokeStarted();
+
   //* COMPUTED *//
   @computed
   bool get languageLoading => languageFuture.isPending;
 
   @computed
   String get language => languageFuture?.value ?? LANGUAGE_ARABIC;
+
+  @computed
+  bool get imageSyncing => imageSyncStatus is InvokeStarted;
 
   //* ACTIONS *//
 
@@ -127,7 +134,7 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
 
   void syncImages() {
     print('syncImages called in appviewmodel');
-    collect(_imageSyncInteractor(Void));
+    collect(_imageSyncInteractor(Void), collector: (status) => imageSyncStatus = status);
   }
 }
 

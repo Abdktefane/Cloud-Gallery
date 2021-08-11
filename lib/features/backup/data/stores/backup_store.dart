@@ -4,7 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:graduation_project/base/data/db/daos/entity_dao.dart';
 import 'package:moor/moor.dart';
 
-part 'backup_datasource.g.dart';
+part 'backup_store.g.dart';
 
 abstract class BackupsStore {
   const BackupsStore();
@@ -14,6 +14,8 @@ abstract class BackupsStore {
   Stream<List<Backup>> observePendingBackup();
 
   Stream<List<Backup>> observeUploadedBackup();
+
+  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status);
 
   Future<void> addNewImages(List<BackupsCompanion> rawImages);
 }
@@ -44,6 +46,10 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
           mode: InsertMode.insertOrIgnore,
         ),
       );
+
+  @override
+  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status) =>
+      (select(backups)..where((it) => it.status.equals(status.index))).watch();
 }
 
 

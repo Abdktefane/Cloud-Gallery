@@ -1,5 +1,6 @@
 import 'package:core_sdk/data/viewmodels/base_viewmodel.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
+import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_observer.dart';
@@ -22,9 +23,10 @@ abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
     this._imageObserver,
   ) : super(logger) {
     images = _imageObserver.asObservable();
-    _imageObserver(1);
+    filterObserver = autorun((_) => _imageObserver(filter));
   }
 
+  late final ReactionDisposer filterObserver;
   final ImageObserver _imageObserver;
 
   //* OBSERVERS *//
@@ -32,8 +34,19 @@ abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
   @observable
   ObservableStream<List<Backup>>? images;
 
+  @observable
+  BackupStatus filter = BackupStatus.PENDING;
+
   //* COMPUTED *//
 
   //* ACTIONS *//
 
+  @action
+  void changeFilter(BackupStatus filter) => this.filter = filter;
+
+  @override
+  Future<void> dispose() {
+    filterObserver();
+    return super.dispose();
+  }
 }

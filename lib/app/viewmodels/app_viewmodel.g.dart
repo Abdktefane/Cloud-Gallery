@@ -23,6 +23,13 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
       (_$languageComputed ??= Computed<String>(() => super.language,
               name: '_AppViewmodelBase.language'))
           .value;
+  Computed<bool>? _$imageSyncingComputed;
+
+  @override
+  bool get imageSyncing =>
+      (_$imageSyncingComputed ??= Computed<bool>(() => super.imageSyncing,
+              name: '_AppViewmodelBase.imageSyncing'))
+          .value;
 
   final _$languageFutureAtom = Atom(name: '_AppViewmodelBase.languageFuture');
 
@@ -81,6 +88,21 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
   set pageIndex(PageIndex value) {
     _$pageIndexAtom.reportWrite(value, super.pageIndex, () {
       super.pageIndex = value;
+    });
+  }
+
+  final _$imageSyncStatusAtom = Atom(name: '_AppViewmodelBase.imageSyncStatus');
+
+  @override
+  InvokeStatus get imageSyncStatus {
+    _$imageSyncStatusAtom.reportRead();
+    return super.imageSyncStatus;
+  }
+
+  @override
+  set imageSyncStatus(InvokeStatus value) {
+    _$imageSyncStatusAtom.reportWrite(value, super.imageSyncStatus, () {
+      super.imageSyncStatus = value;
     });
   }
 
@@ -160,8 +182,10 @@ languageFuture: ${languageFuture},
 logoutResult: ${logoutResult},
 appBarParams: ${appBarParams},
 pageIndex: ${pageIndex},
+imageSyncStatus: ${imageSyncStatus},
 languageLoading: ${languageLoading},
-language: ${language}
+language: ${language},
+imageSyncing: ${imageSyncing}
     ''';
   }
 }
