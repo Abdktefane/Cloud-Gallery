@@ -1,3 +1,4 @@
+import 'package:actors/actors.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/Fimber/logger_impl.dart';
 import 'package:core_sdk/utils/dio/retry_interceptor.dart';
@@ -7,6 +8,8 @@ import 'package:get_it/get_it.dart';
 import 'package:graduation_project/base/data/repositories/prefs_repository_impl.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/base/utils/token_interceptor.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
+import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -78,4 +81,9 @@ abstract class AppModule {
 
   @Singleton(as: Logger)
   LoggerImpl logger() => LoggerImpl();
+
+  // @Named('image_uploader')
+  // @singleton
+  // Actor<void, bool> imageUploader(BackupsRepository backupsRepository) =>
+  //     Actor<void, bool>(ImageUploader(backupsRepository));
 }

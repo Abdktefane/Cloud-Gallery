@@ -48,8 +48,11 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
       );
 
   @override
-  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status) =>
-      (select(backups)..where((it) => it.status.equals(status.index))).watch();
+  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status) => (select(backups)
+        ..where((it) => it.status.equals(status.index))
+        ..orderBy([(it) => OrderingTerm(expression: it.createdDate)])
+        ..limit(25))
+      .watch();
 }
 
 

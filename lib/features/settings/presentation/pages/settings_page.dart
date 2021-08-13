@@ -1,19 +1,18 @@
 import 'package:core_sdk/utils/dialogs.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/extensions/mobx.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get_it/get_it.dart';
 import 'package:graduation_project/app/app.dart';
-import 'package:graduation_project/app/di/injection_container.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/widgets/graduate_app_bar.dart';
 import 'package:graduation_project/features/login/ui/pages/login_page.dart';
 import 'package:graduation_project/features/settings/presentation/pages/change_language.dart';
 import 'package:graduation_project/features/settings/presentation/widgets/setting_option_tile.dart';
-import 'package:get_it/get_it.dart';
 import 'package:moor_db_viewer/moor_db_viewer.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -51,6 +50,15 @@ class _SettingsPageState extends ProviderMobxState<SettingsPage, AppViewmodel> {
                 _navigateTo(const ChangeLanguage());
               },
             ),
+            if (kDebugMode)
+              SettingOption(
+                title: context.translate('lbl_db_viewer'),
+                icon: 'assets/icons/ic_language.png',
+                isLoading: viewmodel?.logoutResult?.isPending ?? false,
+                onTap: () {
+                  App.navKey.currentContext?.pushPage(MoorDbViewer(db));
+                },
+              ),
             Observer(builder: (_) {
               return SettingOption(
                 title: context.translate('lbl_logout'),
@@ -67,15 +75,6 @@ class _SettingsPageState extends ProviderMobxState<SettingsPage, AppViewmodel> {
                 },
               );
             }),
-            if (kDebugMode)
-              SettingOption(
-                title: context.translate('db_viewer'),
-                icon: 'assets/icons/ic_logout.png',
-                isLoading: viewmodel?.logoutResult?.isPending ?? false,
-                onTap: () {
-                  App.navKey.currentContext?.pushPage(MoorDbViewer(db));
-                },
-              ),
           ],
         ),
       ),

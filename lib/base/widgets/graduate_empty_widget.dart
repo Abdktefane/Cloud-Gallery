@@ -1,3 +1,4 @@
+import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:flutter/material.dart';
 
 class GraduateEmptyWidget extends StatelessWidget {
@@ -5,6 +6,6 @@ class GraduateEmptyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return Text(context.translate('lbl_empty'));
   }
 }

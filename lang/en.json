@@ -1,5 +1,32 @@
 {
   "lbl_welcome": "Welcome!",
   "lbl_ok": "ok",
-  "lbl_cancel": "cancel"
+  "lbl_cancel": "cancel",
+
+
+  "lbl_home":"Search",
+  "lbl_reco":"Recommendation",
+  "lbl_backup":"Backup",
+  "lbl_email":"Email",
+  "lbl_password":"Password",
+  "lbl_login":"Login",
+  "lbl_sign_up":"Signup",
+  "lbl_confirm_password":"Confirm Password",
+  "lbl_change_language":"Change Language",
+  "lbl_language":"Languages",
+  "lbl_settings":"Settings",
+  "lbl_logout":"Logout",
+  "lbl_db_viewer": "Data Base Viewer",
+
+  "lbl_canceled":"Canceled",
+  "lbl_uploaded":"Uploaded",
+  "lbl_uploading":"Uploading",
+  "lbl_pending":"Pending",
+
+  "lbl_empty": "Empty Content",
+
+
+
+
+  "msg_app_exit_confirm": "Are you sure you want exit ?"
 }

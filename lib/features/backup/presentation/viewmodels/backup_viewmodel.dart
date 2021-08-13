@@ -32,7 +32,7 @@ abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
   //* OBSERVERS *//
 
   @observable
-  ObservableStream<List<Backup>>? images;
+  ObservableStream<List<Backup>?>? images;
 
   @observable
   BackupStatus filter = BackupStatus.PENDING;
@@ -42,7 +42,7 @@ abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
   //* ACTIONS *//
 
   @action
-  void changeFilter(BackupStatus filter) => this.filter = filter;
+  void changeFilter(BackupStatus filter) => this.filter == filter ? null : this.filter = filter;
 
   @override
   Future<void> dispose() {

@@ -1,6 +1,33 @@
 {
   "lbl_welcome": "مرحباً ",
   "lbl_ok": "موافق",
-  "lbl_cancel": "إلغاء"
+  "lbl_cancel": "إلغاء",
+
+
+  
+  "lbl_home":"بحث",
+  "lbl_reco":"الإقتراحات",
+  "lbl_backup":"النسخ الاحتياطي",
+  "lbl_email":"البريد الإلكتروني",
+  "lbl_password":"كلمة السر",
+  "lbl_login":"تسجيل الدخول",
+  "lbl_sign_up":"إنشاء حساب",
+  "lbl_confirm_password":"تأكيد كلمة السر",
+  "lbl_change_language":"تغيير اللغة",
+  "lbl_language":"اللغات",
+  "lbl_settings":"الإعدادات",
+  "lbl_logout":"تسجبل الخروج",
+  "lbl_db_viewer": "مستعرض قاعدة البيانات",
+
+  "lbl_canceled":"ملغية",
+  "lbl_uploaded":"تم الرفع",
+  "lbl_uploading":"جاري الرفع",
+  "lbl_pending":"قيد الانتظار",
+
+  "lbl_empty": "محتوى فارغ",
+
+
+
+  "msg_app_exit_confirm": "هل انت متاكد من إغلاق التطبيق ؟"
 
 }

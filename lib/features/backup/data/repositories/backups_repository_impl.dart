@@ -10,6 +10,8 @@ import 'package:injectable/injectable.dart';
 import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 
+const Duration _CASHE_DURATION = Duration(minutes: 10);
+
 @LazySingleton(as: BackupsRepository)
 class BackupsRepositoryImpl extends BackupsRepository {
   const BackupsRepositoryImpl(
@@ -47,4 +49,15 @@ class BackupsRepositoryImpl extends BackupsRepository {
   @override
   Future<int> saveLastSync(DateTime date) =>
       _lastSyncRequestStore.saveLastSync(LastSyncRequestsCompanion(lastSyncDate: Value(date)));
+
+  @override
+  Future<bool> canStartSaveBackup() async {
+    final lastSyncTimeObject = await getLastSync();
+    final DateTime? lastSyncDate = lastSyncTimeObject?.lastSyncDate;
+
+    return lastSyncDate == null || DateTime.now().difference(lastSyncDate) > _CASHE_DURATION;
+  }
+
+  @override
+  Future<bool> canStartUploadBackup() async => !(await canStartSaveBackup());
 }

@@ -1,15 +1,16 @@
+import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/base/widgets/graduate_loader.dart';
+import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
 import 'package:graduation_project/features/backup/presentation/viewmodels/backup_viewmodel.dart';
 import 'package:graduation_project/features/backup/presentation/widgets/backup_tile.dart';
-import 'package:graduation_project/features/backup/presentation/widgets/strream_observer.dart';
-import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:provider/provider.dart';
 
 class BackupPage extends StatefulWidget {
@@ -57,24 +58,24 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> {
                       Observer(builder: (_) {
                         return DropdownButton(
                           value: viewmodel.filter,
+                          onChanged: (BackupStatus? it) => viewmodel.changeFilter(it!),
                           items: BackupStatus.values
                               .map((it) => DropdownMenuItem(
                                     value: it,
-                                    child: Text(describeEnum(it).toLowerCase()),
-                                    // onTap: () => viewmodel.changeFilter(it),
+                                    child: Text(context.translate(it.localizationKey)),
                                   ))
                               .toList(),
-                          onChanged: (BackupStatus? it) => viewmodel.changeFilter(it!),
                         );
                       })
                     ],
                   ),
-                  StreamObserver<List<Backup>>(
-                    stream: viewmodel.images,
+                  GraduateStreamObserver<List<Backup>?>(
+                    stream: viewmodel.images!,
                     onSuccess: (images) => ListView.builder(
+                      key: ValueKey(images.hashCode),
                       padding: const EdgeInsets.only(top: 8.0),
-                      itemCount: images.length,
-                      itemBuilder: (_, index) => BackupTile(backup: images[index]),
+                      itemCount: images?.length,
+                      itemBuilder: (_, index) => BackupTile(backup: images![index]),
                     ),
                   ).expand(),
                 ],

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:graduation_project/base/data/db/entities/graduate_entity.dart';
 import 'package:moor/moor.dart';
@@ -23,6 +24,10 @@ extension BackupStatusExt on BackupStatus {
         return material.Icons.circle;
     }
   }
+
+  String get raw => describeEnum(this).toLowerCase();
+
+  String get localizationKey => 'lbl_' + raw;
 }
 
 class Backups extends GraduateEntity {
@@ -37,6 +42,8 @@ class Backups extends GraduateEntity {
   TextColumn get title => text().nullable()();
 
   IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.PENDING.index))();
+
+  DateTimeColumn get createdDate => dateTime().withDefault(currentDateAndTime)();
 
   @override
   Set<Column> get primaryKey => {assetId};

@@ -22,4 +22,8 @@ abstract class BackupsRepository extends BaseRepository {
   Future<LastSyncRequest?> getLastSync();
 
   Future<int> saveLastSync(DateTime date);
+
+  Future<bool> canStartSaveBackup();
+
+  Future<bool> canStartUploadBackup();
 }

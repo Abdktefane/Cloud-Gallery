@@ -8,6 +8,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "22.0.0"
+  actors:
+    dependency: "direct main"
+    description:
+      name: actors
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "0.7.0"
   analyzer:
     dependency: transitive
     description:
@@ -43,6 +50,20 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "2.6.1"
+  async_extension:
+    dependency: transitive
+    description:
+      name: async_extension
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.4"
+  async_task:
+    dependency: "direct main"
+    description:
+      name: async_task
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.0.11"
   auto_size_text:
     dependency: transitive
     description:

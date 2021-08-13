@@ -6,7 +6,6 @@ import 'package:photo_manager/photo_manager.dart';
 
 const int _BUFFER_SIZE = 250;
 const int _PAGE_SIZE = 50;
-const Duration _CASHE_DURATION = Duration(seconds: 5);
 
 @injectable
 class ImageSyncInteractor extends Interactor<void> {
@@ -46,10 +45,7 @@ class ImageSyncInteractor extends Interactor<void> {
   // TODO(abd): find solve to pagination reactive stram
   // TODO(abd): find best arch to support multiple isolate (read moor code)
   Future<void> _syncFolder(AssetPathEntity folder) async {
-    final lastSyncTimeObject = await _backupsRepository.getLastSync();
-    final DateTime? lastSyncDate = lastSyncTimeObject?.lastSyncDate;
-
-    if (lastSyncDate == null || DateTime.now().difference(lastSyncDate) > _CASHE_DURATION) {
+    if (await _backupsRepository.canStartSaveBackup()) {
       print('sync folder:${folder.name},count:${folder.assetCount}');
       final List<AssetEntity> imagesBuffer = [];
       int page = 0;
@@ -73,7 +69,7 @@ class ImageSyncInteractor extends Interactor<void> {
       }
       _backupsRepository.saveLastSync(DateTime.now());
     } else {
-      print('sync image cancelled due to time constraint lastSyncDate:$lastSyncDate');
+      print('sync image cancelled due to time constraint');
     }
   }
 }
