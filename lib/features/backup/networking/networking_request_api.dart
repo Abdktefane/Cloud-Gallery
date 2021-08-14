@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
 import 'package:core_sdk/error/exceptions.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
@@ -6,7 +8,37 @@ import 'package:dio/dio.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networkink_ext.dart';
 
-Future<ResponseIsolateMessage> request({
+void proccessNetworkIsolatorRequests(
+  RequestIsolateMessage requestMessage, {
+  required Logger logger,
+  required Dio dio,
+  required SendPort callerPort,
+}) async {
+  late final ResponseIsolateMessage responseMessage;
+  try {
+    logger.d('Network Isolate:${Isolate.current.hashCode} => RECIVE RequestMessage: $requestMessage');
+    responseMessage = await _proccessNetworkIsolatorRequest(
+      id: requestMessage.id,
+      client: dio,
+      logger: logger,
+      method: requestMessage.method,
+      endpoint: requestMessage.endpoint,
+      params: requestMessage.params,
+      headers: requestMessage.headers,
+      withAuth: requestMessage.withAuth,
+      data: requestMessage.data,
+    );
+    logger.d('Network Isolate:${Isolate.current.hashCode} => SEND ResponseMessage: $responseMessage');
+    callerPort.send(responseMessage);
+  }
+  // TODO(abd): handle error message we should rerurn Error mesage gere
+  catch (ex) {
+    logger.e('Network Isolate:${Isolate.current.hashCode} => Catch ErrorMessage: $ex');
+    callerPort.send(ResponseIsolateMessage.error(requestMessage.id, Exception('unknown error')));
+  }
+}
+
+Future<ResponseIsolateMessage> _proccessNetworkIsolatorRequest({
   required int id,
   required Dio client,
   required Logger logger,

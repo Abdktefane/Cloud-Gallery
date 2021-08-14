@@ -1,21 +1,43 @@
 import 'dart:isolate';
 
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
-import 'package:dio/dio.dart';
+import 'package:equatable/equatable.dart';
 
-abstract class NetworkIsolateMessage {
+abstract class NetworkIsolateMessage extends Equatable {
   const NetworkIsolateMessage(this.id);
   final int id;
+
+  @override
+  bool? get stringify => true;
+
+  @override
+  List<Object?> get props => [id];
 }
 
-class InitIsolateMessage extends NetworkIsolateMessage {
-  const InitIsolateMessage(int id, {required this.callerPort, required this.baseUrl}) : super(id);
+class InitIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
+  const InitIsolateMessage(
+    int id, {
+    required this.callerPort,
+    required this.baseUrl,
+  }) : super(id);
   final SendPort callerPort;
   final String baseUrl;
-  // final BaseOptions dioOptions;
+
+  InitIsolateMessage copyWith({
+    int? id,
+    SendPort? callerPort,
+    String? baseUrl,
+  }) =>
+      InitIsolateMessage(id ?? this.id, callerPort: callerPort ?? this.callerPort, baseUrl: baseUrl ?? this.baseUrl);
+
+  @override
+  bool get stringify => true;
+
+  @override
+  List<Object> get props => [id, callerPort, baseUrl];
 }
 
-class RequestIsolateMessage extends NetworkIsolateMessage {
+class RequestIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
   const RequestIsolateMessage(
     int id, {
     required this.method,
@@ -32,20 +54,46 @@ class RequestIsolateMessage extends NetworkIsolateMessage {
   final dynamic data;
   final Map<String, dynamic>? params;
   final Map<String, dynamic>? headers;
+
+  RequestIsolateMessage copyWith({
+    int? id,
+    METHOD? method,
+    String? endpoint,
+    bool? withAuth,
+    dynamic data,
+    Map<String, dynamic>? params,
+    Map<String, dynamic>? headers,
+  }) {
+    return RequestIsolateMessage(
+      id ?? this.id,
+      method: method ?? this.method,
+      endpoint: endpoint ?? this.endpoint,
+      withAuth: withAuth ?? this.withAuth,
+      data: data ?? this.data,
+      params: params ?? this.params,
+      headers: headers ?? this.headers,
+    );
+  }
+
+  @override
+  bool get stringify => true;
+
+  @override
+  List<Object?> get props => [id, method, endpoint, withAuth, data, params, headers];
 }
 
-class ResponseIsolateMessage extends NetworkIsolateMessage {
-  ResponseIsolateMessage.init(int id, this.callerPort)
+class ResponseIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
+  const ResponseIsolateMessage.init(int id, this.callerPort)
       : response = null,
         error = null,
         super(id);
 
-  ResponseIsolateMessage.error(int id, this.error)
+  const ResponseIsolateMessage.error(int id, this.error)
       : callerPort = null,
         response = null,
         super(id);
 
-  ResponseIsolateMessage.success(int id, this.response)
+  const ResponseIsolateMessage.success(int id, this.response)
       : callerPort = null,
         error = null,
         super(id);
@@ -58,33 +106,10 @@ class ResponseIsolateMessage extends NetworkIsolateMessage {
   bool get isResponse => callerPort == null;
   bool get isSuccess => isResponse && error == null;
   bool get isFailure => !isSuccess;
+
+  @override
+  bool get stringify => true;
+
+  @override
+  List<Object?> get props => [id, callerPort, response, error];
 }
-
-// enum NetworkIsolateMessageType { Init, Post, Get }
-
-// class NetworkIsolateMessage {
-//   const NetworkIsolateMessage.init({required this.callerPort, this.dioOptions})
-//       : type = NetworkIsolateMessageType.Init,
-//         data = null,
-//         endpoint = null,
-//         params = null,
-//         options = null;
-
-//   const NetworkIsolateMessage.post({
-//     required this.endpoint,
-//     required this.params,
-//     required this.data,
-//     this.options,
-//   })  : type = NetworkIsolateMessageType.Init,
-//         callerPort = null,
-//         dioOptions = null;
-
-//   final SendPort? callerPort;
-//   final NetworkIsolateMessageType type;
-//   final BaseOptions? dioOptions;
-
-//   final String? endpoint;
-//   final dynamic data;
-//   final Map<String, dynamic>? params;
-//   final Options? options;
-// }

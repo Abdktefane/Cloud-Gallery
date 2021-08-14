@@ -2,14 +2,14 @@ import 'dart:async';
 import 'dart:isolate';
 
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
-import 'package:core_sdk/error/exceptions.dart';
-import 'package:core_sdk/error/failures.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/Fimber/logger_impl.dart';
 import 'package:core_sdk/utils/network_result.dart';
 import 'package:dio/dio.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networking_request_api.dart';
+
+import 'networkink_ext.dart';
 
 typedef ErrorMapper = String Function(Map<String, dynamic>);
 
@@ -20,25 +20,27 @@ class NetworkIsolate {
   final ErrorMapper? errorMapper;
   final Logger logger;
   final String baseUrl;
+  final ReceivePort _receivePort = ReceivePort();
+
   late final Isolate _isolate;
   late final Stream<ResponseIsolateMessage> _answerStream;
-  final ReceivePort _receivePort = ReceivePort();
-  late final Future<SendPort> _sendPort;
+  late final SendPort _sendPort;
+
   bool _isClosed = false;
   int _currentId = -2 ^ 30;
 
   Future<void> init() async {
-    _answerStream = _receivePort.cast<ResponseIsolateMessage>().asBroadcastStream();
     final id = _currentId++;
-    _sendPort = _waitForRemotePort();
+    logger.d('Creating Network Isolate....');
+    _answerStream = _receivePort.cast<ResponseIsolateMessage>().asBroadcastStream();
     _isolate = await Isolate.spawn(
       _handleNetwrokRequest,
       InitIsolateMessage(id, callerPort: _receivePort.sendPort, baseUrl: baseUrl),
     );
+    _sendPort = await _waitForRemotePort();
+    logger.d('Success Create Network Isolate');
     return;
   }
-
-  Future<SendPort> _waitForRemotePort() => _answerStream.firstWhere((it) => it.isInit).then((it) => it.callerPort!);
 
   Future<NetworkResult<T?>> request<T>({
     required METHOD method,
@@ -53,51 +55,32 @@ class NetworkIsolate {
     final id = _currentId++;
     final completer = Completer<NetworkResult<T?>>();
     final futureAnswer = _answerStream.firstWhere((it) => it.id == id);
-    _sendPort.then((it) => it.send(RequestIsolateMessage(
-          id,
-          endpoint: endpoint,
-          method: method,
-          data: data,
-          headers: headers,
-          params: params,
-          withAuth: withAuth,
-        )));
+    _sendPort.send(RequestIsolateMessage(
+      id,
+      endpoint: endpoint,
+      method: method,
+      data: data,
+      headers: headers,
+      params: params,
+      withAuth: withAuth,
+    ));
     futureAnswer.then((ResponseIsolateMessage answer) {
-      logger.d('futureAnswer return with $answer');
       if (answer.isFailure) {
         // TODO(abd): provide stack trace
         completer.completeError(answer.error! /* , answer.stacktrace */);
       } else {
-        completer.complete(_parseSuccess(answer.response!, mapper, logger));
+        completer.complete(answer.asNetworkResult(
+          jsonResponse: answer.response!,
+          logger: logger,
+          mapper: mapper,
+          errorMapper: errorMapper,
+        ));
       }
     } /* , onError: (e, StackTrace stackTrace) {
       completer.completeError(const MessengerStreamBroken(), stackTrace);
     } */
         );
     return completer.future;
-  }
-
-  NetworkResult<T?> _parseSuccess<T>(Map<String, dynamic> jsonResponse, Mapper<T?>? mapper, Logger logger) {
-    try {
-      if (jsonResponse is! Map && mapper == null) {
-        return Success(jsonResponse as T?);
-      }
-
-      if (mapper == null) {
-        return Success<T?>(null);
-      }
-      if (errorMapper != null || jsonResponse['message'] != null && (jsonResponse['status'] as int?) != 200) {
-        throw ServerException(errorMapper?.call(jsonResponse) ?? jsonResponse['message'] ?? 'msg_something_wrong');
-      }
-
-      final value = mapper(jsonResponse);
-      return Success(value);
-    } catch (e) {
-      logger.e('BaseDataSourceWithMapperImpl FINAL CATCH ERROR => request<$T> => ERROR = e:$e \n $jsonResponse');
-      return e is ServerException
-          ? NetworkError(ServerFailure(e.message))
-          : NetworkError(ServerFailure(e is String ? e : 'msg_something_wrong'));
-    }
   }
 
   FutureOr close() async {
@@ -114,15 +97,18 @@ class NetworkIsolate {
     // _localPort.close();
     _isolate.kill(priority: Isolate.immediate);
   }
+
+  Future<SendPort> _waitForRemotePort() => _answerStream.firstWhere((it) => it.isInit).then((it) => it.callerPort!);
 }
 
 Future<void> _handleNetwrokRequest(dynamic message) async {
   final Logger logger = LoggerImpl();
-  logger.e('Network Isolate Started, isolate:${Isolate.current.hashCode},initial message ${message.toString()}');
+  logger.d('Network Isolate Recive Initial Message: $message, Isolate Id:${Isolate.current.hashCode}');
   final ReceivePort receivePort = ReceivePort();
   SendPort? callerPort;
   Dio? dio;
 
+  // init isolate attributes
   if (message is InitIsolateMessage) {
     callerPort = message.callerPort;
     dio = Dio(
@@ -147,29 +133,14 @@ Future<void> _handleNetwrokRequest(dynamic message) async {
           request: true,
         ),
       ]);
+    // send init message (ready to start signal) to main isolate
     callerPort.send(ResponseIsolateMessage.init(message.id, receivePort.sendPort));
-    receivePort.cast<RequestIsolateMessage>().listen((message) async {
-      late final ResponseIsolateMessage response;
-      try {
-        logger.e('try calling isolate:${Isolate.current.hashCode},with message:$message');
-        response = await request(
-          id: message.id,
-          client: dio!,
+    // prepeate reciver pipeline to stream request
+    receivePort.cast<RequestIsolateMessage>().listen((requestMessage) => proccessNetworkIsolatorRequests(
+          requestMessage,
           logger: logger,
-          method: message.method,
-          endpoint: message.endpoint,
-          params: message.params,
-          headers: message.headers,
-          withAuth: message.withAuth,
-          data: message.data,
-        );
-        callerPort!.send(response);
-      }
-      // TODO(abd): handle error message we should rerurn Error mesage gere
-      catch (ex) {
-        print('error in request $ex');
-        callerPort!.send(ResponseIsolateMessage.error(message.id, Exception('unknown error')));
-      }
-    });
+          dio: dio!,
+          callerPort: callerPort!,
+        ));
   }
 }
