@@ -33,7 +33,8 @@ class BackupTile extends StatelessWidget {
       ),
       title: Text(backup.title ?? ''),
       onTap: () => App.navKey.currentContext?.pushPage(HeroPhotoViewRouteWrapper(
-        imageProvider: Image.file(File('/storage/emulated/0/${backup.path + (backup.title ?? '')}')).image,
+        // imageProvider: Image.file(File('/storage/emulated/0/${backup.path + (backup.title ?? '')}')).image,
+        imageProvider: Image.file(File(backup.path)).image,
         tag: backup.assetId,
       )),
     ).modifier(

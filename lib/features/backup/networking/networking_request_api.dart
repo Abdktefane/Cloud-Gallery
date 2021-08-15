@@ -8,7 +8,8 @@ import 'package:dio/dio.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networkink_ext.dart';
 
-void proccessNetworkIsolatorRequests(
+// TODO(abd): move to core sdk
+Future<void> proccessNetworkIsolatorRequests(
   RequestIsolateMessage requestMessage, {
   required Logger logger,
   required Dio dio,
@@ -32,9 +33,17 @@ void proccessNetworkIsolatorRequests(
     callerPort.send(responseMessage);
   }
   // TODO(abd): handle error message we should rerurn Error mesage gere
-  catch (ex) {
-    logger.e('Network Isolate:${Isolate.current.hashCode} => Catch ErrorMessage: $ex');
-    callerPort.send(ResponseIsolateMessage.error(requestMessage.id, Exception('unknown error')));
+  catch (ex, st) {
+    logger.e(
+      'Network Isolate:${Isolate.current.hashCode} proccessNetworkIsolatorRequests Exception',
+      stacktrace: st,
+      ex: ex,
+    );
+    callerPort.send(ResponseIsolateMessage.error(
+      requestMessage.id,
+      ServerException(ex.toString()),
+      // st: st,
+    ));
   }
 }
 

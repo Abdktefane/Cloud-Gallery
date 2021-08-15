@@ -25,16 +25,17 @@ abstract class _SplashViewmodelBase extends BaseViewmodel with Store {
     Future.delayed(
       2.seconds,
       () => getContext((context) {
-        context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
-        // logger.d('my debug handler executed');
-        // if (!_prefsRepository.token.isNullOrEmpty) {
-        //   logger.d('my debug handler executed 1');
-        //   context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
-        // } else {
-        //   logger.d('my debug handler executed 2');
-        //   context.pushNamedAndRemoveUntil(LoginPage.route, (_) => false);
-        //   // Navigator.of(context).pushNamedAndRemoveUntil(AuthPage.route, (_) => false);
-        // }
+        // context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
+
+        logger.d('my debug handler executed');
+        if (!_prefsRepository.token.isNullOrEmpty) {
+          logger.d('my debug handler executed 1');
+          context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
+        } else {
+          logger.d('my debug handler executed 2');
+          context.pushNamedAndRemoveUntil(LoginPage.route, (_) => false);
+          // Navigator.of(context).pushNamedAndRemoveUntil(AuthPage.route, (_) => false);
+        }
       }),
     );
   }

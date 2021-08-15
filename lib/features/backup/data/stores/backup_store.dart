@@ -18,6 +18,8 @@ abstract class BackupsStore {
   Stream<List<Backup>> observeBackupsByStatus(BackupStatus status);
 
   Future<void> addNewImages(List<BackupsCompanion> rawImages);
+
+  Future<void> updateBackups(List<Backup> images);
 }
 
 @Singleton(as: BackupsStore)
@@ -53,6 +55,10 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
         ..orderBy([(it) => OrderingTerm(expression: it.createdDate)])
         ..limit(25))
       .watch();
+
+  @override
+  Future<void> updateBackups(List<Backup> images) =>
+      batch((Batch batch) => batch.insertAllOnConflictUpdate(backups, images));
 }
 
 

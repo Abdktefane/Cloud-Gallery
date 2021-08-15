@@ -1,47 +1,75 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:isolate';
 
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
+import 'package:core_sdk/error/exceptions.dart';
+import 'package:core_sdk/error/failures.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/Fimber/logger_impl.dart';
+import 'package:core_sdk/utils/dio/retry_interceptor.dart';
+import 'package:core_sdk/utils/dio/retry_options.dart';
 import 'package:core_sdk/utils/network_result.dart';
 import 'package:dio/dio.dart';
+import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/utils/token_interceptor.dart';
+import 'package:graduation_project/features/backup/networking/dio_options_utils.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networking_request_api.dart';
+import 'package:moor/isolate.dart';
 
+import 'base_isolate.dart';
+import 'base_isolate_datasource.dart';
 import 'networkink_ext.dart';
 
-typedef ErrorMapper = String Function(Map<String, dynamic>);
-
+// TODO(abd): move to core sdk
 // TODO(abd): implement wrap with base data
-class NetworkIsolate {
-  NetworkIsolate({required this.baseUrl, required this.logger, this.errorMapper});
 
-  final ErrorMapper? errorMapper;
-  final Logger logger;
-  final String baseUrl;
-  final ReceivePort _receivePort = ReceivePort();
+class NetworkIsolate extends BaseIsolate<RequestIsolateMessage, ResponseIsolateMessage> with NetworkApis {
+  NetworkIsolate._({
+    required Logger logger,
+    required this.databasePort,
+    required this.baseOptions,
+    this.errorMapper,
+    required this.interceptors,
+  }) : super(logger);
 
-  late final Isolate _isolate;
-  late final Stream<ResponseIsolateMessage> _answerStream;
-  late final SendPort _sendPort;
-
-  bool _isClosed = false;
-  int _currentId = -2 ^ 30;
-
-  Future<void> init() async {
-    final id = _currentId++;
-    logger.d('Creating Network Isolate....');
-    _answerStream = _receivePort.cast<ResponseIsolateMessage>().asBroadcastStream();
-    _isolate = await Isolate.spawn(
-      _handleNetwrokRequest,
-      InitIsolateMessage(id, callerPort: _receivePort.sendPort, baseUrl: baseUrl),
+  static Future<NetworkIsolate> getInstance({
+    required Logger logger,
+    required NetworkIsolateBaseOptions baseOptions,
+    required SendPort databasePort,
+    List<Interceptor>? interceptors,
+    ErrorMapper? errorMapper,
+  }) async {
+    final isolate = NetworkIsolate._(
+      logger: logger,
+      baseOptions: baseOptions,
+      interceptors: interceptors,
+      databasePort: databasePort,
+      errorMapper: errorMapper,
     );
-    _sendPort = await _waitForRemotePort();
-    logger.d('Success Create Network Isolate');
-    return;
+    await isolate.init();
+    return isolate;
   }
 
+  final ErrorMapper? errorMapper;
+  final NetworkIsolateBaseOptions baseOptions;
+  final List<Interceptor>? interceptors;
+  final SendPort databasePort;
+
+  @override
+  Future<Isolate> spawnIsolate(int id) => Isolate.spawn(
+        _handleNetwrokRequest,
+        InitIsolateMessage(
+          id,
+          callerPort: receivePort.sendPort,
+          databasePort: databasePort,
+          baseOptions: jsonEncode(baseOptions.toJson()),
+          interceptors: interceptors,
+        ),
+      );
+
+  @override
   Future<NetworkResult<T?>> request<T>({
     required METHOD method,
     required String endpoint,
@@ -52,95 +80,87 @@ class NetworkIsolate {
     dynamic data,
     ErrorMapper? errorMapper,
   }) {
-    final id = _currentId++;
     final completer = Completer<NetworkResult<T?>>();
-    final futureAnswer = _answerStream.firstWhere((it) => it.id == id);
-    _sendPort.send(RequestIsolateMessage(
-      id,
-      endpoint: endpoint,
-      method: method,
-      data: data,
-      headers: headers,
-      params: params,
-      withAuth: withAuth,
-    ));
-    futureAnswer.then((ResponseIsolateMessage answer) {
-      if (answer.isFailure) {
-        // TODO(abd): provide stack trace
-        completer.completeError(answer.error! /* , answer.stacktrace */);
-      } else {
+    proccess((id) => RequestIsolateMessage(
+          id,
+          endpoint: endpoint,
+          method: method,
+          data: data,
+          headers: headers,
+          params: params,
+          withAuth: withAuth,
+        )).then(
+      (ResponseIsolateMessage answer) {
+        logger.d('answer in Network Isolater Wrapper $answer');
         completer.complete(answer.asNetworkResult(
-          jsonResponse: answer.response!,
+          jsonResponse: answer.response,
           logger: logger,
           mapper: mapper,
           errorMapper: errorMapper,
         ));
-      }
-    } /* , onError: (e, StackTrace stackTrace) {
-      completer.completeError(const MessengerStreamBroken(), stackTrace);
-    } */
+      },
+      onError: (e, StackTrace stackTrace) {
+        completer.complete(
+          e is ServerException
+              ? NetworkError(ServerFailure(e.message))
+              : NetworkError(ServerFailure(e is String ? e : 'msg_something_wrong')),
         );
+      },
+    );
     return completer.future;
   }
-
-  FutureOr close() async {
-    if (_isClosed) {
-      return;
-    }
-    _isClosed = true;
-    // final ack = _answerStream
-    //     .firstWhere((msg) => msg.content == #actor_terminated)
-    //     .timeout(const Duration(seconds: 5),
-    //         onTimeout: () => const _Message(0, #timeout));
-    // (await _sendPort).send(_actorTerminate);
-    // await ack;
-    // _localPort.close();
-    _isolate.kill(priority: Isolate.immediate);
-  }
-
-  Future<SendPort> _waitForRemotePort() => _answerStream.firstWhere((it) => it.isInit).then((it) => it.callerPort!);
 }
 
 Future<void> _handleNetwrokRequest(dynamic message) async {
   final Logger logger = LoggerImpl();
   logger.d('Network Isolate Recive Initial Message: $message, Isolate Id:${Isolate.current.hashCode}');
   final ReceivePort receivePort = ReceivePort();
+  late final GraduateDB database;
   SendPort? callerPort;
   Dio? dio;
 
   // init isolate attributes
   if (message is InitIsolateMessage) {
     callerPort = message.callerPort;
-    dio = Dio(
-      BaseOptions(
-        baseUrl: message.baseUrl,
-        connectTimeout: 30000,
-        receiveTimeout: 30000,
-        sendTimeout: 30000,
-        contentType: 'application/json;charset=utf-8',
-        responseType: ResponseType.plain,
-        headers: {
-          'Accept': 'application/json',
-          'Connection': 'keep-alive',
-        },
+    final MoorIsolate moorIsolate = MoorIsolate.fromConnectPort(message.databasePort);
+    database = GraduateDB.connect(await moorIsolate.connect());
+    final options = NetworkIsolateBaseOptions.fromJson(jsonDecode(message.baseOptions)).asDioBaseOptions()
+      ..contentType = null;
+    dio = Dio(options);
+    dio.interceptors.addAll([
+      RetryInterceptor(dio: dio, logger: logger, options: const RetryOptions()),
+      // TokenInterceptor(prefsRepository: prefsRepository)
+      // ...?message.interceptors,
+      LogInterceptor(
+        requestBody: true,
+        responseBody: true,
+        responseHeader: true,
+        requestHeader: true,
+        request: true,
       ),
-    )..interceptors.addAll([
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-          responseHeader: true,
-          requestHeader: true,
-          request: true,
-        ),
-      ]);
+    ]);
     // send init message (ready to start signal) to main isolate
     callerPort.send(ResponseIsolateMessage.init(message.id, receivePort.sendPort));
     // prepeate reciver pipeline to stream request
-    receivePort.cast<RequestIsolateMessage>().listen((requestMessage) => proccessNetworkIsolatorRequests(
-          requestMessage,
-          logger: logger,
-          dio: dio!,
-          callerPort: callerPort!,
+    receivePort.cast<RequestIsolateMessage>().listen(
+      (requestMessage) => proccessNetworkIsolatorRequests(
+        requestMessage,
+        logger: logger,
+        dio: dio!,
+        callerPort: callerPort!,
+      ),
+      onError: (Object error, StackTrace st) {
+        logger.e(
+          'Network Isolate Catch Error with Proccess Message: $message, Isolate Id:${Isolate.current.hashCode}',
+          stacktrace: st,
+          ex: error,
+        );
+        callerPort?.send(ResponseIsolateMessage.error(
+          message.id,
+          ServerException(error.toString()),
+          st: st,
         ));
+      },
+    );
   }
 }

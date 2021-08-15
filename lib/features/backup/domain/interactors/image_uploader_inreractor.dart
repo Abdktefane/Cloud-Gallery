@@ -1,85 +1,99 @@
 import 'dart:async';
-import 'dart:convert';
-import 'dart:isolate';
 
-import 'package:actors/actors.dart';
-import 'package:async_task/async_task.dart';
-import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
-import 'package:core_sdk/error/exceptions.dart';
-import 'package:core_sdk/utils/Fimber/Logger.dart';
-import 'package:core_sdk/utils/Fimber/logger_impl.dart';
-import 'package:core_sdk/utils/constants.dart';
+import 'package:collection/collection.dart';
 import 'package:core_sdk/utils/network_result.dart';
-import 'package:dio/dio.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:graduation_project/base/data/db/entities/backups.dart';
+import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/domain/interactors/interactors.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_observer.dart';
+import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
 
-import 'package:graduation_project/base/domain/interactors/interactors.dart';
-import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
+const int IMAGES_PER_UPLOAD = 1;
 
-class AnyFuckinClass {
-  const AnyFuckinClass({required this.afsadsf});
-  final int afsadsf;
-}
+@injectable
+class ImageUploaderInteractor extends Interactor<void> {
+  ImageUploaderInteractor(this._backupsRepository, this._imageObserver);
 
-class ImageUploader with Handler<int, bool> {
-  // const ImageUploader(this.attr);
-  // final AnyFuckinClass attr;
+  final BackupsRepository _backupsRepository;
+  final ImageObserver _imageObserver;
+  final Set<Backup> uploadQueue = const {};
 
-  // const ImageUploader(this._backupsRepository);
+  late final StreamSubscription<List<Backup>> _subscribe;
+  late final StreamController<List<Backup>> _proxyStream;
 
-  // final BackupsRepository _backupsRepository;
-
-  ImageUploader(String url) {
-    _dio = Dio();
-  }
-
-  late final Dio _dio;
+  bool localImagesSynced = false;
 
   @override
-  FutureOr<bool> handle(int message) async {
-    print(
-        'my debug called image uploader handle,isolate:${Isolate.current.hashCode},message:$message,attr:$_dio,attr2:url');
-    return true;
-  }
-}
+  Future<void> doWork(void params) async {
+    // producer
+    _subscribe = _imageObserver.observe().listen(moveToQueue);
+    _imageObserver(BackupStatus.PENDING);
 
-class ImageUploader2 extends AsyncTask<String, bool> {
-  ImageUploader2(this.url) {
-    dio = Dio(BaseOptions(
-      baseUrl: url,
-      connectTimeout: 3000,
-      receiveTimeout: 3000,
-      sendTimeout: 3000,
-      contentType: 'application/json;charset=utf-8',
-      responseType: ResponseType.plain,
-      headers: {'Accept': 'application/json', 'Connection': 'keep-alive'},
-    ));
+    // consumer
+    _proxyStream = StreamController<List<Backup>>();
+    syncQueue();
+
+    // wait for done signal
+    await _proxyStream.done;
+
+    // clean resources
+    await clean();
   }
 
-  late final Dio dio;
-
-  final String url;
-
-  @override
-  AsyncTask<String, bool> instantiate(String parameters, [Map<String, SharedData>? sharedData]) {
-    return ImageUploader2(parameters);
+  // producer
+  void moveToQueue(List<Backup> pendingImages) {
+    localImagesSynced = pendingImages.isEmpty;
+    checkStopCondition();
+    if (!localImagesSynced) {
+      uploadQueue.addAll(pendingImages);
+      _proxyStream.add(uploadQueue.toList());
+    }
   }
 
-  @override
-  String parameters() {
-    return url;
+  // consumer
+  Future<void> syncQueue() async {
+    await for (final List<Backup> images in _proxyStream.stream) {
+      // ignore: avoid_function_literals_in_foreach_calls
+      images.forEach((image) async {
+        _backupsRepository.updateBackups([image.copyWith(status: BackupStatus.UPLOADING)]);
+        bool isSuccess = false;
+        while (!isSuccess) {
+          isSuccess = (await _backupsRepository.uploadImages([image])).isSuccess;
+        }
+        _backupsRepository.updateBackups([image.copyWith(status: BackupStatus.UPLOADED)]);
+        uploadQueue.remove(image);
+      });
+
+      checkStopCondition();
+    }
+  }
+  // Future<void> syncQueue() async {
+  //   await for (final List<Backup> images in _proxyStream.stream) {
+  //     final List<Future<NetworkResult<bool?>>> futures =
+  //         images.map((it) => _backupsRepository.uploadImages([it])).toList();
+
+  //     final List<NetworkResult<bool?>> uploadResults = await Future.wait(futures);
+
+  //     uploadResults.forEachIndexedWhile((index, element) {
+  //       final uploadedItem = uploadQueue.elementAt(index);
+  //       uploadQueue.remove(uploadedItem);
+  //       _backupsRepository.updateBackups([uploadedItem.copyWith(status: BackupStatus.UPLOADED)]);
+  //       return element.isSuccess;
+  //     });
+
+  //     checkStopCondition();
+  //   }
+  // }
+
+  void checkStopCondition() {
+    if (localImagesSynced && uploadQueue.isEmpty) {
+      _proxyStream.done;
+    }
   }
 
-  @override
-  FutureOr<bool> run() {
-    print('${dio.options} ,isolate:${Isolate.current.hashCode}');
-    return Future.value(true);
+  Future<void> clean() async {
+    await _subscribe.cancel();
+    return _imageObserver.dispose();
   }
-}
-
-Future<Map<String, dynamic>> decodeJson(Response response) {
-  final jsonResponse = jsonDecode(response.data);
-  print('my debug res is $jsonResponse');
-  return jsonResponse;
 }

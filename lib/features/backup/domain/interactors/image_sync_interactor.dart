@@ -1,5 +1,6 @@
 import 'package:core_sdk/utils/extensions/list.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -9,13 +10,15 @@ const int _PAGE_SIZE = 50;
 
 @injectable
 class ImageSyncInteractor extends Interactor<void> {
-  ImageSyncInteractor(this._backupsRepository);
+  ImageSyncInteractor(this._backupsRepository, this._imageUploaderInteractor);
 
   final BackupsRepository _backupsRepository;
+  final ImageUploaderInteractor _imageUploaderInteractor;
 
   @override
   Future<void> doWork(void params) async {
     try {
+      _startUploadInteractor();
       final permission = await PhotoManager.requestPermissionExtend();
       if (permission.isAuth) {
         final gallery = await PhotoManager.getAssetPathList(
@@ -68,9 +71,14 @@ class ImageSyncInteractor extends Interactor<void> {
         _backupsRepository.addNewImages(imagesBuffer);
       }
       _backupsRepository.saveLastSync(DateTime.now());
+      _startUploadInteractor();
     } else {
       print('sync image cancelled due to time constraint');
     }
+  }
+
+  void _startUploadInteractor() {
+    _imageUploaderInteractor(1, timeout: const Duration(hours: 2)).listen((event) {});
   }
 }
 

@@ -1,7 +1,8 @@
-import 'package:core_sdk/data/repositories/base_repository.dart';
+import 'package:core_sdk/utils/network_result.dart';
 import 'package:graduation_project/base/data/datasources/common_datasource.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/domain/repositories/base_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 abstract class BackupsRepository extends BaseRepository {
@@ -26,4 +27,8 @@ abstract class BackupsRepository extends BaseRepository {
   Future<bool> canStartSaveBackup();
 
   Future<bool> canStartUploadBackup();
+
+  Future<NetworkResult<bool?>> uploadImages(List<Backup> images);
+
+  Future<void> updateBackups(List<Backup> images);
 }

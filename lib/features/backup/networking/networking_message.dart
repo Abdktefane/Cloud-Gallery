@@ -1,43 +1,48 @@
 import 'dart:isolate';
 
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
+import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
 
-abstract class NetworkIsolateMessage extends Equatable {
-  const NetworkIsolateMessage(this.id);
-  final int id;
+import 'base_isolate.dart';
 
-  @override
-  bool? get stringify => true;
-
-  @override
-  List<Object?> get props => [id];
-}
-
-class InitIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
+// TODO(abd): move to core sdk
+class InitIsolateMessage extends BaseIsolateMessage with EquatableMixin {
   const InitIsolateMessage(
     int id, {
     required this.callerPort,
-    required this.baseUrl,
+    required this.baseOptions,
+    required this.databasePort,
+    this.interceptors,
   }) : super(id);
   final SendPort callerPort;
-  final String baseUrl;
+  final SendPort databasePort;
+  final String baseOptions;
+  final List<Interceptor>? interceptors;
 
   InitIsolateMessage copyWith({
     int? id,
     SendPort? callerPort,
-    String? baseUrl,
+    SendPort? databasePort,
+    String? baseOptions,
+    List<Interceptor>? interceptors,
   }) =>
-      InitIsolateMessage(id ?? this.id, callerPort: callerPort ?? this.callerPort, baseUrl: baseUrl ?? this.baseUrl);
+      InitIsolateMessage(
+        id ?? this.id,
+        callerPort: callerPort ?? this.callerPort,
+        databasePort: databasePort ?? this.databasePort,
+        baseOptions: baseOptions ?? this.baseOptions,
+        interceptors: interceptors ?? this.interceptors,
+      );
 
   @override
   bool get stringify => true;
 
   @override
-  List<Object> get props => [id, callerPort, baseUrl];
+  List<Object?> get props => [id, callerPort, baseOptions, interceptors];
 }
 
-class RequestIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
+class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
   const RequestIsolateMessage(
     int id, {
     required this.method,
@@ -82,30 +87,21 @@ class RequestIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
   List<Object?> get props => [id, method, endpoint, withAuth, data, params, headers];
 }
 
-class ResponseIsolateMessage extends NetworkIsolateMessage with EquatableMixin {
-  const ResponseIsolateMessage.init(int id, this.callerPort)
+class ResponseIsolateMessage extends BaseInitResponseIsolateMessage with EquatableMixin {
+  const ResponseIsolateMessage.success(int id, this.response) : super(id, callerPort: null, error: null);
+
+  const ResponseIsolateMessage.init(int id, SendPort callerPort)
       : response = null,
-        error = null,
-        super(id);
+        super(id, callerPort: callerPort, error: null);
 
-  const ResponseIsolateMessage.error(int id, this.error)
-      : callerPort = null,
-        response = null,
-        super(id);
+  const ResponseIsolateMessage.error(int id, Exception error, {StackTrace? st})
+      : response = null,
+        super(id, callerPort: null, error: error, st: st);
 
-  const ResponseIsolateMessage.success(int id, this.response)
-      : callerPort = null,
-        error = null,
-        super(id);
-
-  final SendPort? callerPort;
   final Map<String, dynamic>? response;
-  final Exception? error;
 
-  bool get isInit => response == null && error == null;
   bool get isResponse => callerPort == null;
   bool get isSuccess => isResponse && error == null;
-  bool get isFailure => !isSuccess;
 
   @override
   bool get stringify => true;

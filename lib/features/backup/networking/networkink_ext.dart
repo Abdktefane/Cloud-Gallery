@@ -7,9 +7,11 @@ import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/constants.dart';
 import 'package:core_sdk/utils/network_result.dart';
 import 'package:dio/dio.dart';
+import 'package:graduation_project/features/backup/networking/base_isolate_datasource.dart';
 import 'package:graduation_project/features/backup/networking/networking_isolator.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 
+// TODO(abd): move to core sdk
 extension NetworkingExt<T> on Future<Response<T>> {
   Future<ResponseIsolateMessage> asNetworkMessageResponse(int id) => then((res) {
         if (res.statusCode == STATUS_OK) {
@@ -24,12 +26,16 @@ extension NetworkingExt<T> on Future<Response<T>> {
 
 extension ResponseIsolateMessageExt on ResponseIsolateMessage {
   NetworkResult<T?> asNetworkResult<T>({
-    required Map<String, dynamic> jsonResponse,
+    required Map<String, dynamic>? jsonResponse,
     required Logger logger,
     required Mapper<T?>? mapper,
     required ErrorMapper? errorMapper,
   }) {
     try {
+      if (isFailure) {
+        throw error!;
+      }
+      jsonResponse!;
       if (jsonResponse is! Map && mapper == null) {
         return Success(jsonResponse as T?);
       }

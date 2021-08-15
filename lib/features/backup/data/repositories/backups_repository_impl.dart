@@ -1,3 +1,4 @@
+import 'package:core_sdk/utils/network_result.dart';
 import 'package:graduation_project/base/data/datasources/common_datasource.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
@@ -10,22 +11,24 @@ import 'package:injectable/injectable.dart';
 import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-const Duration _CASHE_DURATION = Duration(minutes: 10);
+const Duration _CASHE_DURATION = Duration(seconds: 10);
 
 @LazySingleton(as: BackupsRepository)
 class BackupsRepositoryImpl extends BackupsRepository {
   const BackupsRepositoryImpl(
-    CommonDataSource commonDataSource,
+    this._commonDataSource,
     this._backupsStore,
     this._backupMapper,
     this._lastSyncRequestStore,
-  ) : super(commonDataSource);
+  ) : super(_commonDataSource);
 
   final BackupMapper _backupMapper;
 
   final BackupsStore _backupsStore;
 
   final LastSyncRequestStore _lastSyncRequestStore;
+
+  final CommonDataSource _commonDataSource;
 
   @override
   Stream<List<Backup>> observeActiveBackups() => _backupsStore.observeActiveBackups();
@@ -60,4 +63,12 @@ class BackupsRepositoryImpl extends BackupsRepository {
 
   @override
   Future<bool> canStartUploadBackup() async => !(await canStartSaveBackup());
+
+  @override
+  Future<NetworkResult<bool?>> uploadImages(List<Backup> images) {
+    return _commonDataSource.uploadImages(images);
+  }
+
+  @override
+  Future<void> updateBackups(List<Backup> images) => _backupsStore.updateBackups(images);
 }

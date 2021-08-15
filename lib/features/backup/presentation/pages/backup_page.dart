@@ -49,6 +49,7 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> {
     return Scaffold(body: Observer(
       builder: (_) {
         return _appViewmodel?.imageSyncing == true
+            // TODO(abd): add clear message to make user understand what waitin for
             ? const Center(child: GraduateLoader())
             : Column(
                 children: [

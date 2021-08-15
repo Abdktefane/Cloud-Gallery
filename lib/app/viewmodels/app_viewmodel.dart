@@ -134,7 +134,10 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
 
   void syncImages() {
     print('syncImages called in appviewmodel');
-    collect(_imageSyncInteractor(Void), collector: (status) => imageSyncStatus = status);
+    collect(
+      _imageSyncInteractor(Void, timeout: const Duration(hours: 2)),
+      collector: (status) => imageSyncStatus = status,
+    );
   }
 }
 

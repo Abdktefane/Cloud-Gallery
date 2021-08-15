@@ -30,6 +30,8 @@ class InvokeError extends InvokeStatus {
 }
 
 abstract class Interactor<P> {
+  const Interactor();
+
   Stream<InvokeStatus> call(
     P params, {
     Duration timeout = defaultTimeout,

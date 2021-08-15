@@ -10,12 +10,16 @@ import 'package:graduation_project/base/domain/repositories/prefs_repository.dar
 import 'package:graduation_project/base/utils/token_interceptor.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
+import 'package:graduation_project/features/backup/networking/dio_options_utils.dart';
+import 'package:graduation_project/features/backup/networking/networking_isolator.dart';
+import 'package:graduation_project/features/backup/networking/networking_message.dart';
+import 'package:graduation_project/features/backup/networking/networkink_ext.dart';
 import 'package:injectable/injectable.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
-const String baseUrl2 = 'http://192.168.1.106:3000';
+const String baseUrl2 = 'http://192.168.1.9:3000';
 
 final GetIt getIt = GetIt.I;
 
@@ -31,14 +35,30 @@ abstract class AppModule {
   @Named('ApiBaseUrl')
   String get baseUrl => '$baseUrl2/api';
 
-  BaseOptions dioOption(@Named('ApiBaseUrl') String baseUrl) => BaseOptions(
+  // @Named('ApiBaseUrl')
+  // String get baseUrl => 'https://demo.fivectech.com:9001/rest/v1/';
+
+  NetworkIsolateBaseOptions dioOption(@Named('ApiBaseUrl') String baseUrl) => BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: 3000,
-        receiveTimeout: 3000,
-        sendTimeout: 3000,
+        connectTimeout: 2000,
+        receiveTimeout: 2000,
+        sendTimeout: 2000,
         contentType: 'application/json;charset=utf-8',
         responseType: ResponseType.plain,
         headers: {'Accept': 'application/json', 'Connection': 'keep-alive'},
+      ).asNetworkIsolateBaseOptions;
+
+  @preResolve
+  @singleton
+  Future<NetworkIsolate> getNetworkIsolate(
+    NetworkIsolateBaseOptions baseOptions,
+    Logger logger,
+    PrefsRepository prefsRepository,
+  ) =>
+      NetworkIsolate.getInstance(
+        logger: logger,
+        baseOptions: baseOptions,
+        interceptors: [TokenInterceptor(prefsRepository: prefsRepository)],
       );
 
   @preResolve
@@ -49,35 +69,35 @@ abstract class AppModule {
   @LazySingleton(as: PrefsRepository)
   PrefsRepositoryImpl prefsRepository(SharedPreferences prefs) => PrefsRepositoryImpl(prefs);
 
-  @singleton
-  Dio dio(
-    SharedPreferences sharedPreferences,
-    BaseOptions option,
-    Logger logger,
-    PrefsRepository tokenRepository,
-    // @Named('RefreshTokenUrl') String refreshTokenUrl,
-  ) {
-    final dio = Dio(option);
-    return dio
-      ..interceptors.addAll(<Interceptor>[
-        RetryInterceptor(
-          dio: dio,
-          logger: logger,
-          options: const RetryOptions(),
-        ),
-        TokenInterceptor(
-          baseDio: dio,
-          prefsRepository: tokenRepository,
-        ),
-        LogInterceptor(
-          requestBody: true,
-          responseBody: true,
-          responseHeader: true,
-          requestHeader: true,
-          request: true,
-        ),
-      ]);
-  }
+  // @singleton
+  // Dio dio(
+  //   SharedPreferences sharedPreferences,
+  //   BaseOptions option,
+  //   Logger logger,
+  //   PrefsRepository tokenRepository,
+  //   // @Named('RefreshTokenUrl') String refreshTokenUrl,
+  // ) {
+  //   final dio = Dio(option);
+  //   return dio
+  //     ..interceptors.addAll(<Interceptor>[
+  //       RetryInterceptor(
+  //         dio: dio,
+  //         logger: logger,
+  //         options: const RetryOptions(),
+  //       ),
+  //       TokenInterceptor(
+  //         // baseDio: dio,
+  //         prefsRepository: tokenRepository,
+  //       ),
+  //       LogInterceptor(
+  //         requestBody: true,
+  //         responseBody: true,
+  //         responseHeader: true,
+  //         requestHeader: true,
+  //         request: true,
+  //       ),
+  //     ]);
+  // }
 
   @Singleton(as: Logger)
   LoggerImpl logger() => LoggerImpl();

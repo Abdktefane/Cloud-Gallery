@@ -4,6 +4,11 @@ import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:injectable/injectable.dart';
 
+// TODO(abd): IOS required change prefix
+String getDiskPrefix() {
+  return '/storage/emulated/0/';
+}
+
 @singleton
 class BackupMapper extends Mapper<AssetEntity, BackupsCompanion> {
   @override
@@ -14,7 +19,7 @@ extension AssetEntityExt on AssetEntity {
   Future<BackupsCompanion> toEntry() async => BackupsCompanion(
         assetId: Value(id),
         mime: Value(mimeType ?? ''),
-        path: Value(relativePath ?? ''),
+        path: Value(getDiskPrefix() + relativePath! + title!),
         thumbData: Value((await thumbData)!),
         title: Value(title),
       );

@@ -6,19 +6,12 @@ import 'package:graduation_project/base/data/datasources/graduate_datasource.dar
 import 'package:graduation_project/base/data/models/base_response_model.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/base/utils/end_points.dart';
+import 'package:graduation_project/features/backup/networking/networking_isolator.dart';
 import 'package:graduation_project/features/login/data/models/login_response_model.dart';
 import 'package:injectable/injectable.dart';
 
 abstract class LoginDataSource extends GraduateDataSource {
-  LoginDataSource({
-    required Dio client,
-    required PrefsRepository prefsRepository,
-    required Logger logger,
-  }) : super(
-          prefsRepository: prefsRepository,
-          client: client,
-          logger: logger,
-        );
+  LoginDataSource(NetworkIsolate client) : super(client);
 
   Future<NetworkResult<BaseResponseModel<LoginResponseModel>?>> login({
     required String email,
@@ -33,16 +26,7 @@ abstract class LoginDataSource extends GraduateDataSource {
 
 @LazySingleton(as: LoginDataSource)
 class LoginDataSourceImpl extends LoginDataSource {
-  LoginDataSourceImpl({
-    required Dio client,
-    required PrefsRepository prefsRepository,
-    required Logger logger,
-  }) : super(
-          prefsRepository: prefsRepository,
-          client: client,
-          logger: logger,
-        );
-
+  LoginDataSourceImpl(NetworkIsolate client) : super(client);
   @override
   Future<NetworkResult<BaseResponseModel<LoginResponseModel>?>> login({
     required String email,
