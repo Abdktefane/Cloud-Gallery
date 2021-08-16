@@ -3,7 +3,6 @@ import 'package:core_sdk/utils/network_result.dart';
 import 'package:graduation_project/base/domain/repositories/graduate_repository.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/login/data/datasources/login_datasource.dart';
-import 'package:graduation_project/features/login/data/models/login_response_model.dart';
 
 abstract class LoginRepository extends GraduateRepository {
   const LoginRepository(

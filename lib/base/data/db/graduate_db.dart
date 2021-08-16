@@ -9,12 +9,14 @@ import 'package:moor/moor.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
+import 'entities/tokens.dart';
+
 part 'graduate_db.g.dart';
 
 const int databaseVersion = 1;
 const String databaseFileName = 'graduate_db.sqlite';
 
-@UseMoor(tables: [Backups, LastSyncRequests])
+@UseMoor(tables: [Backups, LastSyncRequests, Tokens])
 class GraduateDB extends _$GraduateDB {
   // GraduateDB({QueryExecutor database}) : super(database ?? _openConnection());
   GraduateDB() : super(_openConnection());

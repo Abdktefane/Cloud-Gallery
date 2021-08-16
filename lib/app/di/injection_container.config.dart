@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart' as _i5;
 
 import '../../base/data/datasources/common_datasource.dart' as _i10;
 import '../../base/data/db/database_transaction_runner.dart' as _i8;
-import '../../base/data/db/di/db_module.dart' as _i33;
+import '../../base/data/db/di/db_module.dart' as _i34;
 import '../../base/data/db/graduate_db.dart' as _i9;
 import '../../base/data/repositories/common_repository_impl.dart' as _i13;
 import '../../base/domain/repositories/common_repository.dart' as _i12;
@@ -23,6 +23,7 @@ import '../../features/backup/data/repositories/backups_repository_impl.dart'
 import '../../features/backup/data/stores/backup_store.dart' as _i23;
 import '../../features/backup/data/stores/last_sync_requrest_store.dart'
     as _i25;
+import '../../features/backup/data/stores/tokens_store.dart' as _i32;
 import '../../features/backup/domain/interactors/image_observer.dart' as _i26;
 import '../../features/backup/domain/interactors/image_sync_interactor.dart'
     as _i29;
@@ -47,7 +48,7 @@ import '../../features/register/presentation/viewmodels/register_viewmodel.dart'
     as _i20;
 import '../../features/splash/viewmodels/splash_viewmodel.dart' as _i6;
 import '../viewmodels/app_viewmodel.dart' as _i30;
-import 'injection_container.dart' as _i32;
+import 'injection_container.dart' as _i33;
 
 const String _prod = 'prod';
 // ignore_for_file: unnecessary_lambdas
@@ -113,6 +114,7 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       preResolve: true);
   gh.singleton<_i25.LastSyncRequestStore>(
       _i25.LastSyncRequestStoreImpl(get<_i9.GraduateDB>()));
+  gh.singleton<_i32.TokensStore>(_i32.TokensStoreImpl(get<_i9.GraduateDB>()));
   gh.singleton<_i23.BackupsStore>(_i23.BackupDao(get<_i9.GraduateDB>()));
   await gh.singletonAsync<_i11.NetworkIsolate>(
       () => appModule.getNetworkIsolate(get<_i3.NetworkIsolateBaseOptions>(),
@@ -121,6 +123,6 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
   return get;
 }
 
-class _$AppModule extends _i32.AppModule {}
+class _$AppModule extends _i33.AppModule {}
 
-class _$GraduateDBModule extends _i33.GraduateDBModule {}
+class _$GraduateDBModule extends _i34.GraduateDBModule {}

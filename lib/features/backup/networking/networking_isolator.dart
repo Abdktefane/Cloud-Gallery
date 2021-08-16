@@ -13,6 +13,7 @@ import 'package:core_sdk/utils/network_result.dart';
 import 'package:dio/dio.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/utils/token_interceptor.dart';
+import 'package:graduation_project/features/backup/data/stores/tokens_store.dart';
 import 'package:graduation_project/features/backup/networking/dio_options_utils.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networking_request_api.dart';
@@ -116,7 +117,8 @@ Future<void> _handleNetwrokRequest(dynamic message) async {
   logger.d('Network Isolate Recive Initial Message: $message, Isolate Id:${Isolate.current.hashCode}');
   final ReceivePort receivePort = ReceivePort();
   late final GraduateDB database;
-  SendPort? callerPort;
+  late final TokensStoreImpl tokenStore;
+  late final SendPort? callerPort;
   Dio? dio;
 
   // init isolate attributes
@@ -124,12 +126,13 @@ Future<void> _handleNetwrokRequest(dynamic message) async {
     callerPort = message.callerPort;
     final MoorIsolate moorIsolate = MoorIsolate.fromConnectPort(message.databasePort);
     database = GraduateDB.connect(await moorIsolate.connect());
+    tokenStore = TokensStoreImpl(database);
     final options = NetworkIsolateBaseOptions.fromJson(jsonDecode(message.baseOptions)).asDioBaseOptions()
       ..contentType = null;
     dio = Dio(options);
     dio.interceptors.addAll([
       RetryInterceptor(dio: dio, logger: logger, options: const RetryOptions()),
-      // TokenInterceptor(prefsRepository: prefsRepository)
+      TokenInterceptor(tokenStore),
       // ...?message.interceptors,
       LogInterceptor(
         requestBody: true,

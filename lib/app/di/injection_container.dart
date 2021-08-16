@@ -1,3 +1,5 @@
+import 'dart:isolate';
+
 import 'package:actors/actors.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/Fimber/logger_impl.dart';
@@ -53,12 +55,12 @@ abstract class AppModule {
   Future<NetworkIsolate> getNetworkIsolate(
     NetworkIsolateBaseOptions baseOptions,
     Logger logger,
-    PrefsRepository prefsRepository,
+    SendPort databasePort,
   ) =>
       NetworkIsolate.getInstance(
         logger: logger,
         baseOptions: baseOptions,
-        interceptors: [TokenInterceptor(prefsRepository: prefsRepository)],
+        databasePort: databasePort,
       );
 
   @preResolve
@@ -68,36 +70,6 @@ abstract class AppModule {
   @prod
   @LazySingleton(as: PrefsRepository)
   PrefsRepositoryImpl prefsRepository(SharedPreferences prefs) => PrefsRepositoryImpl(prefs);
-
-  // @singleton
-  // Dio dio(
-  //   SharedPreferences sharedPreferences,
-  //   BaseOptions option,
-  //   Logger logger,
-  //   PrefsRepository tokenRepository,
-  //   // @Named('RefreshTokenUrl') String refreshTokenUrl,
-  // ) {
-  //   final dio = Dio(option);
-  //   return dio
-  //     ..interceptors.addAll(<Interceptor>[
-  //       RetryInterceptor(
-  //         dio: dio,
-  //         logger: logger,
-  //         options: const RetryOptions(),
-  //       ),
-  //       TokenInterceptor(
-  //         // baseDio: dio,
-  //         prefsRepository: tokenRepository,
-  //       ),
-  //       LogInterceptor(
-  //         requestBody: true,
-  //         responseBody: true,
-  //         responseHeader: true,
-  //         requestHeader: true,
-  //         request: true,
-  //       ),
-  //     ]);
-  // }
 
   @Singleton(as: Logger)
   LoggerImpl logger() => LoggerImpl();
