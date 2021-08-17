@@ -23,13 +23,6 @@ class AppBarParams extends Equatable {
   final VoidCallback? onBackPressed;
   final PreferredSizeWidget? bottom;
 
-  static AppBarParams initial(bool isPlayer) {
-    return AppBarParams(
-      title: 'lbl_home',
-      onBackPressed: null,
-    );
-  }
-
   AppBarParams copyWith({
     String? title,
     Color? backgroundColor,

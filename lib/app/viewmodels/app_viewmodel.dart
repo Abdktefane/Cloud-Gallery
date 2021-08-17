@@ -55,13 +55,13 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   ObservableFuture<bool>? logoutResult;
 
   @observable
-  AppBarParams? appBarParams = const AppBarParams(title: 'lbl_home', onBackPressed: null);
+  AppBarParams? appBarParams = const AppBarParams(title: 'lbl_base_screen', onBackPressed: null);
 
   @observable
   PageIndex pageIndex = PageIndex.home;
 
   @observable
-  InvokeStatus imageSyncStatus = const InvokeStarted();
+  InvokeStatus imageSyncStatus = InvokeError(Exception('not Start yet'));
 
   //* COMPUTED *//
   @computed
@@ -74,6 +74,17 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   bool get imageSyncing => imageSyncStatus is InvokeStarted;
 
   //* ACTIONS *//
+
+  void syncImages() {
+    if (imageSyncStatus is! InvokeStarted) {
+      print('syncImages called in appviewmodel');
+      collect(
+        _imageSyncInteractor(Void, timeout: const Duration(hours: 2)),
+        collector: (status) => imageSyncStatus = status,
+      );
+      print('syncImages end in appviewmodel');
+    }
+  }
 
   @action
   void changeLanguage(String locale, {bool refreshConstants = true}) {
@@ -131,20 +142,12 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
       catchBlock: (err) => showSnack(err ?? '', duration: 2.seconds),
     );
   }
-
-  void syncImages() {
-    print('syncImages called in appviewmodel');
-    collect(
-      _imageSyncInteractor(Void, timeout: const Duration(hours: 2)),
-      collector: (status) => imageSyncStatus = status,
-    );
-  }
 }
 
 String getAppBarTitle(PageIndex pageIndex) {
   switch (pageIndex) {
     case PageIndex.home:
-      return 'lbl_home';
+      return 'lbl_base_screen';
 
     case PageIndex.recommendation:
       return 'lbl_reco';
@@ -155,11 +158,3 @@ String getAppBarTitle(PageIndex pageIndex) {
       return 'not_exist';
   }
 }
-
-
-// mixin Test on GraduateViewmodel{
-//   extension Tes on int{
-
-//   }
-// }
-

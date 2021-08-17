@@ -3,6 +3,7 @@ import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
@@ -49,7 +50,7 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> {
     return Scaffold(body: Observer(
       builder: (_) {
         return _appViewmodel?.imageSyncing == true
-            // TODO(abd): add clear message to make user understand what waitin for
+            // TODO(abd): add clear message to make user understand what waiting for
             ? const Center(child: GraduateLoader())
             : Column(
                 children: [
@@ -72,11 +73,24 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> {
                   ),
                   GraduateStreamObserver<List<Backup>?>(
                     stream: viewmodel.images!,
-                    onSuccess: (images) => ListView.builder(
-                      key: ValueKey(images.hashCode),
-                      padding: const EdgeInsets.only(top: 8.0),
-                      itemCount: images?.length,
-                      itemBuilder: (_, index) => BackupTile(backup: images![index]),
+                    onSuccess: (images) => Column(
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          children: [
+                            Text(
+                              context.translate('lbl_total_images') + ': ' + '${images?.length}',
+                              style: textTheme?.bodyText1?.copyWith(color: ACCENT),
+                            ).padding(padding: const EdgeInsets.symmetric(horizontal: 18.0)),
+                          ],
+                        ),
+                        ListView.builder(
+                          key: ValueKey(images.hashCode),
+                          padding: const EdgeInsets.only(top: 8.0),
+                          itemCount: images?.length,
+                          itemBuilder: (_, index) => BackupTile(backup: images![index]),
+                        ).expand(),
+                      ],
                     ),
                   ).expand(),
                 ],

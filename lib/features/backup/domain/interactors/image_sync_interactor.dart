@@ -18,7 +18,7 @@ class ImageSyncInteractor extends Interactor<void> {
   @override
   Future<void> doWork(void params) async {
     try {
-      _startUploadInteractor();
+      // _startUploadInteractor();
       final permission = await PhotoManager.requestPermissionExtend();
       if (permission.isAuth) {
         final gallery = await PhotoManager.getAssetPathList(
@@ -30,8 +30,9 @@ class ImageSyncInteractor extends Interactor<void> {
           print('gallery is empty');
           return;
         }
+        await _syncFolder(gallery.first);
+        // gallery.forEach( _syncFolder);
 
-        gallery.forEach(_syncFolder);
       } else {
         throw UnimplementedError('user not admit permission');
       }
@@ -71,7 +72,8 @@ class ImageSyncInteractor extends Interactor<void> {
         _backupsRepository.addNewImages(imagesBuffer);
       }
       _backupsRepository.saveLastSync(DateTime.now());
-      _startUploadInteractor();
+      // TODO(abd): we must start upload proccess when finish move images to database
+      // _startUploadInteractor();
     } else {
       print('sync image cancelled due to time constraint');
     }

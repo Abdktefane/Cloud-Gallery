@@ -80,6 +80,7 @@ class NetworkIsolate extends BaseIsolate<RequestIsolateMessage, ResponseIsolateM
     Map<String, dynamic>? headers,
     dynamic data,
     ErrorMapper? errorMapper,
+    String? path,
   }) {
     final completer = Completer<NetworkResult<T?>>();
     proccess((id) => RequestIsolateMessage(
@@ -90,6 +91,7 @@ class NetworkIsolate extends BaseIsolate<RequestIsolateMessage, ResponseIsolateM
           headers: headers,
           params: params,
           withAuth: withAuth,
+          path: path,
         )).then(
       (ResponseIsolateMessage answer) {
         logger.d('answer in Network Isolater Wrapper $answer');
@@ -144,6 +146,7 @@ Future<void> _handleNetwrokRequest(dynamic message) async {
     ]);
     // send init message (ready to start signal) to main isolate
     callerPort.send(ResponseIsolateMessage.init(message.id, receivePort.sendPort));
+
     // prepeate reciver pipeline to stream request
     receivePort.cast<RequestIsolateMessage>().listen(
       (requestMessage) => proccessNetworkIsolatorRequests(

@@ -51,6 +51,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
     this.data,
     this.params,
     this.headers,
+    this.path,
   }) : super(id);
 
   final METHOD method;
@@ -59,6 +60,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
   final dynamic data;
   final Map<String, dynamic>? params;
   final Map<String, dynamic>? headers;
+  final String? path;
 
   RequestIsolateMessage copyWith({
     int? id,
@@ -68,6 +70,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
     dynamic data,
     Map<String, dynamic>? params,
     Map<String, dynamic>? headers,
+    String? path,
   }) {
     return RequestIsolateMessage(
       id ?? this.id,
@@ -77,6 +80,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
       data: data ?? this.data,
       params: params ?? this.params,
       headers: headers ?? this.headers,
+      path: path,
     );
   }
 
@@ -84,7 +88,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
   bool get stringify => true;
 
   @override
-  List<Object?> get props => [id, method, endpoint, withAuth, data, params, headers];
+  List<Object?> get props => [id, method, endpoint, withAuth, data, params, headers, path];
 }
 
 class ResponseIsolateMessage extends BaseInitResponseIsolateMessage with EquatableMixin {

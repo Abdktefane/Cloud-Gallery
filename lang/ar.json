@@ -5,7 +5,10 @@
 
 
   
-  "lbl_home":"بحث",
+  "lbl_search":"البحث",
+  "lbl_base_screen": "الرئيسية",
+  "lbl_total_images":"عدد الصور",
+
   "lbl_reco":"الإقتراحات",
   "lbl_backup":"النسخ الاحتياطي",
   "lbl_email":"البريد الإلكتروني",

@@ -4,7 +4,8 @@
   "lbl_cancel": "cancel",
 
 
-  "lbl_home":"Search",
+  "lbl_search":"Search",
+  "lbl_base_screen": "Home",
   "lbl_reco":"Recommendation",
   "lbl_backup":"Backup",
   "lbl_email":"Email",
@@ -17,6 +18,7 @@
   "lbl_settings":"Settings",
   "lbl_logout":"Logout",
   "lbl_db_viewer": "Data Base Viewer",
+  "lbl_total_images": "Images Count",
 
   "lbl_canceled":"Canceled",
   "lbl_uploaded":"Uploaded",
@@ -24,6 +26,7 @@
   "lbl_pending":"Pending",
 
   "lbl_empty": "Empty Content",
+  
 
 
 

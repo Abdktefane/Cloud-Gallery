@@ -10,8 +10,17 @@ class TokenInterceptor extends Interceptor {
   @override
   Future<RequestOptions?> onRequest(options, handler) async {
     // options.headers['Accept-Language'] = prefsRepository.languageCode;
+    print('interceptor called');
     if (TokenOption.needToken(options)) {
-      options.headers['Authorization'] = /* 'Basic ' + */ await _tokensStore.getToken();
+      try {
+        print('interceptor called and options need token');
+        final token = await _tokensStore.getToken();
+        print('my debug token: $token');
+
+        options.headers['Authorization'] = token?.token;
+      } catch (ex, st) {
+        print('interceptor exception ex:$ex, st: $st');
+      }
     }
     handler.next(options);
   }

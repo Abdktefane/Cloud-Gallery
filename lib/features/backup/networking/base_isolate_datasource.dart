@@ -43,6 +43,7 @@ abstract class BaseIsolateDataSourceImpl extends BaseIsolateDataSource {
     Map<String, dynamic>? headers,
     data,
     ErrorMapper? errorMapper,
+    String? path,
   }) =>
       _networkIsolate.request(
         method: method,
@@ -53,5 +54,6 @@ abstract class BaseIsolateDataSourceImpl extends BaseIsolateDataSource {
         errorMapper: errorMapper,
         headers: headers,
         params: params,
+        path: path,
       );
 }

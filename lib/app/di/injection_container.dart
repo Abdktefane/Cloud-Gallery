@@ -17,11 +17,12 @@ import 'package:graduation_project/features/backup/networking/networking_isolato
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networkink_ext.dart';
 import 'package:injectable/injectable.dart';
+import 'package:moor/isolate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
-const String baseUrl2 = 'http://192.168.1.9:3000';
+const String baseUrl2 = 'http://192.168.1.109:3000';
 
 final GetIt getIt = GetIt.I;
 
@@ -55,12 +56,12 @@ abstract class AppModule {
   Future<NetworkIsolate> getNetworkIsolate(
     NetworkIsolateBaseOptions baseOptions,
     Logger logger,
-    SendPort databasePort,
+    MoorIsolate moorIsolate,
   ) =>
       NetworkIsolate.getInstance(
         logger: logger,
         baseOptions: baseOptions,
-        databasePort: databasePort,
+        databasePort: moorIsolate.connectPort,
       );
 
   @preResolve

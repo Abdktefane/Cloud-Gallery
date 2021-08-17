@@ -27,7 +27,7 @@ Future<void> proccessNetworkIsolatorRequests(
       params: requestMessage.params,
       headers: requestMessage.headers,
       withAuth: requestMessage.withAuth,
-      data: requestMessage.data,
+      data: await getData(requestMessage.data, requestMessage.path),
     );
     logger.d('Network Isolate:${Isolate.current.hashCode} => SEND ResponseMessage: $responseMessage');
     callerPort.send(responseMessage);
@@ -45,6 +45,21 @@ Future<void> proccessNetworkIsolatorRequests(
       // st: st,
     ));
   }
+}
+
+Future<dynamic> getData(dynamic data, String? path) async {
+  print('my debug try to creat form data');
+  final result = path != null
+      ? FormData.fromMap({
+          'file': await MultipartFile.fromFile(
+            path,
+            filename: path.split('/').last,
+          ),
+        })
+      : data;
+  print('my debug try to return result form data $result');
+
+  return result;
 }
 
 Future<ResponseIsolateMessage> _proccessNetworkIsolatorRequest({
