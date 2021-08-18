@@ -30,8 +30,12 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends MobxState<LoginPage, LoginViewmodel> {
-  final TextEditingController _userNameController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // final TextEditingController _userNameController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
+
+  final TextEditingController _userNameController = TextEditingController(text: 'test1@t.com');
+  final TextEditingController _passwordController = TextEditingController(text: '123123');
+
   final _formKey = GlobalKey<FormState>();
   AppViewmodel? appViewmodel;
 

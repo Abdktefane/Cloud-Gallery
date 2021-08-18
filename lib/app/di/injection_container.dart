@@ -1,28 +1,18 @@
-import 'dart:isolate';
-
-import 'package:actors/actors.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/Fimber/logger_impl.dart';
-import 'package:core_sdk/utils/dio/retry_interceptor.dart';
-import 'package:core_sdk/utils/dio/retry_options.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:graduation_project/base/data/repositories/prefs_repository_impl.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
-import 'package:graduation_project/base/utils/token_interceptor.dart';
-import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
-import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:graduation_project/features/backup/networking/dio_options_utils.dart';
 import 'package:graduation_project/features/backup/networking/networking_isolator.dart';
-import 'package:graduation_project/features/backup/networking/networking_message.dart';
-import 'package:graduation_project/features/backup/networking/networkink_ext.dart';
 import 'package:injectable/injectable.dart';
 import 'package:moor/isolate.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
-const String baseUrl2 = 'http://192.168.1.109:3000';
+const String baseUrl2 = 'http://192.168.1.10:3000';
 
 final GetIt getIt = GetIt.I;
 

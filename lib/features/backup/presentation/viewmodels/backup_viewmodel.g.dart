@@ -9,6 +9,13 @@ part of 'backup_viewmodel.dart';
 // ignore_for_file: non_constant_identifier_names, unnecessary_brace_in_string_interps, unnecessary_lambdas, prefer_expression_function_bodies, lines_longer_than_80_chars, avoid_as, avoid_annotating_with_dynamic
 
 mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
+  Computed<bool>? _$canLoadMoreBackupsComputed;
+
+  @override
+  bool get canLoadMoreBackups => (_$canLoadMoreBackupsComputed ??=
+          Computed<bool>(() => super.canLoadMoreBackups, name: '_BackupViewmodelBase.canLoadMoreBackups'))
+      .value;
+
   final _$imagesAtom = Atom(name: '_BackupViewmodelBase.images');
 
   @override
@@ -21,6 +28,21 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
   set images(ObservableStream<List<Backup>?>? value) {
     _$imagesAtom.reportWrite(value, super.images, () {
       super.images = value;
+    });
+  }
+
+  final _$imagesCountAtom = Atom(name: '_BackupViewmodelBase.imagesCount');
+
+  @override
+  ObservableStream<int>? get imagesCount {
+    _$imagesCountAtom.reportRead();
+    return super.imagesCount;
+  }
+
+  @override
+  set imagesCount(ObservableStream<int>? value) {
+    _$imagesCountAtom.reportWrite(value, super.imagesCount, () {
+      super.imagesCount = value;
     });
   }
 
@@ -39,6 +61,21 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
     });
   }
 
+  final _$modifierAtom = Atom(name: '_BackupViewmodelBase.modifier');
+
+  @override
+  BackupModifier get modifier {
+    _$modifierAtom.reportRead();
+    return super.modifier;
+  }
+
+  @override
+  set modifier(BackupModifier value) {
+    _$modifierAtom.reportWrite(value, super.modifier, () {
+      super.modifier = value;
+    });
+  }
+
   final _$_BackupViewmodelBaseActionController = ActionController(name: '_BackupViewmodelBase');
 
   @override
@@ -52,10 +89,44 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
   }
 
   @override
+  void changeModifier(BackupModifier modifier) {
+    final _$actionInfo =
+        _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.changeModifier');
+    try {
+      return super.changeModifier(modifier);
+    } finally {
+      _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void loadMore() {
+    final _$actionInfo = _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.loadMore');
+    try {
+      return super.loadMore();
+    } finally {
+      _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void toggleModifer() {
+    final _$actionInfo = _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.toggleModifer');
+    try {
+      return super.toggleModifer();
+    } finally {
+      _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 images: ${images},
-filter: ${filter}
+imagesCount: ${imagesCount},
+filter: ${filter},
+modifier: ${modifier},
+canLoadMoreBackups: ${canLoadMoreBackups}
     ''';
   }
 }

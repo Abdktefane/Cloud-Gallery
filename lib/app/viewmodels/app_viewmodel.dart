@@ -1,5 +1,6 @@
 import 'dart:ffi';
 
+import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/constants.dart';
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/extensions/mobx.dart';
@@ -10,12 +11,10 @@ import 'package:graduation_project/app/viewmodels/graduate_viewmodel.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_sync_interactor.dart';
-import 'package:mobx/mobx.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
 import 'package:injectable/injectable.dart';
-import 'package:core_sdk/utils/extensions/string.dart';
+import 'package:mobx/mobx.dart';
 import 'package:supercharged/supercharged.dart';
-import 'package:core_sdk/utils/Fimber/Logger.dart';
-import 'package:core_sdk/data/viewmodels/base_viewmodel.dart';
 
 part 'app_viewmodel.g.dart';
 
@@ -32,20 +31,23 @@ class AppViewmodel extends _AppViewmodelBase with _$AppViewmodel {
   AppViewmodel(
     Logger logger,
     PrefsRepository prefsRepository,
-    ImageSyncInteractor imageSyncInteractor,
-  ) : super(logger, prefsRepository, imageSyncInteractor);
+    ImageSaveInteractor imageSyncInteractor,
+    ImageUploaderInteractor imageUploaderInteractor,
+  ) : super(logger, prefsRepository, imageSyncInteractor, imageUploaderInteractor);
 }
 
 abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   _AppViewmodelBase(
     Logger logger,
     this._prefsRepository,
-    this._imageSyncInteractor,
+    this._imageSaveInteractor,
+    this._imageUploaderInteractor,
   ) : super(logger);
 
   PrefsRepository _prefsRepository;
   NavStack<AppBarParams?> appBarHistory = NavStack<AppBarParams?>();
-  final ImageSyncInteractor _imageSyncInteractor;
+  final ImageSaveInteractor _imageSaveInteractor;
+  final ImageUploaderInteractor _imageUploaderInteractor;
 
   //* OBSERVERS *//
   @observable
@@ -61,7 +63,10 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   PageIndex pageIndex = PageIndex.home;
 
   @observable
-  InvokeStatus imageSyncStatus = InvokeError(Exception('not Start yet'));
+  InvokeStatus imageSaveStatus = InvokeError(Exception('not Start yet'));
+
+  @observable
+  InvokeStatus imageUploadStatus = InvokeError(Exception('not Start yet'));
 
   //* COMPUTED *//
   @computed
@@ -71,18 +76,42 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   String get language => languageFuture?.value ?? LANGUAGE_ARABIC;
 
   @computed
-  bool get imageSyncing => imageSyncStatus is InvokeStarted;
+  bool get imageSaving => imageSaveStatus is InvokeStarted;
+
+  @computed
+  bool get imageUploading => imageUploadStatus is InvokeStarted;
 
   //* ACTIONS *//
 
-  void syncImages() {
-    if (imageSyncStatus is! InvokeStarted) {
-      print('syncImages called in appviewmodel');
+  @action
+  void saveImages() {
+    if (!imageSaving) {
+      logger.d('saveImages called in appviewmodel');
       collect(
-        _imageSyncInteractor(Void, timeout: const Duration(hours: 2)),
-        collector: (status) => imageSyncStatus = status,
+        _imageSaveInteractor(Void, timeout: const Duration(hours: 2)),
+        collector: (status) {
+          imageSaveStatus = status;
+          if (status is InvokeSuccess) {
+            uploadImages();
+          }
+        },
       );
-      print('syncImages end in appviewmodel');
+      logger.d('syncImages end in appviewmodel');
+    }
+  }
+
+  @action
+  void uploadImages() {
+    if (!imageUploading) {
+      logger.d('uploadImages called in appviewmodel');
+      collect(
+        _imageUploaderInteractor(Void, timeout: const Duration(hours: 2)),
+        collector: (status) {
+          imageUploadStatus = status;
+          logger.d('Upload Status: $status');
+        },
+      );
+      logger.d('uploadImages end in appviewmodel');
     }
   }
 

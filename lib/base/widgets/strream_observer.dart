@@ -74,7 +74,7 @@ class StreamObserver<T> extends StatelessWidget {
       return onEmptyWidget();
     }
 
-    if ((value as List).isNullOrEmpty) {
+    if ((value is List) && value.isNullOrEmpty) {
       return onEmptyWidget();
     }
 

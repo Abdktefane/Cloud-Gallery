@@ -12,13 +12,13 @@ mixin _$HomeViewmodel on _HomeViewmodelBase, Store {
   final _$imageSourceAtom = Atom(name: '_HomeViewmodelBase.imageSource');
 
   @override
-  ImageSourceType get imageSource {
+  BackupModifier get imageSource {
     _$imageSourceAtom.reportRead();
     return super.imageSource;
   }
 
   @override
-  set imageSource(ImageSourceType value) {
+  set imageSource(BackupModifier value) {
     _$imageSourceAtom.reportWrite(value, super.imageSource, () {
       super.imageSource = value;
     });

@@ -11,7 +11,8 @@ import 'package:injectable/injectable.dart';
 import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-const Duration _CASHE_DURATION = Duration(seconds: 10);
+// const Duration _CASHE_DURATION = Duration(seconds: 10);
+const Duration _CASHE_DURATION = Duration(hours: 12);
 
 @LazySingleton(as: BackupsRepository)
 class BackupsRepositoryImpl extends BackupsRepository {
@@ -39,7 +40,18 @@ class BackupsRepositoryImpl extends BackupsRepository {
   @override
   Stream<List<Backup>> observeUploadedBackup() => _backupsStore.observeUploadedBackup();
   @override
-  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status) => _backupsStore.observeBackupsByStatus(status);
+  Stream<List<Backup>> observeBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  }) =>
+      _backupsStore.observeBackupsByStatus(
+        asc: asc,
+        modifier: modifier,
+        status: status,
+        limit: limit,
+      );
 
   @override
   Future<void> addNewImages(List<AssetEntity> rawImages) async => _backupsStore.addNewImages(
@@ -71,4 +83,8 @@ class BackupsRepositoryImpl extends BackupsRepository {
 
   @override
   Future<void> updateBackups(List<Backup> images) => _backupsStore.updateBackups(images);
+
+  @override
+  Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier}) =>
+      _backupsStore.observeBackupsRows(status: status, modifier: modifier);
 }

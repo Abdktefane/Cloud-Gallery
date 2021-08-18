@@ -10,6 +10,7 @@ import 'package:graduation_project/features/backup/domain/interactors/image_obse
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:collection/collection.dart';
 
 const int IMAGES_PER_UPLOAD = 1;
 
@@ -31,38 +32,24 @@ class ImageUploaderInteractor extends Interactor<void> {
   Future<void> doWork(void params) async {
     try {
       _logger.d('ImageUploader Started ...');
-
       // producer
-      // _subscribe = _imageObserver.observe().listen(moveToQueue);
-      _pendingImagesubscribe =
-          _pendingImageObserver.observe() /* .mergeWith([_uploadingImageObserver.observe()]) */ .listen(moveToQueue);
-
-      _logger.d('ImageUploader 1');
-
-      _logger.d('ImageUploader Started 2');
-
-      _pendingImageObserver(BackupStatus.PENDING);
-      _logger.d('ImageUploader Started 3');
-
-      // _uploadingImageObserver(BackupStatus.UPLOADING);
-      // _logger.d('ImageUploader Started 4');
+      _pendingImagesubscribe = _pendingImageObserver.observe().listen(moveToQueue);
+      _pendingImageObserver(ImageObserver.params(
+        status: BackupStatus.PENDING,
+        modifier: BackupModifier.PRIVATE,
+        asc: false,
+      ));
 
       // consumer
       _proxyStream = StreamController<List<Backup>>();
-      _logger.d('ImageUploader Started 5');
-
       syncQueue();
-
-      _logger.d('ImageUploader Started 6');
 
       // wait for done signal
       await _proxyStream.done;
 
-      _logger.d('ImageUploader Started 7');
-
       // clean resources
-      await clean();
-      _logger.d('ImageUploader Started 8');
+      _logger.d('ImageUploader done');
+      return clean();
     } catch (ex) {
       _logger.e('ImageUploaderInteractor exception $ex');
     }
@@ -70,7 +57,7 @@ class ImageUploaderInteractor extends Interactor<void> {
 
   // producer
   void moveToQueue(List<Backup> pendingImages) {
-    _logger.d('ImageUploader moveToQueue (producer) images:$pendingImages');
+    _logger.d('ImageUploader moveToQueue (producer) images:${pendingImages.length}');
     localImagesSynced = pendingImages.isEmpty;
     checkStopCondition();
     if (!localImagesSynced) {
@@ -82,45 +69,38 @@ class ImageUploaderInteractor extends Interactor<void> {
   // consumer
   Future<void> syncQueue() async {
     await for (final List<Backup> images in _proxyStream.stream) {
-      _logger.d('ImageUploader syncQueue (consumer) images:$images');
+      _logger.d('ImageUploader syncQueue (consumer) images:${images.length}');
       // ignore: avoid_function_literals_in_foreach_calls
-      images.forEach((image) async {
-        _backupsRepository.updateBackups([image.copyWith(status: BackupStatus.UPLOADING)]);
+      for (final image in images) {
         bool isSuccess = false;
         while (!isSuccess) {
-          _logger.d('ImageUploader syncQueue try to upload $image');
-          isSuccess = (await _backupsRepository.uploadImages([image])).isSuccess;
+          try {
+            _logger.d('ImageUploader syncQueue try to upload ${image.assetId}');
+            await changeImagesStatus([image], BackupStatus.UPLOADING);
+            isSuccess = await uploadImages([image]);
+          } catch (ex, st) {
+            await changeImagesStatus([image], BackupStatus.PENDING);
+            _logger.e('ImageUploader upload fail id: ${image.assetId},cause: $ex, st: $st');
+          }
         }
-        _logger.d('ImageUploader syncQueue success upload $image');
-        _backupsRepository.updateBackups([image.copyWith(status: BackupStatus.UPLOADED)]);
+        _logger.d('ImageUploader syncQueue success upload ${image.assetId}');
+        await changeImagesStatus([image], BackupStatus.UPLOADED);
         uploadQueue.remove(image);
-      });
+      }
 
       checkStopCondition();
     }
   }
-  // Future<void> syncQueue() async {
-  //   await for (final List<Backup> images in _proxyStream.stream) {
-  //     final List<Future<NetworkResult<bool?>>> futures =
-  //         images.map((it) => _backupsRepository.uploadImages([it])).toList();
 
-  //     final List<NetworkResult<bool?>> uploadResults = await Future.wait(futures);
+  Future<bool> uploadImages(List<Backup> images) =>
+      _backupsRepository.uploadImages(images).then((res) => res.isSuccess || res.getOrThrow()!);
 
-  //     uploadResults.forEachIndexedWhile((index, element) {
-  //       final uploadedItem = uploadQueue.elementAt(index);
-  //       uploadQueue.remove(uploadedItem);
-  //       _backupsRepository.updateBackups([uploadedItem.copyWith(status: BackupStatus.UPLOADED)]);
-  //       return element.isSuccess;
-  //     });
-
-  //     checkStopCondition();
-  //   }
-  // }
+  Future<void> changeImagesStatus(List<Backup> images, BackupStatus status) =>
+      _backupsRepository.updateBackups(images.map((it) => it.copyWith(status: status)).toList());
 
   void checkStopCondition() {
     if (localImagesSynced && uploadQueue.isEmpty) {
       _logger.d('ImageUploader stopeed with stop condition');
-
       _proxyStream.done;
     }
   }

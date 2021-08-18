@@ -27,7 +27,8 @@ abstract class _SplashViewmodelBase extends BaseViewmodel with Store {
       () => getContext((context) async {
         // context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
 
-        (await _tokensStore.getToken())?.token.isNullOrEmpty == true
+        final token = (await _tokensStore.getToken())?.token;
+        token.isNullOrEmpty
             ? context.pushNamedAndRemoveUntil(LoginPage.route, (_) => false)
             : context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
       }),

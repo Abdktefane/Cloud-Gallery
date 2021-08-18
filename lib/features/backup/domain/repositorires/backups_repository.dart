@@ -16,7 +16,12 @@ abstract class BackupsRepository extends BaseRepository {
 
   Stream<List<Backup>> observeUploadedBackup();
 
-  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status);
+  Stream<List<Backup>> observeBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  });
 
   Future<void> addNewImages(List<AssetEntity> rawImages);
 
@@ -31,4 +36,6 @@ abstract class BackupsRepository extends BaseRepository {
   Future<NetworkResult<bool?>> uploadImages(List<Backup> images);
 
   Future<void> updateBackups(List<Backup> images);
+
+  Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
 }

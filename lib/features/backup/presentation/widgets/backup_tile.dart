@@ -37,9 +37,6 @@ class BackupTile extends StatelessWidget {
         imageProvider: Image.file(File(backup.path)).image,
         tag: backup.assetId,
       )),
-    ).modifier(
-      decoration: const BoxDecoration(color: WHITE),
-      margin: const EdgeInsets.only(bottom: 8.0),
-    );
+    ).modifier(decoration: const BoxDecoration(color: WHITE));
   }
 }

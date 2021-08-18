@@ -14,6 +14,7 @@ class Backup extends DataClass implements Insertable<Backup> {
   final String assetId;
   final String? title;
   final BackupStatus status;
+  final BackupModifier modifier;
   final DateTime createdDate;
   Backup(
       {required this.path,
@@ -22,6 +23,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       required this.assetId,
       this.title,
       required this.status,
+      required this.modifier,
       required this.createdDate});
   factory Backup.fromData(Map<String, dynamic> data, GeneratedDatabase db,
       {String? prefix}) {
@@ -39,6 +41,8 @@ class Backup extends DataClass implements Insertable<Backup> {
           .mapFromDatabaseResponse(data['${effectivePrefix}title']),
       status: $BackupsTable.$converter0.mapToDart(const IntType()
           .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
+      modifier: $BackupsTable.$converter1.mapToDart(const IntType()
+          .mapFromDatabaseResponse(data['${effectivePrefix}modifier']))!,
       createdDate: const DateTimeType()
           .mapFromDatabaseResponse(data['${effectivePrefix}created_date'])!,
     );
@@ -57,6 +61,10 @@ class Backup extends DataClass implements Insertable<Backup> {
       final converter = $BackupsTable.$converter0;
       map['status'] = Variable<int>(converter.mapToSql(status)!);
     }
+    {
+      final converter = $BackupsTable.$converter1;
+      map['modifier'] = Variable<int>(converter.mapToSql(modifier)!);
+    }
     map['created_date'] = Variable<DateTime>(createdDate);
     return map;
   }
@@ -70,6 +78,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       title:
           title == null && nullToAbsent ? const Value.absent() : Value(title),
       status: Value(status),
+      modifier: Value(modifier),
       createdDate: Value(createdDate),
     );
   }
@@ -84,6 +93,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       assetId: serializer.fromJson<String>(json['assetId']),
       title: serializer.fromJson<String?>(json['title']),
       status: serializer.fromJson<BackupStatus>(json['status']),
+      modifier: serializer.fromJson<BackupModifier>(json['modifier']),
       createdDate: serializer.fromJson<DateTime>(json['createdDate']),
     );
   }
@@ -97,6 +107,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       'assetId': serializer.toJson<String>(assetId),
       'title': serializer.toJson<String?>(title),
       'status': serializer.toJson<BackupStatus>(status),
+      'modifier': serializer.toJson<BackupModifier>(modifier),
       'createdDate': serializer.toJson<DateTime>(createdDate),
     };
   }
@@ -108,6 +119,7 @@ class Backup extends DataClass implements Insertable<Backup> {
           String? assetId,
           String? title,
           BackupStatus? status,
+          BackupModifier? modifier,
           DateTime? createdDate}) =>
       Backup(
         path: path ?? this.path,
@@ -116,6 +128,7 @@ class Backup extends DataClass implements Insertable<Backup> {
         assetId: assetId ?? this.assetId,
         title: title ?? this.title,
         status: status ?? this.status,
+        modifier: modifier ?? this.modifier,
         createdDate: createdDate ?? this.createdDate,
       );
   @override
@@ -127,6 +140,7 @@ class Backup extends DataClass implements Insertable<Backup> {
           ..write('assetId: $assetId, ')
           ..write('title: $title, ')
           ..write('status: $status, ')
+          ..write('modifier: $modifier, ')
           ..write('createdDate: $createdDate')
           ..write(')'))
         .toString();
@@ -141,8 +155,10 @@ class Backup extends DataClass implements Insertable<Backup> {
               thumbData.hashCode,
               $mrjc(
                   assetId.hashCode,
-                  $mrjc(title.hashCode,
-                      $mrjc(status.hashCode, createdDate.hashCode)))))));
+                  $mrjc(
+                      title.hashCode,
+                      $mrjc(status.hashCode,
+                          $mrjc(modifier.hashCode, createdDate.hashCode))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -153,6 +169,7 @@ class Backup extends DataClass implements Insertable<Backup> {
           other.assetId == this.assetId &&
           other.title == this.title &&
           other.status == this.status &&
+          other.modifier == this.modifier &&
           other.createdDate == this.createdDate);
 }
 
@@ -163,6 +180,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
   final Value<String> assetId;
   final Value<String?> title;
   final Value<BackupStatus> status;
+  final Value<BackupModifier> modifier;
   final Value<DateTime> createdDate;
   const BackupsCompanion({
     this.path = const Value.absent(),
@@ -171,6 +189,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     this.assetId = const Value.absent(),
     this.title = const Value.absent(),
     this.status = const Value.absent(),
+    this.modifier = const Value.absent(),
     this.createdDate = const Value.absent(),
   });
   BackupsCompanion.insert({
@@ -180,6 +199,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     required String assetId,
     this.title = const Value.absent(),
     this.status = const Value.absent(),
+    this.modifier = const Value.absent(),
     this.createdDate = const Value.absent(),
   })  : path = Value(path),
         mime = Value(mime),
@@ -192,6 +212,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     Expression<String>? assetId,
     Expression<String?>? title,
     Expression<BackupStatus>? status,
+    Expression<BackupModifier>? modifier,
     Expression<DateTime>? createdDate,
   }) {
     return RawValuesInsertable({
@@ -201,6 +222,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       if (assetId != null) 'asset_id': assetId,
       if (title != null) 'title': title,
       if (status != null) 'status': status,
+      if (modifier != null) 'modifier': modifier,
       if (createdDate != null) 'created_date': createdDate,
     });
   }
@@ -212,6 +234,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       Value<String>? assetId,
       Value<String?>? title,
       Value<BackupStatus>? status,
+      Value<BackupModifier>? modifier,
       Value<DateTime>? createdDate}) {
     return BackupsCompanion(
       path: path ?? this.path,
@@ -220,6 +243,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       assetId: assetId ?? this.assetId,
       title: title ?? this.title,
       status: status ?? this.status,
+      modifier: modifier ?? this.modifier,
       createdDate: createdDate ?? this.createdDate,
     );
   }
@@ -246,6 +270,10 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       final converter = $BackupsTable.$converter0;
       map['status'] = Variable<int>(converter.mapToSql(status.value)!);
     }
+    if (modifier.present) {
+      final converter = $BackupsTable.$converter1;
+      map['modifier'] = Variable<int>(converter.mapToSql(modifier.value)!);
+    }
     if (createdDate.present) {
       map['created_date'] = Variable<DateTime>(createdDate.value);
     }
@@ -261,6 +289,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
           ..write('assetId: $assetId, ')
           ..write('title: $title, ')
           ..write('status: $status, ')
+          ..write('modifier: $modifier, ')
           ..write('createdDate: $createdDate')
           ..write(')'))
         .toString();
@@ -298,6 +327,13 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
               requiredDuringInsert: false,
               defaultValue: Constant(BackupStatus.PENDING.index))
           .withConverter<BackupStatus>($BackupsTable.$converter0);
+  final VerificationMeta _modifierMeta = const VerificationMeta('modifier');
+  late final GeneratedColumnWithTypeConverter<BackupModifier, int?> modifier =
+      GeneratedColumn<int?>('modifier', aliasedName, false,
+              typeName: 'INTEGER',
+              requiredDuringInsert: false,
+              defaultValue: Constant(BackupModifier.PRIVATE.index))
+          .withConverter<BackupModifier>($BackupsTable.$converter1);
   final VerificationMeta _createdDateMeta =
       const VerificationMeta('createdDate');
   late final GeneratedColumn<DateTime?> createdDate =
@@ -307,7 +343,7 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
           defaultValue: currentDateAndTime);
   @override
   List<GeneratedColumn> get $columns =>
-      [path, mime, thumbData, assetId, title, status, createdDate];
+      [path, mime, thumbData, assetId, title, status, modifier, createdDate];
   @override
   String get aliasedName => _alias ?? 'backups';
   @override
@@ -346,6 +382,7 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
           _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     }
     context.handle(_statusMeta, const VerificationResult.success());
+    context.handle(_modifierMeta, const VerificationResult.success());
     if (data.containsKey('created_date')) {
       context.handle(
           _createdDateMeta,
@@ -370,6 +407,8 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
 
   static TypeConverter<BackupStatus, int> $converter0 =
       const EnumIndexConverter<BackupStatus>(BackupStatus.values);
+  static TypeConverter<BackupModifier, int> $converter1 =
+      const EnumIndexConverter<BackupModifier>(BackupModifier.values);
 }
 
 class LastSyncRequest extends DataClass implements Insertable<LastSyncRequest> {

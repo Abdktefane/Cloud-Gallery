@@ -23,12 +23,19 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
       (_$languageComputed ??= Computed<String>(() => super.language,
               name: '_AppViewmodelBase.language'))
           .value;
-  Computed<bool>? _$imageSyncingComputed;
+  Computed<bool>? _$imageSavingComputed;
 
   @override
-  bool get imageSyncing =>
-      (_$imageSyncingComputed ??= Computed<bool>(() => super.imageSyncing,
-              name: '_AppViewmodelBase.imageSyncing'))
+  bool get imageSaving =>
+      (_$imageSavingComputed ??= Computed<bool>(() => super.imageSaving,
+              name: '_AppViewmodelBase.imageSaving'))
+          .value;
+  Computed<bool>? _$imageUploadingComputed;
+
+  @override
+  bool get imageUploading =>
+      (_$imageUploadingComputed ??= Computed<bool>(() => super.imageUploading,
+              name: '_AppViewmodelBase.imageUploading'))
           .value;
 
   final _$languageFutureAtom = Atom(name: '_AppViewmodelBase.languageFuture');
@@ -91,23 +98,61 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
     });
   }
 
-  final _$imageSyncStatusAtom = Atom(name: '_AppViewmodelBase.imageSyncStatus');
+  final _$imageSaveStatusAtom = Atom(name: '_AppViewmodelBase.imageSaveStatus');
 
   @override
-  InvokeStatus get imageSyncStatus {
-    _$imageSyncStatusAtom.reportRead();
-    return super.imageSyncStatus;
+  InvokeStatus get imageSaveStatus {
+    _$imageSaveStatusAtom.reportRead();
+    return super.imageSaveStatus;
   }
 
   @override
-  set imageSyncStatus(InvokeStatus value) {
-    _$imageSyncStatusAtom.reportWrite(value, super.imageSyncStatus, () {
-      super.imageSyncStatus = value;
+  set imageSaveStatus(InvokeStatus value) {
+    _$imageSaveStatusAtom.reportWrite(value, super.imageSaveStatus, () {
+      super.imageSaveStatus = value;
+    });
+  }
+
+  final _$imageUploadStatusAtom =
+      Atom(name: '_AppViewmodelBase.imageUploadStatus');
+
+  @override
+  InvokeStatus get imageUploadStatus {
+    _$imageUploadStatusAtom.reportRead();
+    return super.imageUploadStatus;
+  }
+
+  @override
+  set imageUploadStatus(InvokeStatus value) {
+    _$imageUploadStatusAtom.reportWrite(value, super.imageUploadStatus, () {
+      super.imageUploadStatus = value;
     });
   }
 
   final _$_AppViewmodelBaseActionController =
       ActionController(name: '_AppViewmodelBase');
+
+  @override
+  void saveImages() {
+    final _$actionInfo = _$_AppViewmodelBaseActionController.startAction(
+        name: '_AppViewmodelBase.saveImages');
+    try {
+      return super.saveImages();
+    } finally {
+      _$_AppViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void uploadImages() {
+    final _$actionInfo = _$_AppViewmodelBaseActionController.startAction(
+        name: '_AppViewmodelBase.uploadImages');
+    try {
+      return super.uploadImages();
+    } finally {
+      _$_AppViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
 
   @override
   void changeLanguage(String locale, {bool refreshConstants = true}) {
@@ -182,10 +227,12 @@ languageFuture: ${languageFuture},
 logoutResult: ${logoutResult},
 appBarParams: ${appBarParams},
 pageIndex: ${pageIndex},
-imageSyncStatus: ${imageSyncStatus},
+imageSaveStatus: ${imageSaveStatus},
+imageUploadStatus: ${imageUploadStatus},
 languageLoading: ${languageLoading},
 language: ${language},
-imageSyncing: ${imageSyncing}
+imageSaving: ${imageSaving},
+imageUploading: ${imageUploading}
     ''';
   }
 }

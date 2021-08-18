@@ -52,7 +52,7 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     appViewmodel = Provider.of<AppViewmodel>(context, listen: false);
-    appViewmodel?.syncImages();
+    appViewmodel?.saveImages();
   }
 
   @override

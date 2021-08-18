@@ -15,11 +15,18 @@ abstract class BackupsStore {
 
   Stream<List<Backup>> observeUploadedBackup();
 
-  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status);
+  Stream<List<Backup>> observeBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  });
 
   Future<void> addNewImages(List<BackupsCompanion> rawImages);
 
   Future<void> updateBackups(List<Backup> images);
+
+  Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
 }
 
 @Singleton(as: BackupsStore)
@@ -50,11 +57,34 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
       );
 
   @override
-  Stream<List<Backup>> observeBackupsByStatus(BackupStatus status) => (select(backups)
-        ..where((it) => it.status.equals(status.index))
-        ..orderBy([(it) => OrderingTerm(expression: it.createdDate)])
-        ..limit(25))
-      .watch();
+  Stream<List<Backup>> observeBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  }) {
+    final query = select(backups)
+      ..where((it) => it.status.equals(status.index) & it.modifier.equals(modifier.index))
+      ..orderBy(
+        [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
+      )
+      ..limit(limit!);
+
+    if (limit != null && limit != 0) {
+      query.limit(limit);
+    }
+
+    return query.watch();
+  }
+
+  @override
+  Stream<int> observeBackupsRows({
+    required BackupStatus status,
+    required BackupModifier modifier,
+  }) {
+    final countExpr = countAll(filter: backups.status.equals(status.index) & backups.modifier.equals(modifier.index));
+    return (selectOnly(backups)..addColumns([countExpr])).map((it) => it.read(countExpr)).watchSingle();
+  }
 
   @override
   Future<void> updateBackups(List<Backup> images) =>
