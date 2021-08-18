@@ -3,8 +3,11 @@ import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:injectable/injectable.dart';
 import 'package:graduation_project/base/data/db/daos/entity_dao.dart';
 import 'package:moor/moor.dart';
-
+import 'package:collection/collection.dart';
+import 'package:rxdart/rxdart.dart';
 part 'backup_store.g.dart';
+
+Function eq = const ListEquality().equals;
 
 abstract class BackupsStore {
   const BackupsStore();
@@ -27,6 +30,13 @@ abstract class BackupsStore {
   Future<void> updateBackups(List<Backup> images);
 
   Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
+
+  Future<List<Backup>> getBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  });
 }
 
 @Singleton(as: BackupsStore)
@@ -67,14 +77,38 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
       ..where((it) => it.status.equals(status.index) & it.modifier.equals(modifier.index))
       ..orderBy(
         [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
-      )
-      ..limit(limit!);
+      );
+    // ..limit(limit!);
 
     if (limit != null && limit != 0) {
       query.limit(limit);
     }
 
-    return query.watch();
+    return query.watch().distinct((oldImages, newImages) {
+      final result = eq(oldImages, newImages);
+      return result;
+    });
+  }
+
+  @override
+  Future<List<Backup>> getBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  }) {
+    final query = select(backups)
+      ..where((it) => it.status.equals(status.index) & it.modifier.equals(modifier.index))
+      ..orderBy(
+        [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
+      );
+    // ..limit(limit!);
+
+    if (limit != null && limit != 0) {
+      query.limit(limit);
+    }
+
+    return query.get();
   }
 
   @override
@@ -90,7 +124,6 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
   Future<void> updateBackups(List<Backup> images) =>
       batch((Batch batch) => batch.insertAllOnConflictUpdate(backups, images));
 }
-
 
 // @LazySingleton(as: BackupsStore)
 // class BackupsStoreImpl extends BackupsStore {
@@ -110,3 +143,4 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
 //   @override
 //   Future<void> addNewImages(List<BackupsCompanion> rawImages) => _dao.addNewImages(rawImages);
 // }
+

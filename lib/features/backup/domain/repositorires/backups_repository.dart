@@ -38,4 +38,11 @@ abstract class BackupsRepository extends BaseRepository {
   Future<void> updateBackups(List<Backup> images);
 
   Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
+
+  Future<List<Backup>> getBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  });
 }

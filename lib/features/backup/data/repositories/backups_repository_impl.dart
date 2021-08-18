@@ -87,4 +87,13 @@ class BackupsRepositoryImpl extends BackupsRepository {
   @override
   Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier}) =>
       _backupsStore.observeBackupsRows(status: status, modifier: modifier);
+
+  @override
+  Future<List<Backup>> getBackupsByStatus({
+    required BackupStatus status,
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  }) =>
+      _backupsStore.getBackupsByStatus(status: status, asc: asc, modifier: modifier, limit: limit);
 }

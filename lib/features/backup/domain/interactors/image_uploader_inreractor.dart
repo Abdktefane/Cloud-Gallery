@@ -33,15 +33,21 @@ class ImageUploaderInteractor extends Interactor<void> {
     try {
       _logger.d('ImageUploader Started ...');
       // producer
-      _pendingImagesubscribe = _pendingImageObserver.observe().listen(moveToQueue);
-      _pendingImageObserver(ImageObserver.params(
+      // _pendingImagesubscribe = _pendingImageObserver.observe().listen(moveToQueue);
+      // _pendingImageObserver(ImageObserver.params(
+      //   status: BackupStatus.PENDING,
+      //   modifier: BackupModifier.PRIVATE,
+      //   asc: false,
+      // ));
+      _proxyStream = StreamController<List<Backup>>();
+
+      moveToQueue(await _backupsRepository.getBackupsByStatus(
         status: BackupStatus.PENDING,
         modifier: BackupModifier.PRIVATE,
         asc: false,
       ));
 
       // consumer
-      _proxyStream = StreamController<List<Backup>>();
       syncQueue();
 
       // wait for done signal
@@ -72,19 +78,27 @@ class ImageUploaderInteractor extends Interactor<void> {
       _logger.d('ImageUploader syncQueue (consumer) images:${images.length}');
       // ignore: avoid_function_literals_in_foreach_calls
       for (final image in images) {
-        bool isSuccess = false;
-        while (!isSuccess) {
-          try {
-            _logger.d('ImageUploader syncQueue try to upload ${image.assetId}');
-            await changeImagesStatus([image], BackupStatus.UPLOADING);
-            isSuccess = await uploadImages([image]);
-          } catch (ex, st) {
-            await changeImagesStatus([image], BackupStatus.PENDING);
-            _logger.e('ImageUploader upload fail id: ${image.assetId},cause: $ex, st: $st');
-          }
+        try {
+          _logger.d('ImageUploader syncQueue try to upload ${image.assetId}');
+          await changeImagesStatus([image], BackupStatus.UPLOADING);
+          await uploadImages([image]);
+          await changeImagesStatus([image], BackupStatus.UPLOADED);
+        } catch (ex, st) {
+          await changeImagesStatus([image], BackupStatus.PENDING);
+          _logger.e('ImageUploader upload fail id: ${image.assetId},cause: $ex, st: $st');
         }
+        // while (!isSuccess) {
+        //   try {
+        //     _logger.d('ImageUploader syncQueue try to upload ${image.assetId}');
+        //     await changeImagesStatus([image], BackupStatus.UPLOADING);
+        //     isSuccess = await uploadImages([image]);
+        //   } catch (ex, st) {
+        //     await changeImagesStatus([image], BackupStatus.PENDING);
+        //     _logger.e('ImageUploader upload fail id: ${image.assetId},cause: $ex, st: $st');
+        //   }
+        // }
         _logger.d('ImageUploader syncQueue success upload ${image.assetId}');
-        await changeImagesStatus([image], BackupStatus.UPLOADED);
+
         uploadQueue.remove(image);
       }
 
@@ -107,6 +121,6 @@ class ImageUploaderInteractor extends Interactor<void> {
 
   Future<void> clean() async {
     await _pendingImagesubscribe.cancel();
-    return _pendingImageObserver.dispose();
+    // return _pendingImageObserver.dispose();
   }
 }
