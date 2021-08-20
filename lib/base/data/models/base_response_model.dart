@@ -6,20 +6,20 @@ part 'base_response_model.g.dart';
 
 @JsonSerializable(genericArgumentFactories: true)
 class BaseResponseModel<T> extends Equatable {
-  @JsonKey(name: 'status')
-  final int? statusCode;
-  final String? message;
-  final T? data;
-  final String? error;
-  final String? timestamp;
-
-  BaseResponseModel({
+  const BaseResponseModel({
     this.statusCode,
     this.message,
     this.data,
     this.error,
     this.timestamp,
   });
+
+  @JsonKey(name: 'status')
+  final int? statusCode;
+  final String? message;
+  final T? data;
+  final String? error;
+  final String? timestamp;
 
   BaseResponseModel<T> copyWith({
     int? statusCode,

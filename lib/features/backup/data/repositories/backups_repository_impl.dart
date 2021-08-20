@@ -1,8 +1,10 @@
+import 'package:core_sdk/utils/extensions/future.dart';
 import 'package:core_sdk/utils/network_result.dart';
 import 'package:graduation_project/base/data/datasources/common_datasource.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/data/mappers/mappers.dart';
+import 'package:graduation_project/base/data/models/upload_model.dart';
 import 'package:graduation_project/features/backup/data/mappers/backup_mapper.dart';
 import 'package:graduation_project/features/backup/data/stores/backup_store.dart';
 import 'package:graduation_project/features/backup/data/stores/last_sync_requrest_store.dart';
@@ -77,9 +79,8 @@ class BackupsRepositoryImpl extends BackupsRepository {
   Future<bool> canStartUploadBackup() async => !(await canStartSaveBackup());
 
   @override
-  Future<NetworkResult<bool?>> uploadImages(List<Backup> images) {
-    return _commonDataSource.uploadImages(images);
-  }
+  Future<NetworkResult<UploadModel?>> uploadImages(List<Backup> images) =>
+      _commonDataSource.uploadImages(images).whenSuccessWrapped((res) => res!.data);
 
   @override
   Future<void> updateBackups(List<Backup> images) => _backupsStore.updateBackups(images);
@@ -96,4 +97,13 @@ class BackupsRepositoryImpl extends BackupsRepository {
     int? limit,
   }) =>
       _backupsStore.getBackupsByStatus(status: status, asc: asc, modifier: modifier, limit: limit);
+
+  @override
+  Future<NetworkResult<UploadModel?>> changeModifire({
+    required BackupModifier modifier,
+    required String serverPath,
+  }) =>
+      _commonDataSource
+          .changeModifire(modifier: modifier, serverPath: serverPath)
+          .whenSuccessWrapped((res) => res!.data);
 }

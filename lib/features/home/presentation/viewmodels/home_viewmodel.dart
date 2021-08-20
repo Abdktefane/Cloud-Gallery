@@ -27,6 +27,8 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
   final CommonRepository _commonRepository;
   final ImagePicker _picker = ImagePicker();
 
+  int page = 1;
+
   //* OBSERVERS *//
   @observable
   BackupModifier imageSource = BackupModifier.PRIVATE;
@@ -36,8 +38,7 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
   //* ACTIONS *//
 
   @action
-  void toggleImageSource() =>
-      imageSource = imageSource == BackupModifier.PRIVATE ? BackupModifier.PUBPLIC : BackupModifier.PRIVATE;
+  void toggleImageSource() => imageSource = imageSource.negate;
 
   @action
   void searchByText(String query) {}
@@ -47,4 +48,7 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
     final XFile? image = await _picker.pickImage(source: index == 0 ? ImageSource.camera : ImageSource.gallery);
     print('image picked ${image?.path}');
   }
+
+  @action
+  void search({fresh = false}) {}
 }

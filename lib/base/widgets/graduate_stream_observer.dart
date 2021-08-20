@@ -18,6 +18,7 @@ class GraduateStreamObserver<T> extends StatelessWidget {
     this.switchOutCurve = Curves.linear,
     this.transitionBuilder = AnimatedSwitcher.defaultTransitionBuilder,
     this.layoutBuilder = AnimatedSwitcher.defaultLayoutBuilder,
+    this.useAnimatedSwitcher = true,
   }) : super(key: key);
 
   final ObservableStream<T> stream;
@@ -30,6 +31,7 @@ class GraduateStreamObserver<T> extends StatelessWidget {
   final Curve switchOutCurve;
   final AnimatedSwitcherTransitionBuilder transitionBuilder;
   final AnimatedSwitcherLayoutBuilder layoutBuilder;
+  final bool useAnimatedSwitcher;
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +47,7 @@ class GraduateStreamObserver<T> extends StatelessWidget {
       switchOutCurve: switchOutCurve,
       switchInCurve: switchInCurve,
       transitionBuilder: transitionBuilder,
+      useAnimatedSwitcher: useAnimatedSwitcher,
     );
   }
 }

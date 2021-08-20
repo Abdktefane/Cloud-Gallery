@@ -2,6 +2,7 @@ import 'package:core_sdk/utils/network_result.dart';
 import 'package:graduation_project/base/data/datasources/common_datasource.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/data/models/upload_model.dart';
 import 'package:graduation_project/base/domain/repositories/base_repository.dart';
 import 'package:photo_manager/photo_manager.dart';
 
@@ -33,7 +34,7 @@ abstract class BackupsRepository extends BaseRepository {
 
   Future<bool> canStartUploadBackup();
 
-  Future<NetworkResult<bool?>> uploadImages(List<Backup> images);
+  Future<NetworkResult<UploadModel?>> uploadImages(List<Backup> images);
 
   Future<void> updateBackups(List<Backup> images);
 
@@ -44,5 +45,10 @@ abstract class BackupsRepository extends BaseRepository {
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+  });
+
+  Future<NetworkResult<UploadModel?>> changeModifire({
+    required BackupModifier modifier,
+    required String serverPath,
   });
 }

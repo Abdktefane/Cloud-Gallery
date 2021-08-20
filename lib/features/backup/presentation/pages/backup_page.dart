@@ -1,7 +1,8 @@
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:core_sdk/utils/pagination_mixin.dart';
-import 'package:core_sdk/utils/widgets/pagination_list.dart';
+import 'package:core_sdk/utils/widgets/staggered_column.dart';
+import 'package:core_sdk/utils/widgets/staggered_list.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
@@ -11,11 +12,11 @@ import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/base/widgets/graduate_empty_widget.dart';
-import 'package:graduation_project/base/widgets/graduate_loader.dart';
 import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
 import 'package:graduation_project/features/backup/presentation/viewmodels/backup_viewmodel.dart';
 import 'package:graduation_project/features/backup/presentation/widgets/backup_tile.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:supercharged/supercharged.dart';
 
 class BackupPage extends StatefulWidget {
@@ -54,6 +55,7 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      key: viewmodel.scaffoldKey,
       body: Column(
         children: [
           Row(
@@ -67,19 +69,24 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
           const SizedBox(height: 8.0),
           GraduateStreamObserver<List<Backup>?>(
             stream: viewmodel.images!,
-            onSuccess: (images) => PaginationList<Backup>(
+            onSuccess: (images) => StaggredPaginationList<Backup>(
+              key: ValueKey(images.hashCode),
               padding: 8.0,
               shrinkWrap: false,
               dataList: images!,
               canLoadMore: false,
+              staggeredAnimations: const [StaggeredType.SlideAnimation],
               scrollController: scrollController,
               emptyWidget: const GraduateEmptyWidget(),
-              cardBuilder: (image) => BackupTile(backup: image),
+              cardBuilder: (image) => BackupTile(
+                backup: image,
+                toggleModifier: (_) => viewmodel.toggleBackupModifire(image),
+              ),
             ),
           ).expand(),
         ],
       ),
-    );
+    ).asMobxPageLoader(viewmodel);
   }
 
   Widget _imagesCountBuilder() {
@@ -99,6 +106,7 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
         underline: const SizedBox(),
         onChanged: (BackupStatus? it) => viewmodel.changeFilter(it!),
         items: BackupStatus.values
+            .where((it) => it != BackupStatus.CANCELED)
             .map((it) => DropdownMenuItem(
                   value: it,
                   child: Text(context.translate(it.localizationKey)),
@@ -118,7 +126,7 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
             child: child,
           ),
           child: viewmodel.filter == BackupStatus.UPLOADED
-              ? viewmodel.modifier.getIcon(viewmodel.toggleModifer, color: ACCENT.withAlpha(150))
+              ? viewmodel.modifier.getIcon(viewmodel.toggleFilterModifer, color: ACCENT.withAlpha(150))
               : const SizedBox(width: 48, height: 48),
         );
       },

@@ -90,7 +90,7 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
             scale: animation,
             child: child,
           ),
-          child: viewmodel.imageSource.getIcon(viewmodel.toggleImageSource),
+          child: viewmodel.imageSource.getIcon(viewmodel.toggleImageSource, color: ACCENT.withAlpha(150)),
         );
       },
     );

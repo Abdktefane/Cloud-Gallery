@@ -16,6 +16,7 @@ enum BackupModifier { PUBPLIC, PRIVATE }
 extension BackupModifierExt on BackupModifier {
   String get raw => describeEnum(this);
   String get localizationKey => 'lbl_' + raw;
+  BackupModifier get negate => this == BackupModifier.PRIVATE ? BackupModifier.PUBPLIC : BackupModifier.PRIVATE;
   material.IconButton getIcon(VoidCallback onPressed, {material.Color color = PRIMARY}) {
     late final material.IconData iconData;
     switch (this) {
@@ -65,6 +66,8 @@ class Backups extends GraduateEntity {
   TextColumn get assetId => text()();
 
   TextColumn get title => text().nullable()();
+
+  TextColumn get serverPath => text().nullable()();
 
   IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.PENDING.index))();
 

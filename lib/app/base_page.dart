@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:animations/animations.dart';
 import 'package:core_sdk/utils/dialogs.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,6 +15,7 @@ import 'package:graduation_project/base/widgets/graduate_bottom_nav.dart';
 import 'package:graduation_project/features/backup/presentation/pages/backup_page.dart';
 import 'package:graduation_project/features/home/presentation/pages/home_page.dart';
 import 'package:graduation_project/features/recommend/presentation/pages/recommned_page.dart';
+import 'package:graduation_project/main.dart';
 import 'package:provider/provider.dart';
 import 'package:supercharged/supercharged.dart';
 
@@ -34,13 +37,15 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
 
   final List<Widget> pages = <Widget>[
     Navigator(key: HomePage.navKey, onGenerateRoute: (RouteSettings route) => HomePage.pageRoute),
-    Navigator(key: RecommendPage.navKey, onGenerateRoute: (RouteSettings route) => RecommendPage.pageRoute),
+    if (kShowRec)
+      Navigator(key: RecommendPage.navKey, onGenerateRoute: (RouteSettings route) => RecommendPage.pageRoute),
     Navigator(key: BackupPage.navKey, onGenerateRoute: (RouteSettings route) => BackupPage.pageRoute),
   ];
 
   @override
   void initState() {
     super.initState();
+    scheduleMicrotask(() => appViewmodel?.saveImages());
   }
 
   @override
@@ -52,7 +57,6 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     appViewmodel = Provider.of<AppViewmodel>(context, listen: false);
-    appViewmodel?.saveImages();
   }
 
   @override

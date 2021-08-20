@@ -58,6 +58,17 @@ mixin _$HomeViewmodel on _HomeViewmodelBase, Store {
   }
 
   @override
+  void search({dynamic fresh = false}) {
+    final _$actionInfo = _$_HomeViewmodelBaseActionController.startAction(
+        name: '_HomeViewmodelBase.search');
+    try {
+      return super.search(fresh: fresh);
+    } finally {
+      _$_HomeViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 imageSource: ${imageSource}

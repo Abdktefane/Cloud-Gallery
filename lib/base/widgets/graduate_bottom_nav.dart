@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:graduation_project/main.dart';
 
 class GraduateBottomNavigationBar extends StatelessWidget {
   const GraduateBottomNavigationBar({Key? key, required this.appViewModel}) : super(key: key);
@@ -36,12 +37,13 @@ class GraduateBottomNavigationBar extends StatelessWidget {
               child: const Icon(Icons.search, size: 20.0, color: GREY),
               activeChild: const Icon(Icons.search, size: 20.0, color: Colors.black),
             ),
-            bottomNavigationBarTile(
-              title: context.translate(getAppBarTitle(PageIndex.recommendation)),
-              index: PageIndex.recommendation.index,
-              child: const Icon(Icons.recommend, size: 20.0, color: GREY),
-              activeChild: const Icon(Icons.recommend, size: 20.0, color: Colors.black),
-            ),
+            if (kShowRec)
+              bottomNavigationBarTile(
+                title: context.translate(getAppBarTitle(PageIndex.recommendation)),
+                index: PageIndex.recommendation.index,
+                child: const Icon(Icons.recommend, size: 20.0, color: GREY),
+                activeChild: const Icon(Icons.recommend, size: 20.0, color: Colors.black),
+              ),
             bottomNavigationBarTile(
               title: context.translate(getAppBarTitle(PageIndex.backup)),
               index: PageIndex.backup.index,

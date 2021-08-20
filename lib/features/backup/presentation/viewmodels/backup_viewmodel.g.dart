@@ -110,10 +110,22 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
   }
 
   @override
-  void toggleModifer() {
-    final _$actionInfo = _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.toggleModifer');
+  void toggleFilterModifer() {
+    final _$actionInfo =
+        _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.toggleFilterModifer');
     try {
-      return super.toggleModifer();
+      return super.toggleFilterModifer();
+    } finally {
+      _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void toggleBackupModifire(dynamic backup) {
+    final _$actionInfo =
+        _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.toggleBackupModifire');
+    try {
+      return super.toggleBackupModifire(backup);
     } finally {
       _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
     }

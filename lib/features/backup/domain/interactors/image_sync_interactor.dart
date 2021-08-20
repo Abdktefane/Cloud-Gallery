@@ -38,13 +38,10 @@ class ImageSaveInteractor extends Interactor<void> {
     }
   }
 
-  // TODO(abd): remove recommendation tab in add fake data with home if no search exist
+  // TODO(abd): new feed if no serarch(recommend)
   // TODO(abd): find best way for image with text search
   // TODO(abd): add base url as textfiled in settings
-  // TODO(abd): implement public and private functionallity
   // TODO(abd): save last time sync happen and if it's more than 12 hour ask workmanager to do sync with power constraint and support foreground service
-  // TODO(abd): add DB query to get pagesize unuploaded image and upload them with ui refresh
-  // TODO(abd): add stagred animation to lists
   Future<void> _saveFolder(AssetPathEntity folder) async {
     if (await _backupsRepository.canStartSaveBackup()) {
       print('sync folder:${folder.name},count:${folder.assetCount}');

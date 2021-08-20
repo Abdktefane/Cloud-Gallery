@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:core_sdk/utils/Fimber/Logger.dart';
+import 'package:core_sdk/utils/extensions/future.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/data/models/upload_model.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
@@ -57,9 +59,9 @@ class ImageUploaderInteractor extends Interactor<void> {
       try {
         _logger.d('ImageUploader syncQueue try to upload ${image.assetId}');
         await changeImagesStatus([image], BackupStatus.UPLOADING);
-        await uploadImages([images[i]]);
+        final UploadModel res = await uploadImages([images[i]]);
         _logger.d('ImageUploader syncQueue success upload ${image.assetId}');
-        await changeImagesStatus([image], BackupStatus.UPLOADED);
+        await changeImagesStatus([image.copyWith(serverPath: res.name)], BackupStatus.UPLOADED);
       } catch (ex, st) {
         await changeImagesStatus([image], BackupStatus.PENDING);
         _logger.e('ImageUploader upload fail id: ${image.assetId},cause: $ex, st: $st');
@@ -68,8 +70,8 @@ class ImageUploaderInteractor extends Interactor<void> {
     uploadQueue.clear();
   }
 
-  Future<bool> uploadImages(List<Backup> images) =>
-      _backupsRepository.uploadImages(images).then((res) => res.isSuccess || res.getOrThrow()!);
+  Future<UploadModel> uploadImages(List<Backup> images) =>
+      _backupsRepository.uploadImages(images).whenSuccess((res) => res!);
 
   Future<void> changeImagesStatus(List<Backup> images, BackupStatus status) =>
       _backupsRepository.updateBackups(images.map((it) => it.copyWith(status: status)).toList());

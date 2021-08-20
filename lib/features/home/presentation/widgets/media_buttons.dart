@@ -50,14 +50,15 @@ class _MediaButtonsState extends State<MediaButtons> with TickerProviderStateMix
       child: IconButton(
         onPressed: toggleHideStatus,
         icon: const Icon(Icons.attach_file),
-        color: PRIMARY,
+        color: ACCENT,
       ),
     );
   }
 
   Widget _buildChild(int index) {
     final Color backgroundColor = Theme.of(context).cardColor;
-    final Color foregroundColor = Theme.of(context).primaryColor;
+    // final Color foregroundColor = Theme.of(context).primaryColor;
+    final Color foregroundColor = ACCENT.withAlpha(150);
     return ScaleTransition(
       scale: CurvedAnimation(
         parent: _controller,

@@ -13,6 +13,7 @@ class Backup extends DataClass implements Insertable<Backup> {
   final Uint8List thumbData;
   final String assetId;
   final String? title;
+  final String? serverPath;
   final BackupStatus status;
   final BackupModifier modifier;
   final DateTime createdDate;
@@ -22,6 +23,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       required this.thumbData,
       required this.assetId,
       this.title,
+      this.serverPath,
       required this.status,
       required this.modifier,
       required this.createdDate});
@@ -33,6 +35,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       thumbData: const BlobType().mapFromDatabaseResponse(data['${effectivePrefix}thumb_data'])!,
       assetId: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}asset_id'])!,
       title: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}title']),
+      serverPath: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}server_path']),
       status: $BackupsTable.$converter0
           .mapToDart(const IntType().mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
       modifier: $BackupsTable.$converter1
@@ -49,6 +52,9 @@ class Backup extends DataClass implements Insertable<Backup> {
     map['asset_id'] = Variable<String>(assetId);
     if (!nullToAbsent || title != null) {
       map['title'] = Variable<String?>(title);
+    }
+    if (!nullToAbsent || serverPath != null) {
+      map['server_path'] = Variable<String?>(serverPath);
     }
     {
       final converter = $BackupsTable.$converter0;
@@ -69,6 +75,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       thumbData: Value(thumbData),
       assetId: Value(assetId),
       title: title == null && nullToAbsent ? const Value.absent() : Value(title),
+      serverPath: serverPath == null && nullToAbsent ? const Value.absent() : Value(serverPath),
       status: Value(status),
       modifier: Value(modifier),
       createdDate: Value(createdDate),
@@ -83,6 +90,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       thumbData: serializer.fromJson<Uint8List>(json['thumbData']),
       assetId: serializer.fromJson<String>(json['assetId']),
       title: serializer.fromJson<String?>(json['title']),
+      serverPath: serializer.fromJson<String?>(json['serverPath']),
       status: serializer.fromJson<BackupStatus>(json['status']),
       modifier: serializer.fromJson<BackupModifier>(json['modifier']),
       createdDate: serializer.fromJson<DateTime>(json['createdDate']),
@@ -97,6 +105,7 @@ class Backup extends DataClass implements Insertable<Backup> {
       'thumbData': serializer.toJson<Uint8List>(thumbData),
       'assetId': serializer.toJson<String>(assetId),
       'title': serializer.toJson<String?>(title),
+      'serverPath': serializer.toJson<String?>(serverPath),
       'status': serializer.toJson<BackupStatus>(status),
       'modifier': serializer.toJson<BackupModifier>(modifier),
       'createdDate': serializer.toJson<DateTime>(createdDate),
@@ -109,6 +118,7 @@ class Backup extends DataClass implements Insertable<Backup> {
           Uint8List? thumbData,
           String? assetId,
           String? title,
+          String? serverPath,
           BackupStatus? status,
           BackupModifier? modifier,
           DateTime? createdDate}) =>
@@ -118,6 +128,7 @@ class Backup extends DataClass implements Insertable<Backup> {
         thumbData: thumbData ?? this.thumbData,
         assetId: assetId ?? this.assetId,
         title: title ?? this.title,
+        serverPath: serverPath ?? this.serverPath,
         status: status ?? this.status,
         modifier: modifier ?? this.modifier,
         createdDate: createdDate ?? this.createdDate,
@@ -130,6 +141,7 @@ class Backup extends DataClass implements Insertable<Backup> {
           ..write('thumbData: $thumbData, ')
           ..write('assetId: $assetId, ')
           ..write('title: $title, ')
+          ..write('serverPath: $serverPath, ')
           ..write('status: $status, ')
           ..write('modifier: $modifier, ')
           ..write('createdDate: $createdDate')
@@ -144,8 +156,12 @@ class Backup extends DataClass implements Insertable<Backup> {
           mime.hashCode,
           $mrjc(
               thumbData.hashCode,
-              $mrjc(assetId.hashCode,
-                  $mrjc(title.hashCode, $mrjc(status.hashCode, $mrjc(modifier.hashCode, createdDate.hashCode))))))));
+              $mrjc(
+                  assetId.hashCode,
+                  $mrjc(
+                      title.hashCode,
+                      $mrjc(serverPath.hashCode,
+                          $mrjc(status.hashCode, $mrjc(modifier.hashCode, createdDate.hashCode)))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -155,6 +171,7 @@ class Backup extends DataClass implements Insertable<Backup> {
           // other.thumbData == this.thumbData &&
           other.assetId == this.assetId &&
           other.title == this.title &&
+          other.serverPath == this.serverPath &&
           other.status == this.status &&
           other.modifier == this.modifier &&
           other.createdDate == this.createdDate);
@@ -166,6 +183,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
   final Value<Uint8List> thumbData;
   final Value<String> assetId;
   final Value<String?> title;
+  final Value<String?> serverPath;
   final Value<BackupStatus> status;
   final Value<BackupModifier> modifier;
   final Value<DateTime> createdDate;
@@ -175,6 +193,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     this.thumbData = const Value.absent(),
     this.assetId = const Value.absent(),
     this.title = const Value.absent(),
+    this.serverPath = const Value.absent(),
     this.status = const Value.absent(),
     this.modifier = const Value.absent(),
     this.createdDate = const Value.absent(),
@@ -185,6 +204,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     required Uint8List thumbData,
     required String assetId,
     this.title = const Value.absent(),
+    this.serverPath = const Value.absent(),
     this.status = const Value.absent(),
     this.modifier = const Value.absent(),
     this.createdDate = const Value.absent(),
@@ -198,6 +218,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     Expression<Uint8List>? thumbData,
     Expression<String>? assetId,
     Expression<String?>? title,
+    Expression<String?>? serverPath,
     Expression<BackupStatus>? status,
     Expression<BackupModifier>? modifier,
     Expression<DateTime>? createdDate,
@@ -208,6 +229,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       if (thumbData != null) 'thumb_data': thumbData,
       if (assetId != null) 'asset_id': assetId,
       if (title != null) 'title': title,
+      if (serverPath != null) 'server_path': serverPath,
       if (status != null) 'status': status,
       if (modifier != null) 'modifier': modifier,
       if (createdDate != null) 'created_date': createdDate,
@@ -220,6 +242,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       Value<Uint8List>? thumbData,
       Value<String>? assetId,
       Value<String?>? title,
+      Value<String?>? serverPath,
       Value<BackupStatus>? status,
       Value<BackupModifier>? modifier,
       Value<DateTime>? createdDate}) {
@@ -229,6 +252,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       thumbData: thumbData ?? this.thumbData,
       assetId: assetId ?? this.assetId,
       title: title ?? this.title,
+      serverPath: serverPath ?? this.serverPath,
       status: status ?? this.status,
       modifier: modifier ?? this.modifier,
       createdDate: createdDate ?? this.createdDate,
@@ -253,6 +277,9 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     if (title.present) {
       map['title'] = Variable<String?>(title.value);
     }
+    if (serverPath.present) {
+      map['server_path'] = Variable<String?>(serverPath.value);
+    }
     if (status.present) {
       final converter = $BackupsTable.$converter0;
       map['status'] = Variable<int>(converter.mapToSql(status.value)!);
@@ -275,6 +302,7 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
           ..write('thumbData: $thumbData, ')
           ..write('assetId: $assetId, ')
           ..write('title: $title, ')
+          ..write('serverPath: $serverPath, ')
           ..write('status: $status, ')
           ..write('modifier: $modifier, ')
           ..write('createdDate: $createdDate')
@@ -302,6 +330,9 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
   final VerificationMeta _titleMeta = const VerificationMeta('title');
   late final GeneratedColumn<String?> title =
       GeneratedColumn<String?>('title', aliasedName, true, typeName: 'TEXT', requiredDuringInsert: false);
+  final VerificationMeta _serverPathMeta = const VerificationMeta('serverPath');
+  late final GeneratedColumn<String?> serverPath =
+      GeneratedColumn<String?>('server_path', aliasedName, true, typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
   late final GeneratedColumnWithTypeConverter<BackupStatus, int?> status = GeneratedColumn<int?>(
           'status', aliasedName, false,
@@ -316,7 +347,8 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
   late final GeneratedColumn<DateTime?> createdDate = GeneratedColumn<DateTime?>('created_date', aliasedName, false,
       typeName: 'INTEGER', requiredDuringInsert: false, defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns => [path, mime, thumbData, assetId, title, status, modifier, createdDate];
+  List<GeneratedColumn> get $columns =>
+      [path, mime, thumbData, assetId, title, serverPath, status, modifier, createdDate];
   @override
   String get aliasedName => _alias ?? 'backups';
   @override
@@ -347,6 +379,9 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
     }
     if (data.containsKey('title')) {
       context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+    }
+    if (data.containsKey('server_path')) {
+      context.handle(_serverPathMeta, serverPath.isAcceptableOrUnknown(data['server_path']!, _serverPathMeta));
     }
     context.handle(_statusMeta, const VerificationResult.success());
     context.handle(_modifierMeta, const VerificationResult.success());

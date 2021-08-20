@@ -60,6 +60,7 @@ dependencies:
   image_picker: ^0.8.3+2
   syncfusion_flutter_gauges: ^19.2.56
   lottie: ^1.1.0
+  custom_pop_up_menu: ^1.2.2
 
 dev_dependencies:
   flutter_test:

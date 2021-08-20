@@ -1,12 +1,14 @@
-import 'package:core_sdk/data/viewmodels/base_viewmodel.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
+import 'package:graduation_project/app/viewmodels/graduate_viewmodel.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/features/backup/domain/interactors/backups_rows_observer.dart';
+import 'package:graduation_project/features/backup/domain/interactors/change_modifire_interactor.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_observer.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobx/mobx.dart';
+import 'package:rxdart/rxdart.dart';
 
 part 'backup_viewmodel.g.dart';
 
@@ -18,19 +20,31 @@ class BackupViewmodel extends _BackupViewmodelBase with _$BackupViewmodel {
     Logger logger,
     ImageObserver imageSyncInteractor,
     BackupsRowsObserver backupsRowsObserver,
-  ) : super(logger, imageSyncInteractor, backupsRowsObserver);
+    ChangeModifireInteractor changeModifireInteractor,
+  ) : super(logger, imageSyncInteractor, backupsRowsObserver, changeModifireInteractor);
 }
 
-abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
+abstract class _BackupViewmodelBase extends GraduateViewmodel with Store {
   _BackupViewmodelBase(
     Logger logger,
     this._imageObserver,
     this._backupsRowsObserver,
+    this._changeModifireInteractor,
   ) : super(logger) {
     images = _imageObserver.asObservable();
     imagesCount = _backupsRowsObserver.asObservable();
+    imagesCount?.first.then((count) {
+      if (count == 0 && filter == BackupStatus.PENDING) {
+        changeFilter(BackupStatus.UPLOADED);
+
+        // imagesCount?.first.then((count) {
+        //   if (count == 0 && filter == BackupStatus.UPLOADED && modifier == BackupModifier.PRIVATE) {
+        //     changeModifier(BackupModifier.PUBPLIC);
+        //   }
+        // });
+      }
+    });
     filterObserver = autorun((_) {
-      logger.d('backup viemodel auto run work');
       _imageObserver(ImageObserver.params(
         status: filter,
         modifier: modifier,
@@ -45,6 +59,7 @@ abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
   late final ReactionDisposer filterObserver;
   final ImageObserver _imageObserver;
   final BackupsRowsObserver _backupsRowsObserver;
+  final ChangeModifireInteractor _changeModifireInteractor;
   int limit = _pageSize;
 
   //* OBSERVERS *//
@@ -109,8 +124,13 @@ abstract class _BackupViewmodelBase extends BaseViewmodel with Store {
   }
 
   @action
-  void toggleModifer() =>
-      modifier = modifier == BackupModifier.PRIVATE ? BackupModifier.PUBPLIC : BackupModifier.PRIVATE;
+  void toggleFilterModifer() => modifier = modifier.negate;
+
+  @action
+  void toggleBackupModifire(Backup backup) => collect(
+        _changeModifireInteractor(ChangeModifireInteractor.params(backup)),
+        useLoadingCollector: true,
+      );
 
   @override
   Future<void> dispose() {

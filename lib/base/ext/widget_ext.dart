@@ -1,10 +1,24 @@
+import 'package:core_sdk/data/viewmodels/base_viewmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:graduation_project/base/widgets/graduate_page_loader.dart';
 
 extension WidgetExt on Widget {
   Widget expand({int flex = 1}) => Expanded(flex: flex, child: this);
 
   Widget asSingleChildScrollView({ScrollPhysics? physics}) => SingleChildScrollView(
         physics: physics,
+        child: this,
+      );
+
+  Widget asMobxPageLoader(
+    BaseViewmodel viewmodel, {
+    Duration animationDuration = const Duration(milliseconds: 400),
+    Color barrierColor = const Color(0xFFc7c7c7),
+  }) =>
+      GraduateMobxPageLoader(
+        viewmodel: viewmodel,
+        animationDuration: animationDuration,
+        barrierColor: barrierColor,
         child: this,
       );
 
