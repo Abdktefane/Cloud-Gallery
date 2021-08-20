@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:ffi';
 
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/constants.dart';
+import 'package:core_sdk/utils/dialogs.dart';
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/extensions/mobx.dart';
 import 'package:core_sdk/utils/nav_stack.dart';
@@ -11,9 +13,10 @@ import 'package:graduation_project/app/viewmodels/graduate_viewmodel.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_sync_interactor.dart';
-import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_uploader_interactor.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobx/mobx.dart';
+import 'package:get_it/get_it.dart';
 import 'package:supercharged/supercharged.dart';
 
 part 'app_viewmodel.g.dart';
@@ -43,8 +46,9 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
     this._imageSaveInteractor,
     this._imageUploaderInteractor,
   ) : super(logger);
+  // imageUploadProgress = _imageUploaderObserver.asObservable();
 
-  PrefsRepository _prefsRepository;
+  final PrefsRepository _prefsRepository;
   NavStack<AppBarParams?> appBarHistory = NavStack<AppBarParams?>();
   final ImageSaveInteractor _imageSaveInteractor;
   final ImageUploaderInteractor _imageUploaderInteractor;
@@ -63,10 +67,13 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   PageIndex pageIndex = PageIndex.home;
 
   @observable
-  InvokeStatus imageSaveStatus = InvokeError(Exception('not Start yet'));
+  InvokeStatus imageSaveStatus = const InvokeWaiting();
 
   @observable
-  InvokeStatus imageUploadStatus = InvokeError(Exception('not Start yet'));
+  InvokeStatus imageUploadStatus = const InvokeWaiting();
+
+  // @observable
+  // ObservableStream<String>? imageUploadProgress;
 
   //* COMPUTED *//
   @computed
@@ -80,22 +87,30 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
 
   @computed
   bool get imageUploading => imageUploadStatus is InvokeStarted;
-
   //* ACTIONS *//
 
   @action
   void saveImages() {
     if (!imageSaving) {
       logger.d('saveImages called in appviewmodel');
-      collect(
-        _imageSaveInteractor(Void, timeout: const Duration(hours: 2)),
-        collector: (status) {
-          imageSaveStatus = status;
-          if (status is InvokeSuccess) {
-            uploadImages();
-          }
-        },
-      );
+      scheduleMicrotask(() {
+        getContext((context) {
+          showConfirmDialog(
+            context,
+            context.translate('msg_confirm_save_start'),
+            () => collect(
+              _imageSaveInteractor(Void, timeout: const Duration(hours: 2)),
+              collector: (status) {
+                imageSaveStatus = status;
+                if (status is InvokeSuccess) {
+                  uploadImages();
+                }
+              },
+            ),
+          );
+        });
+      });
+
       logger.d('syncImages end in appviewmodel');
     }
   }
@@ -106,10 +121,7 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
       logger.d('uploadImages called in appviewmodel');
       collect(
         _imageUploaderInteractor(Void, timeout: const Duration(hours: 2)),
-        collector: (status) {
-          imageUploadStatus = status;
-          logger.d('Upload Status: $status');
-        },
+        collector: (status) => imageUploadStatus = status,
       );
       logger.d('uploadImages end in appviewmodel');
     }

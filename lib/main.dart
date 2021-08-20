@@ -18,8 +18,6 @@ Future<void> main() async {
 
   await inject(environment: prod.name);
 
-  final NetworkIsolate networkIsolate = GetIt.I();
-
   // await networkIsolate.request(
   //   method: METHOD.POST,
   //   endpoint: 'common/public/sites/all',

@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
+import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
+import 'package:graduation_project/base/widgets/sync_status_indicator.dart';
 import 'package:graduation_project/features/settings/presentation/pages/settings_page.dart';
 import 'package:supercharged/supercharged.dart';
 
@@ -62,6 +64,7 @@ class GraduateAppBar extends StatelessWidget implements PreferredSizeWidget {
             actions: title != null
                 ? null
                 : [
+                    SyncStatusIndicator(viewmodel: appViewModel!),
                     IconButton(
                       icon: const Icon(Icons.settings_outlined, size: 24.0, color: TEXT_COLOR),
                       onPressed: () {

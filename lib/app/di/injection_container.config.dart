@@ -29,7 +29,7 @@ import '../../features/backup/domain/interactors/backups_rows_observer.dart'
 import '../../features/backup/domain/interactors/image_observer.dart' as _i28;
 import '../../features/backup/domain/interactors/image_sync_interactor.dart'
     as _i29;
-import '../../features/backup/domain/interactors/image_uploader_inreractor.dart'
+import '../../features/backup/domain/interactors/image_uploader_interactor.dart'
     as _i30;
 import '../../features/backup/domain/repositorires/backups_repository.dart'
     as _i22;
@@ -102,9 +102,7 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
   gh.factory<_i29.ImageSaveInteractor>(
       () => _i29.ImageSaveInteractor(get<_i22.BackupsRepository>()));
   gh.factory<_i30.ImageUploaderInteractor>(() => _i30.ImageUploaderInteractor(
-      get<_i22.BackupsRepository>(),
-      get<_i28.ImageObserver>(),
-      get<_i9.Logger>()));
+      get<_i22.BackupsRepository>(), get<_i9.Logger>()));
   gh.factory<_i31.AppViewmodel>(() => _i31.AppViewmodel(
       get<_i9.Logger>(),
       get<_i4.PrefsRepository>(),

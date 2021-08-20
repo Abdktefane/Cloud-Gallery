@@ -58,7 +58,8 @@ dependencies:
   flutter_svg: ^0.22.0
   flutter_spinkit: ^5.0.0
   image_picker: ^0.8.3+2
-
+  syncfusion_flutter_gauges: ^19.2.56
+  lottie: ^1.1.0
 
 dev_dependencies:
   flutter_test:
@@ -80,6 +81,7 @@ flutter:
     - assets/images/
     - assets/icons/
     - assets/fonts/
+    - assets/animations/
     - lang/
 
   

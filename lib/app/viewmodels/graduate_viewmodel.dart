@@ -32,12 +32,14 @@ abstract class _GraduateViewmodelGraduate extends BaseViewmodel with Store {
     }
   }
 
-  void collect(
+  StreamSubscription<InvokeStatus> collect(
     Stream<InvokeStatus> stream, {
     bool useLoadingCollector = false,
     void Function(InvokeStatus)? collector,
   }) {
-    stream.listen(collector ?? (useLoadingCollector ? _collectStatus : (_) {})).regist(subscriptionList);
+    final sub = stream.listen(collector ?? (useLoadingCollector ? _collectStatus : (_) {}));
+    sub.regist(subscriptionList);
+    return sub;
   }
 
   Future<void> cancelSubscription() async {

@@ -53,59 +53,62 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Observer(
-      builder: (_) {
-        /*  return _appViewmodel?.imageSaving == true
-            // TODO(abd): add clear message to make user understand what waiting for
-            ? const Center(child: GraduateLoader())
-            : */
-        return Column(
-          children: [
-            GraduateStreamObserver<int>(
-              stream: viewmodel.imagesCount!,
-              onSuccess: (count) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      context.translate('lbl_total_images') + ': ' + count.toString(),
-                      style: textTheme?.bodyText1?.copyWith(color: ACCENT),
-                    ).padding(padding: const EdgeInsets.symmetric(horizontal: 18.0)),
-                    DropdownButton(
-                      value: viewmodel.filter,
-                      onChanged: (BackupStatus? it) => viewmodel.changeFilter(it!),
-                      items: BackupStatus.values
-                          .map((it) => DropdownMenuItem(
-                                value: it,
-                                child: Text(context.translate(it.localizationKey)),
-                              ))
-                          .toList(),
-                    ),
-                    filterWidget(),
-                  ],
-                );
-              },
+    return Scaffold(
+      body: Column(
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _imagesCountBuilder(),
+              _filterBuilder(),
+              _modifierBuilder(),
+            ],
+          ),
+          const SizedBox(height: 8.0),
+          GraduateStreamObserver<List<Backup>?>(
+            stream: viewmodel.images!,
+            onSuccess: (images) => PaginationList<Backup>(
+              padding: 8.0,
+              shrinkWrap: false,
+              dataList: images!,
+              canLoadMore: false,
+              scrollController: scrollController,
+              emptyWidget: const GraduateEmptyWidget(),
+              cardBuilder: (image) => BackupTile(backup: image),
             ),
-            const SizedBox(height: 8.0),
-            GraduateStreamObserver<List<Backup>?>(
-              stream: viewmodel.images!,
-              onSuccess: (images) => PaginationList<Backup>(
-                padding: 8.0,
-                shrinkWrap: false,
-                dataList: images!,
-                canLoadMore: false,
-                scrollController: scrollController,
-                emptyWidget: const GraduateEmptyWidget(),
-                cardBuilder: (image) => BackupTile(backup: image),
-              ),
-            ).expand(),
-          ],
-        );
-      },
-    ));
+          ).expand(),
+        ],
+      ),
+    );
   }
 
-  Widget filterWidget() {
+  Widget _imagesCountBuilder() {
+    return GraduateStreamObserver<int>(
+      stream: viewmodel.imagesCount!,
+      onSuccess: (count) => Text(
+        context.translate('lbl_total_images') + ': ' + count.toString(),
+        style: textTheme?.bodyText1?.copyWith(color: ACCENT),
+      ).padding(padding: const EdgeInsets.symmetric(horizontal: 18.0)),
+    );
+  }
+
+  Widget _filterBuilder() {
+    return Observer(builder: (_) {
+      return DropdownButton(
+        value: viewmodel.filter,
+        underline: const SizedBox(),
+        onChanged: (BackupStatus? it) => viewmodel.changeFilter(it!),
+        items: BackupStatus.values
+            .map((it) => DropdownMenuItem(
+                  value: it,
+                  child: Text(context.translate(it.localizationKey)),
+                ))
+            .toList(),
+      );
+    });
+  }
+
+  Widget _modifierBuilder() {
     return Observer(
       builder: (_) {
         return AnimatedSwitcher(

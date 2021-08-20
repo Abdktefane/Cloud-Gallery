@@ -1,12 +1,12 @@
 import 'package:core_sdk/utils/extensions/list.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
-import 'package:graduation_project/features/backup/domain/interactors/image_uploader_inreractor.dart';
+import 'package:graduation_project/features/backup/domain/interactors/image_uploader_interactor.dart';
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-const int _BUFFER_SIZE = 500;
-const int _PAGE_SIZE = 100;
+const int _BUFFER_SIZE = 1000;
+const int _PAGE_SIZE = 250;
 
 @injectable
 class ImageSaveInteractor extends Interactor<void> {
@@ -17,7 +17,6 @@ class ImageSaveInteractor extends Interactor<void> {
   @override
   Future<void> doWork(void params) async {
     try {
-      // _startUploadInteractor();
       final permission = await PhotoManager.requestPermissionExtend();
       if (permission.isAuth) {
         final gallery = await PhotoManager.getAssetPathList(
@@ -39,13 +38,13 @@ class ImageSaveInteractor extends Interactor<void> {
     }
   }
 
+  // TODO(abd): remove recommendation tab in add fake data with home if no search exist
+  // TODO(abd): find best way for image with text search
+  // TODO(abd): add base url as textfiled in settings
+  // TODO(abd): implement public and private functionallity
   // TODO(abd): save last time sync happen and if it's more than 12 hour ask workmanager to do sync with power constraint and support foreground service
-  // TODO(abd): find solve to mobx null stram value
-  // TODO(abd): isolate for networking to upload backup to server
-  // TODO(abd): add DB quert to get pagesize unploaded image and upload them with ui refresh
+  // TODO(abd): add DB query to get pagesize unuploaded image and upload them with ui refresh
   // TODO(abd): add stagred animation to lists
-  // TODO(abd): find solve to pagination reactive stram
-  // TODO(abd): find best arch to support multiple isolate (read moor code)
   Future<void> _saveFolder(AssetPathEntity folder) async {
     if (await _backupsRepository.canStartSaveBackup()) {
       print('sync folder:${folder.name},count:${folder.assetCount}');

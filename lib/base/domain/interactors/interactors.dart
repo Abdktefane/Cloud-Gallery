@@ -1,4 +1,8 @@
+// import 'dart:async';
+
 import 'dart:async';
+
+import 'package:async/async.dart';
 
 import 'package:flutter/foundation.dart';
 import 'package:rxdart/rxdart.dart';
@@ -8,6 +12,12 @@ import 'package:collection/collection.dart';
 
 abstract class InvokeStatus extends Equatable {
   const InvokeStatus();
+}
+
+class InvokeWaiting extends InvokeStatus {
+  const InvokeWaiting();
+  @override
+  List<Object> get props => [];
 }
 
 class InvokeStarted extends InvokeStatus {
@@ -30,18 +40,12 @@ class InvokeError extends InvokeStatus {
 }
 
 abstract class Interactor<P> {
-  const Interactor();
-
-  Stream<InvokeStatus> call(
-    P params, {
-    Duration timeout = defaultTimeout,
-  }) async* {
+  Stream<InvokeStatus> call(P params, {Duration timeout = defaultTimeout}) async* {
     try {
       yield const InvokeStarted();
-      await doWork(params).timeout(
-        timeout,
-        onTimeout: () => throw TimeoutException(''),
-      );
+
+      await doWork(params).timeout(timeout, onTimeout: () => throw TimeoutException(''));
+
       yield const InvokeSuccess();
     } catch (error) {
       yield InvokeError(error);
@@ -67,6 +71,8 @@ abstract class ResultInteractor<P, R> {
 
 abstract class SubjectInteractor<P, T> {
   final BehaviorSubject<P> _controller = BehaviorSubject<P>();
+
+  bool get hasListener => _controller.hasListener;
 
   void call(P params) => _controller.add(params);
 
