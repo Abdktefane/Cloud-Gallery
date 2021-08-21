@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
-const String baseUrl2 = 'http://192.168.1.10:3000';
+const String baseUrl2 = 'http://192.168.1.106:3000';
 
 final GetIt getIt = GetIt.I;
 

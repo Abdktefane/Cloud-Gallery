@@ -78,9 +78,17 @@ abstract class SubjectInteractor<P, T> {
 
   Stream<T> createObservable(P params);
 
-  ValueStream<T> observe() => _controller.switchMap(
-        (P value) => createObservable(value).where((event) => event != null),
-      ) as ValueStream<T>;
+  ValueStream<T>? outputStream;
+
+  ValueStream<T> observe() {
+    outputStream = _controller.switchMap(
+      (P value) => createObservable(value).where((event) => event != null),
+    ) as ValueStream<T>;
+
+    return outputStream!;
+  }
+
+  P? get valueOrNull => _controller.valueOrNull;
 
   // ignore: todo
   Future<void> dispose() => _controller.close();

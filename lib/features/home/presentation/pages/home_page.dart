@@ -2,12 +2,19 @@ import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:core_sdk/utils/pagination_mixin.dart';
 import 'package:core_sdk/utils/search_mixin.dart';
+import 'package:core_sdk/utils/widgets/pagination_list.dart';
+import 'package:core_sdk/utils/widgets/staggered_column.dart';
+import 'package:core_sdk/utils/widgets/staggered_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
+import 'package:graduation_project/base/data/models/pagination_response.dart';
+import 'package:graduation_project/base/data/models/search_result_model.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
+import 'package:graduation_project/base/widgets/graduate_empty_widget.dart';
 import 'package:graduation_project/base/widgets/graduate_page_loader.dart';
+import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
 import 'package:graduation_project/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:graduation_project/features/home/presentation/widgets/media_buttons.dart';
 import 'package:supercharged/supercharged.dart';
@@ -99,13 +106,24 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
   bool showMediaOptions = false;
 
   Widget searchResult() {
-    return ListView(children: const []);
+    return GraduateStreamObserver<PaginationResponse<SearchResultModel>>(
+      stream: viewmodel.searchResult!,
+      onSuccess: (results) => StaggredPaginationList<SearchResultModel>(
+        key: ValueKey(results.hashCode),
+        padding: 8.0,
+        shrinkWrap: false,
+        dataList: results.data!,
+        canLoadMore: false,
+        staggeredAnimations: const [StaggeredType.SlideAnimation],
+        scrollController: scrollController,
+        emptyWidget: const GraduateEmptyWidget(),
+        cardBuilder: (image) => Text(image.id.toString()),
+      ),
+    );
   }
 
   @override
-  void onLoadMore() {
-    // TODO(abd): finde way to know what source is image or text
-  }
+  void onLoadMore() => viewmodel.search();
 
   @override
   void onSearch(String qurey) => viewmodel.searchByText(qurey);

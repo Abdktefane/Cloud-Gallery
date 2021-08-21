@@ -24,6 +24,22 @@ mixin _$HomeViewmodel on _HomeViewmodelBase, Store {
     });
   }
 
+  final _$searchResultAtom = Atom(name: '_HomeViewmodelBase.searchResult');
+
+  @override
+  ObservableStream<PaginationResponse<SearchResultModel>>? get searchResult {
+    _$searchResultAtom.reportRead();
+    return super.searchResult;
+  }
+
+  @override
+  set searchResult(
+      ObservableStream<PaginationResponse<SearchResultModel>>? value) {
+    _$searchResultAtom.reportWrite(value, super.searchResult, () {
+      super.searchResult = value;
+    });
+  }
+
   final _$searchByImageAsyncAction =
       AsyncAction('_HomeViewmodelBase.searchByImage');
 
@@ -71,7 +87,8 @@ mixin _$HomeViewmodel on _HomeViewmodelBase, Store {
   @override
   String toString() {
     return '''
-imageSource: ${imageSource}
+imageSource: ${imageSource},
+searchResult: ${searchResult}
     ''';
   }
 }

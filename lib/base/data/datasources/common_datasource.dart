@@ -4,6 +4,10 @@ import 'package:graduation_project/base/data/datasources/graduate_datasource.dar
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/data/models/base_response_model.dart';
+import 'package:graduation_project/base/data/models/form_data_model.dart';
+import 'package:graduation_project/base/data/models/pagination_response.dart';
+import 'package:graduation_project/base/data/models/search_key_model.dart';
+import 'package:graduation_project/base/data/models/search_result_model.dart';
 import 'package:graduation_project/base/data/models/upload_model.dart';
 import 'package:graduation_project/base/utils/end_points.dart';
 import 'package:graduation_project/features/backup/networking/networking_isolator.dart';
@@ -18,6 +22,13 @@ abstract class CommonDataSource extends GraduateDataSource {
     required BackupModifier modifier,
     required String serverPath,
   });
+
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> search({
+    required int page,
+    required BackupModifier modifier,
+    required String? query,
+    required String? path,
+  });
 }
 
 @LazySingleton(as: CommonDataSource)
@@ -30,7 +41,10 @@ class CommonDataSourceImpl extends CommonDataSource {
         endpoint: EndPoints.upload,
         mapper: BaseResponseModel.fromJson(UploadModel.fromJson),
         withAuth: true,
-        path: images.first.path,
+        // path: images.first.path,
+        formDataRows: [
+          FormDataRow(key: 'file', value: images.first.path),
+        ],
       );
 
   @override
@@ -44,6 +58,7 @@ class CommonDataSourceImpl extends CommonDataSource {
           'status': 200,
         })),
       );
+
   // request(
   //   method: METHOD.POST,
   //   endpoint: EndPoints.changeModifire,
@@ -54,4 +69,35 @@ class CommonDataSourceImpl extends CommonDataSource {
   //     'public': modifier == BackupModifier.PUBPLIC,
   //   },
   // );
+
+  @override
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> search({
+    required int page,
+    required BackupModifier modifier,
+    required String? query,
+    required String? path,
+  }) async {
+    final res = await request(
+      method: METHOD.POST,
+      endpoint: query == null ? EndPoints.imageToImage : EndPoints.textToImage,
+      mapper: BaseResponseModel.fromJson(SearchKeyModel.fromJson),
+      data: {
+        'text': query,
+        if (modifier == BackupModifier.PUBPLIC) 'isPublic': true,
+      },
+      // path: path,
+      formDataRows: path != null
+          ? [
+              FormDataRow(key: 'image', value: path),
+            ]
+          : null,
+    );
+
+    return request(
+      method: METHOD.GET,
+      endpoint: EndPoints.getSearchResult + '/${res.getOrThrow()!.data!.key}',
+      params: {'page': page},
+      mapper: BaseResponseModel.fromJsonWithPagination(SearchResultModel.fromJson),
+    );
+  }
 }

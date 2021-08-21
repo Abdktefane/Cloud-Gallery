@@ -42,6 +42,7 @@ class ImageSaveInteractor extends Interactor<void> {
   // TODO(abd): find best way for image with text search
   // TODO(abd): add base url as textfiled in settings
   // TODO(abd): save last time sync happen and if it's more than 12 hour ask workmanager to do sync with power constraint and support foreground service
+  // TODO(abd): empty database when logout
   Future<void> _saveFolder(AssetPathEntity folder) async {
     if (await _backupsRepository.canStartSaveBackup()) {
       print('sync folder:${folder.name},count:${folder.assetCount}');

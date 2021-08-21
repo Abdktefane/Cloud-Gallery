@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:graduation_project/base/data/models/pagination_response.dart';
 import 'package:graduation_project/base/utils/base_mapper.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -75,16 +76,16 @@ class BaseResponseModel<T> extends Equatable {
             // fromJsonT,
           );
 
-  // static PaginationMapper<R> fromJsonWithPagination<R>(
-  //   R Function(Object) fromJsonT,
-  // ) =>
-  //     (Object? baseJson) => _$BaseResponseModelFromJson<PaginationResponse<R>>(
-  //           baseJson as Map<String, dynamic>,
-  //           (Object? paginationJson) => PaginationResponse.fromJson<R>(
-  //             paginationJson as Map<String, dynamic>,
-  //             fromJsonT as R Function(Object?),
-  //           ),
-  //         );
+  static PaginationMapper<R> fromJsonWithPagination<R>(
+    R Function(Object) fromJsonT,
+  ) =>
+      (Object? baseJson) => _$BaseResponseModelFromJson<PaginationResponse<R>>(
+            baseJson as Map<String, dynamic>,
+            (Object? paginationJson) => PaginationResponse.fromJson<R>(
+              paginationJson as Map<String, dynamic>,
+              fromJsonT as R Function(Object?),
+            ),
+          );
 
   Map<String, dynamic> toJson(
     Object Function(T? value) toJsonT,

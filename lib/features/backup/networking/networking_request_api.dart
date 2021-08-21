@@ -5,6 +5,7 @@ import 'package:core_sdk/error/exceptions.dart';
 import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/dio/token_option.dart';
 import 'package:dio/dio.dart';
+import 'package:graduation_project/base/data/models/form_data_model.dart';
 import 'package:graduation_project/features/backup/networking/networking_message.dart';
 import 'package:graduation_project/features/backup/networking/networkink_ext.dart';
 
@@ -27,7 +28,7 @@ Future<void> proccessNetworkIsolatorRequests(
       params: requestMessage.params,
       headers: requestMessage.headers,
       withAuth: requestMessage.withAuth,
-      data: await getData(requestMessage.data, requestMessage.path),
+      data: await getData(requestMessage.data, requestMessage.formDataRows),
     );
     logger.d('Network Isolate:${Isolate.current.hashCode} => SEND ResponseMessage: $responseMessage');
     callerPort.send(responseMessage);
@@ -47,16 +48,9 @@ Future<void> proccessNetworkIsolatorRequests(
   }
 }
 
-Future<dynamic> getData(dynamic data, String? path) async {
+Future<dynamic> getData(dynamic data, List<FormDataRow>? formDataRows) async {
   print('my debug try to creat form data');
-  final result = path != null
-      ? FormData.fromMap({
-          'file': await MultipartFile.fromFile(
-            path,
-            filename: path.split('/').last,
-          ),
-        })
-      : data;
+  final result = formDataRows != null ? await formDataRows.asBody() : data;
   print('my debug try to return result form data $result');
 
   return result;

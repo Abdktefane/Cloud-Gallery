@@ -12,6 +12,7 @@ import 'package:core_sdk/utils/dio/retry_options.dart';
 import 'package:core_sdk/utils/network_result.dart';
 import 'package:dio/dio.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
+import 'package:graduation_project/base/data/models/form_data_model.dart';
 import 'package:graduation_project/base/utils/token_interceptor.dart';
 import 'package:graduation_project/features/backup/data/stores/tokens_store.dart';
 import 'package:graduation_project/features/backup/networking/dio_options_utils.dart';
@@ -80,7 +81,7 @@ class NetworkIsolate extends BaseIsolate<RequestIsolateMessage, ResponseIsolateM
     Map<String, dynamic>? headers,
     dynamic data,
     ErrorMapper? errorMapper,
-    String? path,
+    List<FormDataRow>? formDataRows,
   }) {
     final completer = Completer<NetworkResult<T?>>();
     proccess((id) => RequestIsolateMessage(
@@ -91,7 +92,7 @@ class NetworkIsolate extends BaseIsolate<RequestIsolateMessage, ResponseIsolateM
           headers: headers,
           params: params,
           withAuth: withAuth,
-          path: path,
+          formDataRows: formDataRows,
         )).then(
       (ResponseIsolateMessage answer) {
         logger.d('answer in Network Isolater Wrapper $answer');

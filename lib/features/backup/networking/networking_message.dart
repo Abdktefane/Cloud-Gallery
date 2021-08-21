@@ -3,6 +3,7 @@ import 'dart:isolate';
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
 import 'package:dio/dio.dart';
 import 'package:equatable/equatable.dart';
+import 'package:graduation_project/base/data/models/form_data_model.dart';
 
 import 'base_isolate.dart';
 
@@ -51,7 +52,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
     this.data,
     this.params,
     this.headers,
-    this.path,
+    this.formDataRows,
   }) : super(id);
 
   final METHOD method;
@@ -60,7 +61,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
   final dynamic data;
   final Map<String, dynamic>? params;
   final Map<String, dynamic>? headers;
-  final String? path;
+  final List<FormDataRow>? formDataRows;
 
   RequestIsolateMessage copyWith({
     int? id,
@@ -70,7 +71,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
     dynamic data,
     Map<String, dynamic>? params,
     Map<String, dynamic>? headers,
-    String? path,
+    List<FormDataRow>? formDataRows,
   }) {
     return RequestIsolateMessage(
       id ?? this.id,
@@ -80,7 +81,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
       data: data ?? this.data,
       params: params ?? this.params,
       headers: headers ?? this.headers,
-      path: path,
+      formDataRows: formDataRows ?? this.formDataRows,
     );
   }
 
@@ -88,7 +89,7 @@ class RequestIsolateMessage extends BaseIsolateMessage with EquatableMixin {
   bool get stringify => true;
 
   @override
-  List<Object?> get props => [id, method, endpoint, withAuth, data, params, headers, path];
+  List<Object?> get props => [id, method, endpoint, withAuth, data, params, headers, formDataRows];
 }
 
 class ResponseIsolateMessage extends BaseInitResponseIsolateMessage with EquatableMixin {

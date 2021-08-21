@@ -4,6 +4,8 @@ import 'package:graduation_project/base/data/datasources/common_datasource.dart'
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/data/mappers/mappers.dart';
+import 'package:graduation_project/base/data/models/pagination_response.dart';
+import 'package:graduation_project/base/data/models/search_result_model.dart';
 import 'package:graduation_project/base/data/models/upload_model.dart';
 import 'package:graduation_project/features/backup/data/mappers/backup_mapper.dart';
 import 'package:graduation_project/features/backup/data/stores/backup_store.dart';
@@ -105,5 +107,16 @@ class BackupsRepositoryImpl extends BackupsRepository {
   }) =>
       _commonDataSource
           .changeModifire(modifier: modifier, serverPath: serverPath)
+          .whenSuccessWrapped((res) => res!.data);
+
+  @override
+  Future<NetworkResult<PaginationResponse<SearchResultModel>?>> search({
+    required int page,
+    required BackupModifier modifier,
+    required String? query,
+    required String? path,
+  }) =>
+      _commonDataSource
+          .search(page: page, modifier: modifier, query: query, path: path)
           .whenSuccessWrapped((res) => res!.data);
 }
