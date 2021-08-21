@@ -115,8 +115,9 @@ class BackupsRepositoryImpl extends BackupsRepository {
     required BackupModifier modifier,
     required String? query,
     required String? path,
+    required String? serverPath,
   }) =>
       _commonDataSource
-          .search(page: page, modifier: modifier, query: query, path: path)
+          .search(page: page, modifier: modifier, query: query, path: path, serverPath: serverPath)
           .whenSuccessWrapped((res) => res!.data);
 }

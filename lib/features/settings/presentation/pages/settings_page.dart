@@ -50,15 +50,20 @@ class _SettingsPageState extends ProviderMobxState<SettingsPage, AppViewmodel> {
                 _navigateTo(const ChangeLanguage());
               },
             ),
-            if (kDebugMode)
-              SettingOption(
-                title: context.translate('lbl_db_viewer'),
-                icon: 'assets/icons/ic_language.png',
-                isLoading: viewmodel?.logoutResult?.isPending ?? false,
-                onTap: () {
-                  App.navKey.currentContext?.pushPage(MoorDbViewer(db));
-                },
-              ),
+            // if (kDebugMode)
+            SettingOption(
+              title: context.translate('lbl_db_viewer'),
+              icon: 'assets/icons/ic_language.png',
+              isLoading: viewmodel?.logoutResult?.isPending ?? false,
+              onTap: () {
+                App.navKey.currentContext?.pushPage(MoorDbViewer(db));
+              },
+            ),
+            // if (kDebugMode)
+            TextFormField(
+              // initialValue: viewmodel.baseUrl,
+              onFieldSubmitted: (baseUrl) => viewmodel?.changeBaseUrl(baseUrl),
+            ),
             Observer(builder: (_) {
               return SettingOption(
                 title: context.translate('lbl_logout'),

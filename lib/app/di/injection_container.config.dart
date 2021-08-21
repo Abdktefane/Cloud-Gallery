@@ -8,15 +8,15 @@ import 'package:core_sdk/utils/Fimber/Logger.dart' as _i9;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
 import 'package:moor/isolate.dart' as _i35;
-import 'package:shared_preferences/shared_preferences.dart' as _i5;
+import 'package:shared_preferences/shared_preferences.dart' as _i4;
 
 import '../../base/data/datasources/common_datasource.dart' as _i11;
-import '../../base/data/db/database_transaction_runner.dart' as _i6;
+import '../../base/data/db/database_transaction_runner.dart' as _i5;
 import '../../base/data/db/di/db_module.dart' as _i38;
-import '../../base/data/db/graduate_db.dart' as _i7;
+import '../../base/data/db/graduate_db.dart' as _i6;
 import '../../base/data/repositories/common_repository_impl.dart' as _i14;
 import '../../base/domain/repositories/common_repository.dart' as _i13;
-import '../../base/domain/repositories/prefs_repository.dart' as _i4;
+import '../../base/domain/repositories/prefs_repository.dart' as _i3;
 import '../../base/utils/image_url_provider.dart' as _i36;
 import '../../features/backup/data/mappers/backup_mapper.dart' as _i24;
 import '../../features/backup/data/repositories/backups_repository_impl.dart'
@@ -37,7 +37,7 @@ import '../../features/backup/domain/interactors/image_uploader_interactor.dart'
 import '../../features/backup/domain/interactors/search_observer.dart' as _i31;
 import '../../features/backup/domain/repositorires/backups_repository.dart'
     as _i21;
-import '../../features/backup/networking/dio_options_utils.dart' as _i3;
+import '../../features/backup/networking/dio_options_utils.dart' as _i7;
 import '../../features/backup/networking/networking_isolator.dart' as _i12;
 import '../../features/backup/presentation/viewmodels/backup_viewmodel.dart'
     as _i33;
@@ -65,14 +65,15 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
   final gh = _i2.GetItHelper(get, environment, environmentFilter);
   final appModule = _$AppModule();
   final graduateDBModule = _$GraduateDBModule();
-  gh.factory<String>(() => appModule.baseUrl, instanceName: 'ApiBaseUrl');
-  gh.factory<_i3.NetworkIsolateBaseOptions>(
-      () => appModule.dioOption(get<String>(instanceName: 'ApiBaseUrl')));
-  gh.lazySingleton<_i4.PrefsRepository>(
-      () => appModule.prefsRepository(get<_i5.SharedPreferences>()),
+  gh.lazySingleton<_i3.PrefsRepository>(
+      () => appModule.prefsRepository(get<_i4.SharedPreferences>()),
       registerFor: {_prod});
-  gh.factory<_i6.DatabaseTransactionRunner>(
-      () => _i6.DatabaseTransactionRunner(get<_i7.GraduateDB>()));
+  gh.factory<String>(() => appModule.getBaseUrl(get<_i3.PrefsRepository>()),
+      instanceName: 'ApiBaseUrl');
+  gh.factory<_i5.DatabaseTransactionRunner>(
+      () => _i5.DatabaseTransactionRunner(get<_i6.GraduateDB>()));
+  gh.factory<_i7.NetworkIsolateBaseOptions>(
+      () => appModule.dioOption(get<String>(instanceName: 'ApiBaseUrl')));
   gh.factory<_i8.SplashViewmodel>(
       () => _i8.SplashViewmodel(get<_i9.Logger>(), get<_i10.TokensStore>()));
   gh.lazySingleton<_i11.CommonDataSource>(
@@ -85,7 +86,7 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       get<_i15.LoginDataSource>(),
       get<_i10.TokensStore>(),
       get<_i9.Logger>(),
-      get<_i4.PrefsRepository>()));
+      get<_i3.PrefsRepository>()));
   gh.factory<_i18.LoginViewmodel>(() =>
       _i18.LoginViewmodel(get<_i9.Logger>(), get<_i16.LoginRepository>()));
   gh.factory<_i19.RecommendViewmodel>(() =>
@@ -111,7 +112,7 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       () => _i31.SearchObserver(get<_i21.BackupsRepository>()));
   gh.factory<_i32.AppViewmodel>(() => _i32.AppViewmodel(
       get<_i9.Logger>(),
-      get<_i4.PrefsRepository>(),
+      get<_i3.PrefsRepository>(),
       get<_i29.ImageSaveInteractor>(),
       get<_i30.ImageUploaderInteractor>()));
   gh.factory<_i33.BackupViewmodel>(() => _i33.BackupViewmodel(
@@ -119,26 +120,26 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       get<_i28.ImageObserver>(),
       get<_i26.BackupsRowsObserver>(),
       get<_i27.ChangeModifireInteractor>()));
-  gh.factory<_i34.HomeViewmodel>(() => _i34.HomeViewmodel(get<_i9.Logger>(),
-      get<_i13.CommonRepository>(), get<_i31.SearchObserver>()));
+  gh.factory<_i34.HomeViewmodel>(
+      () => _i34.HomeViewmodel(get<_i9.Logger>(), get<_i31.SearchObserver>()));
   gh.singleton<_i24.BackupMapper>(_i24.BackupMapper());
   gh.singleton<_i9.Logger>(appModule.logger());
   await gh.singletonAsync<_i35.MoorIsolate>(
       () => graduateDBModule.getMoorIsolate(),
       preResolve: true);
-  await gh.singletonAsync<_i5.SharedPreferences>(() => appModule.getPrefs(),
+  await gh.singletonAsync<_i4.SharedPreferences>(() => appModule.getPrefs(),
       preResolve: true);
-  await gh.singletonAsync<_i7.GraduateDB>(
+  await gh.singletonAsync<_i6.GraduateDB>(
       () => graduateDBModule.getDb(get<_i35.MoorIsolate>()),
       preResolve: true);
+  gh.singleton<_i25.LastSyncRequestStore>(
+      _i25.LastSyncRequestStoreImpl(get<_i6.GraduateDB>()));
+  gh.singleton<_i10.TokensStore>(_i10.TokensStoreImpl(get<_i6.GraduateDB>()));
+  gh.singleton<_i23.BackupsStore>(_i23.BackupDao(get<_i6.GraduateDB>()));
   gh.singleton<_i36.ImageUrlProvider>(
       _i36.ImageUrlProvider(get<String>(instanceName: 'ApiBaseUrl')));
-  gh.singleton<_i25.LastSyncRequestStore>(
-      _i25.LastSyncRequestStoreImpl(get<_i7.GraduateDB>()));
-  gh.singleton<_i10.TokensStore>(_i10.TokensStoreImpl(get<_i7.GraduateDB>()));
-  gh.singleton<_i23.BackupsStore>(_i23.BackupDao(get<_i7.GraduateDB>()));
   await gh.singletonAsync<_i12.NetworkIsolate>(
-      () => appModule.getNetworkIsolate(get<_i3.NetworkIsolateBaseOptions>(),
+      () => appModule.getNetworkIsolate(get<_i7.NetworkIsolateBaseOptions>(),
           get<_i9.Logger>(), get<_i35.MoorIsolate>()),
       preResolve: true);
   return get;

@@ -53,6 +53,8 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   final ImageSaveInteractor _imageSaveInteractor;
   final ImageUploaderInteractor _imageUploaderInteractor;
 
+  String? serverPath;
+
   //* OBSERVERS *//
   @observable
   ObservableFuture<String?>? languageFuture;
@@ -182,6 +184,11 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
       }),
       catchBlock: (err) => showSnack(err ?? '', duration: 2.seconds),
     );
+  }
+
+  @action
+  void changeBaseUrl(String baseUrl) {
+    _prefsRepository.setBaseUrl(baseUrl);
   }
 }
 

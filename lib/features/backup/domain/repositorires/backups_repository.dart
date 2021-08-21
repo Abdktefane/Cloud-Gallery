@@ -59,5 +59,6 @@ abstract class BackupsRepository extends BaseRepository {
     required BackupModifier modifier,
     required String? query,
     required String? path,
+    required String? serverPath,
   });
 }

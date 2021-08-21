@@ -4,8 +4,6 @@ import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/models/pagination_response.dart';
 import 'package:graduation_project/base/data/models/search_result_model.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
-import 'package:graduation_project/base/domain/repositories/common_repository.dart';
-import 'package:graduation_project/base/widgets/strream_observer.dart';
 import 'package:graduation_project/features/backup/domain/interactors/search_observer.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
@@ -17,20 +15,25 @@ part 'home_viewmodel.g.dart';
 class HomeViewmodel extends _HomeViewmodelBase with _$HomeViewmodel {
   HomeViewmodel(
     Logger logger,
-    CommonRepository _commonRepository,
     SearchObserver searchObserver,
-  ) : super(logger, _commonRepository, searchObserver);
+  ) : super(logger, searchObserver);
 }
 
 abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
-  _HomeViewmodelBase(Logger logger, this._commonRepository, this._searchObserver) : super(logger) {
+  _HomeViewmodelBase(Logger logger, this._searchObserver) : super(logger) {
     searchResult = _searchObserver.asObservable();
+    // filterObserver = autorun((_) {
+    //   logger.d('change modifire to $imageSource');
+    //   search(fresh: true);
+    // });
   }
-  final CommonRepository _commonRepository;
+
   final SearchObserver _searchObserver;
   final ImagePicker _picker = ImagePicker();
 
   int page = 1;
+
+  // late final ReactionDisposer filterObserver;
 
   //* OBSERVERS *//
   @observable
@@ -45,6 +48,7 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
 
   String? query;
   String? path;
+  String? serverPath;
 
   @action
   void toggleImageSource() => imageSource = imageSource.negate;
@@ -53,6 +57,15 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
   void searchByText(String query) {
     this.query = query;
     path = null;
+    serverPath = null;
+    search(fresh: true);
+  }
+
+  @action
+  void searchBySimiliraty(String serverPath) {
+    this.serverPath = serverPath;
+    path = null;
+    query = null;
     search(fresh: true);
   }
 
@@ -61,6 +74,7 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
     final XFile? image = await _picker.pickImage(source: index == 0 ? ImageSource.camera : ImageSource.gallery);
     path = image?.path;
     query = null;
+    serverPath = null;
     search(fresh: true);
   }
 
@@ -71,6 +85,13 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
       query: query,
       path: path,
       fresh: fresh,
+      serverPath: serverPath,
     ));
+  }
+
+  @override
+  Future<void> dispose() {
+    // filterObserver();
+    return super.dispose();
   }
 }

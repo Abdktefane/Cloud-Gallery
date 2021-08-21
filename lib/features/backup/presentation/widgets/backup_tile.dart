@@ -15,9 +15,12 @@ class BackupTile extends StatefulWidget {
     Key? key,
     required this.backup,
     required this.toggleModifier,
+    required this.searchByImage,
   }) : super(key: key);
   final Backup backup;
   final ValueChanged<BackupModifier> toggleModifier;
+  final ValueChanged<String> searchByImage;
+
   @override
   _BackupTileState createState() => _BackupTileState();
 }
@@ -28,6 +31,7 @@ class _BackupTileState extends State<BackupTile> {
 
   late final List<ItemModel> menuItems;
   final CustomPopupMenuController _menuController = CustomPopupMenuController();
+  ValueChanged<String> get searchByImage => widget.searchByImage;
 
   @override
   void dispose() {
@@ -52,6 +56,14 @@ class _BackupTileState extends State<BackupTile> {
         title: 'lbl_toggle',
         onPress: () {
           widget.toggleModifier(backup.modifier);
+          _menuController.hideMenu();
+        },
+      ),
+      ItemModel(
+        icon: Icons.search,
+        title: 'lbl_search',
+        onPress: () {
+          widget.searchByImage(backup.serverPath!);
           _menuController.hideMenu();
         },
       ),

@@ -16,6 +16,7 @@ class SearchObserver extends SubjectInteractor<_Params, PaginationResponse<Searc
     required BackupModifier backupModifier,
     required String? query,
     required String? path,
+    required String? serverPath,
     required bool fresh,
   }) =>
       _Params(
@@ -23,6 +24,7 @@ class SearchObserver extends SubjectInteractor<_Params, PaginationResponse<Searc
         path: path,
         query: query,
         fresh: fresh,
+        serverPath: serverPath,
       );
 
   @override
@@ -32,6 +34,7 @@ class SearchObserver extends SubjectInteractor<_Params, PaginationResponse<Searc
       modifier: params.backupModifier,
       query: params.query,
       path: params.path,
+      serverPath: params.serverPath,
     ));
 
     return stream.map((event) {
@@ -50,6 +53,7 @@ class _Params {
     required this.backupModifier,
     required this.query,
     required this.path,
+    required this.serverPath,
     this.fresh = false,
     this.page = 1,
   });
@@ -57,6 +61,7 @@ class _Params {
   final BackupModifier backupModifier;
   final String? query;
   final String? path;
+  final String? serverPath;
   final bool fresh;
   final int page;
 }

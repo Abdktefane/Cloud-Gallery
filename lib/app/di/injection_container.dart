@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
-const String baseUrl2 = 'http://192.168.1.106:3000';
+const String baseUrl2 = 'http://192.168.1.6:3000';
 
 final GetIt getIt = GetIt.I;
 
@@ -26,7 +26,9 @@ Future<GetIt?> inject({String? environment}) async => $inject(getIt, environment
 @module
 abstract class AppModule {
   @Named('ApiBaseUrl')
-  String get baseUrl => '$baseUrl2/api';
+  String getBaseUrl(PrefsRepository prefsRepository) {
+    return prefsRepository.baseUrl ?? '$baseUrl2/api';
+  }
 
   // @Named('ApiBaseUrl')
   // String get baseUrl => 'https://demo.fivectech.com:9001/rest/v1/';

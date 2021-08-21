@@ -221,6 +221,17 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
   }
 
   @override
+  void changeBaseUrl(String baseUrl) {
+    final _$actionInfo = _$_AppViewmodelBaseActionController.startAction(
+        name: '_AppViewmodelBase.changeBaseUrl');
+    try {
+      return super.changeBaseUrl(baseUrl);
+    } finally {
+      _$_AppViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   String toString() {
     return '''
 languageFuture: ${languageFuture},

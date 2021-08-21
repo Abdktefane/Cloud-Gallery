@@ -28,6 +28,7 @@ abstract class CommonDataSource extends GraduateDataSource {
     required BackupModifier modifier,
     required String? query,
     required String? path,
+    required String? serverPath,
   });
 }
 
@@ -70,19 +71,36 @@ class CommonDataSourceImpl extends CommonDataSource {
   //   },
   // );
 
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> _getResultByKey({
+    required int page,
+    required int key,
+  }) =>
+      request(
+        method: METHOD.GET,
+        endpoint: EndPoints.getSearchResult + '/$key',
+        mapper: BaseResponseModel.fromJsonWithPagination(SearchResultModel.fromJson),
+        params: {'page': page},
+      );
+
   @override
   Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> search({
     required int page,
     required BackupModifier modifier,
     required String? query,
     required String? path,
+    required String? serverPath,
   }) async {
     final res = await request(
       method: METHOD.POST,
-      endpoint: query == null ? EndPoints.imageToImage : EndPoints.textToImage,
+      endpoint: query != null
+          ? EndPoints.textToImage
+          : serverPath == null
+              ? EndPoints.imageToImage
+              : EndPoints.getSimilar,
       mapper: BaseResponseModel.fromJson(SearchKeyModel.fromJson),
       data: {
-        'text': query,
+        if (query != null) 'text': query,
+        if (serverPath != null) 'name': serverPath,
         if (modifier == BackupModifier.PUBPLIC) 'isPublic': true,
       },
       // path: path,
@@ -93,11 +111,31 @@ class CommonDataSourceImpl extends CommonDataSource {
           : null,
     );
 
-    return request(
-      method: METHOD.GET,
-      endpoint: EndPoints.getSearchResult + '/${res.getOrThrow()!.data!.key}',
-      params: {'page': page},
-      mapper: BaseResponseModel.fromJsonWithPagination(SearchResultModel.fromJson),
+    return _getResultByKey(
+      key: res.getOrThrow()!.data!.key!,
+      page: page,
     );
   }
+
+  // @override
+  // Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> searchBySimilarity({
+  //   required int page,
+  //   required BackupModifier modifier,
+  //   required String serverPath,
+  // }) async {
+  //   final res = await request(
+  //     method: METHOD.POST,
+  //     endpoint: EndPoints.getSearchResult,
+  //     mapper: BaseResponseModel.fromJson(SearchKeyModel.fromJson),
+  //     data: {
+  //       'name': serverPath,
+  //       if (modifier == BackupModifier.PUBPLIC) 'isPublic': true,
+  //     },
+  //   );
+
+  //   return _getResultByKey(
+  //     key: res.getOrThrow()!.data!.key!,
+  //     page: page,
+  //   );
+  // }
 }

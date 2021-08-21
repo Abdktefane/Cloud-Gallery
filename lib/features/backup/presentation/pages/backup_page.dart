@@ -81,6 +81,10 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
               cardBuilder: (image) => BackupTile(
                 backup: image,
                 toggleModifier: (_) => viewmodel.toggleBackupModifire(image),
+                searchByImage: (_) {
+                  _appViewmodel?.serverPath = image.serverPath!;
+                  _appViewmodel?.navigateTo(PageIndex.home);
+                },
               ),
             ),
           ).expand(),

@@ -74,6 +74,17 @@ mixin _$HomeViewmodel on _HomeViewmodelBase, Store {
   }
 
   @override
+  void searchBySimiliraty(String serverPath) {
+    final _$actionInfo = _$_HomeViewmodelBaseActionController.startAction(
+        name: '_HomeViewmodelBase.searchBySimiliraty');
+    try {
+      return super.searchBySimiliraty(serverPath);
+    } finally {
+      _$_HomeViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
   void search({dynamic fresh = false}) {
     final _$actionInfo = _$_HomeViewmodelBaseActionController.startAction(
         name: '_HomeViewmodelBase.search');
