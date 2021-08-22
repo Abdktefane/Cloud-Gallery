@@ -79,8 +79,8 @@ class _BackupTileState extends State<BackupTile> {
         child: Icon(widget.backup.status.icon, color: PRIMARY),
       ),
       title: Text(widget.backup.title ?? ''),
-      // onTap: showModifireActions ? openMenu : openImage,
-      onTap: () => _menuController.showMenu(),
+      onTap: showModifireActions ? () => _menuController.showMenu() : openImage,
+      // onTap: () => _menuController.showMenu(),
     ).modifier(decoration: const BoxDecoration(color: WHITE));
 
     if (!showModifireActions) {
@@ -124,31 +124,30 @@ class _BackupTileState extends State<BackupTile> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(5),
       child: Container(
-        width: 200,
+        width: 150,
         color: const Color(0xFF4C4C4C),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: menuItems
-              .map((item) => GestureDetector(
-                    onTap: item.onPress,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Icon(
-                          item.icon,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        Container(
-                          margin: const EdgeInsets.only(top: 2),
-                          child: Text(
-                            item.title,
-                            style: const TextStyle(color: Colors.white, fontSize: 12),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ))
+              .map(
+                (item) => GestureDetector(
+                  onTap: item.onPress,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      Icon(
+                        item.icon,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                      Text(
+                        context.translate(item.title),
+                        style: const TextStyle(color: Colors.white, fontSize: 12),
+                      ),
+                    ],
+                  ).padding(padding: const EdgeInsets.symmetric(vertical: 2.0)),
+                ),
+              )
               .toList(),
         ),
       ),

@@ -104,8 +104,8 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       () => _i27.ChangeModifireInteractor(get<_i21.BackupsRepository>()));
   gh.factory<_i28.ImageObserver>(
       () => _i28.ImageObserver(get<_i21.BackupsRepository>()));
-  gh.factory<_i29.ImageSaveInteractor>(
-      () => _i29.ImageSaveInteractor(get<_i21.BackupsRepository>()));
+  gh.factory<_i29.ImageSaveInteractor>(() => _i29.ImageSaveInteractor(
+      get<_i21.BackupsRepository>(), get<_i3.PrefsRepository>()));
   gh.factory<_i30.ImageUploaderInteractor>(() => _i30.ImageUploaderInteractor(
       get<_i21.BackupsRepository>(), get<_i9.Logger>()));
   gh.factory<_i31.SearchObserver>(

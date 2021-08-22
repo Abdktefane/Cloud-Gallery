@@ -14,6 +14,7 @@
   "lbl_sign_up":"Signup",
   "lbl_confirm_password":"Confirm Password",
   "lbl_change_language":"Change Language",
+  "lbl_control_panel":"Control Panel",
   "lbl_language":"Languages",
   "lbl_settings":"Settings",
   "lbl_logout":"Logout",
@@ -26,10 +27,19 @@
   "lbl_pending":"Pending",
 
   "lbl_empty": "Empty Content",
+
+  "lbl_show_image":"ِShow",
+  "lbl_toggle":"Toggle",
+  "lbl_base_url":"Base Url",
+
+
+  "lbl_all":"All Images",
+  "lbl_folder":"Special Folder",
   
 
 
 
+  "msg_confirm_save_start": "We need access to the gallery for our magic to start (no one can see the photos if you don't let them)",
 
   "msg_app_exit_confirm": "Are you sure you want exit ?"
 }

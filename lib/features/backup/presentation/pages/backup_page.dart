@@ -16,7 +16,6 @@ import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
 import 'package:graduation_project/features/backup/presentation/viewmodels/backup_viewmodel.dart';
 import 'package:graduation_project/features/backup/presentation/widgets/backup_tile.dart';
 import 'package:provider/provider.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:supercharged/supercharged.dart';
 
 class BackupPage extends StatefulWidget {
@@ -70,13 +69,14 @@ class _BackupPageState extends MobxState<BackupPage, BackupViewmodel> with Pagin
           GraduateStreamObserver<List<Backup>?>(
             stream: viewmodel.images!,
             onSuccess: (images) => StaggredPaginationList<Backup>(
-              key: ValueKey(images.hashCode),
+              key: ValueKey(viewmodel.filter.hashCode),
               padding: 8.0,
               shrinkWrap: false,
               dataList: images!,
               canLoadMore: false,
               staggeredAnimations: const [StaggeredType.SlideAnimation],
               scrollController: scrollController,
+              duration: 250.milliseconds,
               emptyWidget: const GraduateEmptyWidget(),
               cardBuilder: (image) => BackupTile(
                 backup: image,

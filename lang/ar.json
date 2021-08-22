@@ -27,8 +27,22 @@
   "lbl_uploading":"جاري الرفع",
   "lbl_pending":"قيد الانتظار",
 
+  "lbl_show_image":"عرض",
+  "lbl_toggle":"تبديل",
+
+  "lbl_control_panel":"لوحة التحكم",
+  "lbl_base_url":"العنوان الرئيسي",
+
+
+  "lbl_all":"كل الصور",
+  "lbl_folder":"مجلد خاص",
+
+
+
+
   "lbl_empty": "محتوى فارغ",
 
+  "msg_confirm_save_start": "نحتاج اذن الوصول الى معرض الصور حتى يبدأ السحر الخاص بنا (لا أحد يمكنه روئية الصور اذا لم تسمح له بذلك)",
 
 
   "msg_app_exit_confirm": "هل انت متاكد من إغلاق التطبيق ؟"

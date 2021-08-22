@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 abstract class PrefsRepository {
   String? get token;
   Future<bool> setToken(String token);
@@ -14,6 +16,9 @@ abstract class PrefsRepository {
   String? get baseUrl;
   Future<bool> setBaseUrl(String baseUrl);
 
+  ImageFileSource get imageFileSource;
+  Future<bool> setImageFileSource(ImageFileSource imageFileSource);
+
   String? get languageCode;
   Future<bool> setApplicationLanguage(String languageCode);
 
@@ -27,4 +32,14 @@ abstract class PrefsRepository {
   // Future<bool> setProfile(ProfileModel? profile);
 
   Future<void> clearUserData();
+}
+
+const String kSyncFolderName = 'SmartGallery';
+enum ImageFileSource { ALL, FOLDER }
+
+extension ImageFileSourceExt on ImageFileSource {
+  String get raw => describeEnum(this);
+  String get localizationKey => 'lbl_' + raw.toLowerCase();
+  static ImageFileSource fromIndex(int? index) =>
+      index == null || index == 1 ? ImageFileSource.FOLDER : ImageFileSource.ALL;
 }

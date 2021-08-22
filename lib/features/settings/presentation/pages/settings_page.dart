@@ -12,6 +12,7 @@ import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/widgets/graduate_app_bar.dart';
 import 'package:graduation_project/features/login/ui/pages/login_page.dart';
 import 'package:graduation_project/features/settings/presentation/pages/change_language.dart';
+import 'package:graduation_project/features/settings/presentation/pages/controll_panel_page.dart';
 import 'package:graduation_project/features/settings/presentation/widgets/setting_option_tile.dart';
 import 'package:moor_db_viewer/moor_db_viewer.dart';
 
@@ -25,7 +26,6 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends ProviderMobxState<SettingsPage, AppViewmodel> {
-  final GraduateDB db = GetIt.I.get();
   @override
   void initState() {
     super.initState();
@@ -52,18 +52,12 @@ class _SettingsPageState extends ProviderMobxState<SettingsPage, AppViewmodel> {
             ),
             // if (kDebugMode)
             SettingOption(
-              title: context.translate('lbl_db_viewer'),
+              title: context.translate('lbl_control_panel'),
               icon: 'assets/icons/ic_language.png',
-              isLoading: viewmodel?.logoutResult?.isPending ?? false,
-              onTap: () {
-                App.navKey.currentContext?.pushPage(MoorDbViewer(db));
-              },
+              onTap: () => App.navKey.currentContext?.pushPage(const ControllPanelPage()),
             ),
             // if (kDebugMode)
-            TextFormField(
-              // initialValue: viewmodel.baseUrl,
-              onFieldSubmitted: (baseUrl) => viewmodel?.changeBaseUrl(baseUrl),
-            ),
+
             Observer(builder: (_) {
               return SettingOption(
                 title: context.translate('lbl_logout'),

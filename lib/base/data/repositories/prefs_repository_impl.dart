@@ -1,11 +1,13 @@
 import 'package:core_sdk/utils/constants.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:get_it/get_it.dart';
 
 class PrefsRepositoryImpl implements PrefsRepository {
   const PrefsRepositoryImpl(this._prefs);
 
   final SharedPreferences _prefs;
+
   @override
   String? get token => _prefs.getString(PreferencesKeys.USER_TOKEN);
 
@@ -56,6 +58,12 @@ class PrefsRepositoryImpl implements PrefsRepository {
   @override
   Future<bool> setUploadedFiles(List<String> uploadedFiles) => _prefs.setStringList(_UPLOADED_FILES_KEY, uploadedFiles);
 
+  @override
+  ImageFileSource get imageFileSource => ImageFileSourceExt.fromIndex(_prefs.getInt(_IMAGE_FILE_SOURCE));
+  @override
+  Future<bool> setImageFileSource(ImageFileSource imageFileSource) =>
+      _prefs.setInt(_IMAGE_FILE_SOURCE, imageFileSource.index);
+
   // @override
   // Future<bool> setProfile(ProfileModel? profile) =>
   //     _prefs.setString(PreferencesKeys.USER_PROFILE, json.encode(profile!.toJson()));
@@ -76,7 +84,9 @@ class PrefsRepositoryImpl implements PrefsRepository {
     await _prefs.remove(PreferencesKeys.IS_DEVICE_REGISTERED);
     await _prefs.remove(PreferencesKeys.FB_USER_TOKEN);
     await _prefs.remove(_UPLOADED_FILES_KEY);
+    await _prefs.remove(_IMAGE_FILE_SOURCE);
   }
 }
 
 const String _UPLOADED_FILES_KEY = 'graduate_uploaded_files_key';
+const String _IMAGE_FILE_SOURCE = 'image_file_source';

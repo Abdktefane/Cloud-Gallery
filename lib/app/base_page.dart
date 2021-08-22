@@ -107,7 +107,7 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
       bool exitConfirmed = false;
       await showConfirmDialog(
         context,
-        context.translate('msg_close_app'),
+        context.translate('msg_app_exit_confirm'),
         () => exitConfirmed = true,
       );
       return exitConfirmed;

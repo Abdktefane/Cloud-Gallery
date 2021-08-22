@@ -1,29 +1,41 @@
 import 'package:core_sdk/utils/extensions/list.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
+import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_uploader_interactor.dart';
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:photo_manager/photo_manager.dart';
 
-const int _BUFFER_SIZE = 1000;
-const int _PAGE_SIZE = 250;
+const int _BUFFER_SIZE = 500;
+const int _PAGE_SIZE = 100;
 
 @injectable
 class ImageSaveInteractor extends Interactor<void> {
-  ImageSaveInteractor(this._backupsRepository);
+  ImageSaveInteractor(this._backupsRepository, this._prefsRepository);
 
   final BackupsRepository _backupsRepository;
+  final PrefsRepository _prefsRepository;
 
   @override
   Future<void> doWork(void params) async {
     try {
       final permission = await PhotoManager.requestPermissionExtend();
       if (permission.isAuth) {
-        final gallery = await PhotoManager.getAssetPathList(
-          type: RequestType.image,
-          hasAll: true,
-          onlyAll: true,
-        );
+        late List<AssetPathEntity> gallery;
+        if (_prefsRepository.imageFileSource == ImageFileSource.ALL) {
+          gallery = await PhotoManager.getAssetPathList(
+            type: RequestType.image,
+            hasAll: true,
+            onlyAll: true,
+          );
+        } else {
+          gallery = await PhotoManager.getAssetPathList(
+            type: RequestType.image,
+          );
+          int i = 0;
+          gallery = gallery.where((it) => it.name == kSyncFolderName).toList();
+        }
+
         if (gallery.isNullOrEmpty) {
           print('gallery is empty');
           return;
@@ -33,16 +45,18 @@ class ImageSaveInteractor extends Interactor<void> {
       } else {
         throw UnimplementedError('user not admit permission');
       }
-    } catch (ex) {
-      print('my debug image fetcher with $ex');
+    } catch (ex, st) {
+      print('my debug image fetcher ex: $ex ,st: $st');
     }
   }
 
   // TODO(abd): new feed if no serarch(recommend)
-  // TODO(abd): find best way for image with text search
-  // TODO(abd): add base url as textfiled in settings
   // TODO(abd): save last time sync happen and if it's more than 12 hour ask workmanager to do sync with power constraint and support foreground service
   // TODO(abd): empty database when logout
+  // TODO(abd): move every thing in uploading to pending when close app
+  // TODO(abd): add folder sync operations and force sync to overcome last_sync conditions
+  // TODO(abd): long tab on image sync icon to start upload immediatly
+  // TODO(abd): token in image loader
   Future<void> _saveFolder(AssetPathEntity folder) async {
     if (await _backupsRepository.canStartSaveBackup()) {
       print('sync folder:${folder.name},count:${folder.assetCount}');
