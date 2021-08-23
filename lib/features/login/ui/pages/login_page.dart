@@ -4,6 +4,7 @@ import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:core_sdk/utils/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:graduation_project/app/app.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:graduation_project/base/utils/validators.dart';
@@ -13,6 +14,7 @@ import 'package:graduation_project/base/widgets/graduate_page_loader.dart';
 import 'package:graduation_project/base/widgets/graduate_text_field.dart';
 import 'package:graduation_project/features/login/viewmodels/login_viewmodel.dart';
 import 'package:graduation_project/features/register/presentation/pages/register_page.dart';
+import 'package:graduation_project/features/settings/presentation/pages/controll_panel_page.dart';
 import 'package:graduation_project/features/splash/ui/pages/splash_page.dart';
 import 'package:provider/provider.dart';
 
@@ -155,7 +157,14 @@ class _LoginPageState extends MobxState<LoginPage, LoginViewmodel> {
                         )
                       ],
                     ),
-                  )
+                  ),
+                  InkWell(
+                    onTap: () => App.navKey.currentContext?.pushPage(const ControllPanelPage()),
+                    child: Text(
+                      context.translate('lbl_control_panel'),
+                      style: textTheme?.bodyText1!.copyWith(color: RED, fontWeight: FontWeight.w600),
+                    ),
+                  ),
                 ],
               ),
             ),

@@ -32,6 +32,11 @@
   "lbl_toggle":"Toggle",
   "lbl_base_url":"Base Url",
 
+  "lbl_text_search": "Text Search",
+  "lbl_image_search": "Image Search",
+  "lbl_sim_search": "Similarity Search",
+  "lbl_recommendations":"Recommendations",
+
 
   "lbl_all":"All Images",
   "lbl_folder":"Special Folder",

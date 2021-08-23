@@ -29,6 +29,8 @@ abstract class BackupsStore {
 
   Future<void> updateBackups(List<Backup> images);
 
+  Future<void> moveUploadingToPending();
+
   Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
 
   Future<List<Backup>> getBackupsByStatus({
@@ -123,6 +125,12 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
   @override
   Future<void> updateBackups(List<Backup> images) =>
       batch((Batch batch) => batch.insertAllOnConflictUpdate(backups, images));
+
+  @override
+  Future<void> moveUploadingToPending() =>
+      (update(backups)..where((t) => t.status.equals(BackupStatus.UPLOADING.index))).write(const BackupsCompanion(
+        status: Value(BackupStatus.PENDING),
+      ));
 }
 
 // @LazySingleton(as: BackupsStore)

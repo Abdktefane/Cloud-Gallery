@@ -90,6 +90,13 @@ class CommonDataSourceImpl extends CommonDataSource {
     required String? path,
     required String? serverPath,
   }) async {
+    if (query == null && path == null && serverPath == null)
+      return request(
+        method: METHOD.GET,
+        endpoint: EndPoints.recommendations,
+        mapper: BaseResponseModel.fromJsonWithPagination(SearchResultModel.fromJson),
+        params: {'page': page},
+      );
     final res = await request(
       method: METHOD.POST,
       endpoint: query != null

@@ -50,13 +50,21 @@ class ImageSaveInteractor extends Interactor<void> {
     }
   }
 
-  // TODO(abd): new feed if no serarch(recommend)
+  // TODO(abd): UI Enhancement floating search and slideable list in db sections
+  // TODO(abd): solve double reaction when search
+  // TODO(abd): add empty uint8 list as no thumb image
+  // TODO(abd): DB pagination on ahmad phone
+
+  // TODO(abd): send asset id with upload add sync it with server when application first start move each container to done
+  // TODO(abd): long tab on image sync icon to start upload immediatly
+  // TODO(abd): force sync to overcome last_sync conditions
   // TODO(abd): save last time sync happen and if it's more than 12 hour ask workmanager to do sync with power constraint and support foreground service
+  // TODO(abd): upload image with small size image
+
   // TODO(abd): empty database when logout
   // TODO(abd): move every thing in uploading to pending when close app
-  // TODO(abd): add folder sync operations and force sync to overcome last_sync conditions
-  // TODO(abd): long tab on image sync icon to start upload immediatly
-  // TODO(abd): token in image loader
+
+  // TODO(abd): Hint don't change folder source while uploading
   Future<void> _saveFolder(AssetPathEntity folder) async {
     if (await _backupsRepository.canStartSaveBackup()) {
       print('sync folder:${folder.name},count:${folder.assetCount}');
@@ -64,23 +72,31 @@ class ImageSaveInteractor extends Interactor<void> {
       int page = 0;
       bool canLoadMore = true;
 
+      List<AssetEntity> images = [];
+
       while (canLoadMore) {
-        final images = await folder.getAssetListPaged(page, _PAGE_SIZE);
-        if (images.isNullOrEmpty) {
-          break;
+        try {
+          images = await folder.getAssetListPaged(page, _PAGE_SIZE);
+          if (images.isNullOrEmpty) {
+            break;
+          }
+          imagesBuffer.addAll(images);
+          if (imagesBuffer.length >= _BUFFER_SIZE) {
+            await _backupsRepository.addNewImages(imagesBuffer);
+            imagesBuffer.clear();
+          }
+
+          if (imagesBuffer.isNotEmpty) {
+            await _backupsRepository.addNewImages(imagesBuffer);
+          }
+          _backupsRepository.saveLastSync(DateTime.now());
+        } catch (ex, st) {
+          print('exception while save folder ex: $ex, st: $st');
+        } finally {
+          page++;
+          canLoadMore = images.length == _PAGE_SIZE;
         }
-        imagesBuffer.addAll(images);
-        if (imagesBuffer.length >= _BUFFER_SIZE) {
-          await _backupsRepository.addNewImages(imagesBuffer);
-          imagesBuffer.clear();
-        }
-        page++;
-        canLoadMore = images.length == _PAGE_SIZE;
       }
-      if (imagesBuffer.isNotEmpty) {
-        await _backupsRepository.addNewImages(imagesBuffer);
-      }
-      _backupsRepository.saveLastSync(DateTime.now());
     } else {
       print('sync image cancelled due to time constraint');
     }

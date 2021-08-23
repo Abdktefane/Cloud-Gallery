@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:animations/animations.dart';
+import 'package:core_sdk/utils/Fimber/Logger.dart';
 import 'package:core_sdk/utils/dialogs.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:core_sdk/utils/extensions/build_context.dart';
@@ -10,14 +12,17 @@ import 'package:core_sdk/utils/extensions/mobx.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
+import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/base/widgets/graduate_app_bar.dart';
 import 'package:graduation_project/base/widgets/graduate_bottom_nav.dart';
+import 'package:graduation_project/features/backup/data/stores/backup_store.dart';
 import 'package:graduation_project/features/backup/presentation/pages/backup_page.dart';
 import 'package:graduation_project/features/home/presentation/pages/home_page.dart';
 import 'package:graduation_project/features/recommend/presentation/pages/recommned_page.dart';
 import 'package:graduation_project/main.dart';
 import 'package:provider/provider.dart';
 import 'package:supercharged/supercharged.dart';
+import 'package:get_it/get_it.dart';
 
 class BasePage extends StatefulWidget {
   const BasePage({
@@ -34,6 +39,7 @@ class BasePage extends StatefulWidget {
 
 class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
   AppViewmodel? appViewmodel;
+  final BackupsStore _backupsStore = GetIt.I();
 
   final List<Widget> pages = <Widget>[
     Navigator(key: HomePage.navKey, onGenerateRoute: (RouteSettings route) => HomePage.pageRoute),
@@ -45,7 +51,19 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
   @override
   void initState() {
     super.initState();
-    scheduleMicrotask(() => appViewmodel?.saveImages());
+    scheduleMicrotask(() {
+      appViewmodel?.saveImages();
+    });
+    // scheduleMicrotask(() {
+    //   appViewmodel = Provider.of<AppViewmodel>(context, listen: false);
+    //   appViewmodel?.saveImages();
+    // });
+  }
+
+  @override
+  void didChangeDependencies() {
+    appViewmodel = Provider.of<AppViewmodel>(context, listen: false);
+    super.didChangeDependencies();
   }
 
   @override
@@ -54,24 +72,22 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
   }
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    appViewmodel = Provider.of<AppViewmodel>(context, listen: false);
-  }
-
-  @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: onWillPop,
       child: Scaffold(
         appBar: GraduateAppBar(appViewModel: appViewmodel),
-        body: buildBaseScreenBody,
-        bottomNavigationBar: Container(
-          height: 60.0 + context.mediaQuery.padding.bottom,
-          decoration: const BoxDecoration(color: WHITE, border: Border(top: BorderSide(color: LIGHT_GREY))),
-          child: Column(children: <Widget>[
-            Expanded(child: GraduateBottomNavigationBar(appViewModel: appViewmodel)),
-          ]),
+        body: Stack(
+          alignment: AlignmentDirectional.bottomCenter,
+          children: [
+            buildBaseScreenBody,
+            Positioned(
+              width: context.fullWidth * 0.6,
+              height: 60.0 + context.mediaQuery.padding.bottom,
+              bottom: 12.0,
+              child: GraduateBottomNavigationBar(appViewModel: appViewmodel),
+            ),
+          ],
         ),
       ),
     );

@@ -12,7 +12,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'injection_container.config.dart';
 
-const String baseUrl2 = 'http://192.168.1.10:3000';
+const String baseUrl2 = 'http://192.168.1.6:3000';
 
 final GetIt getIt = GetIt.I;
 
@@ -35,9 +35,9 @@ abstract class AppModule {
 
   NetworkIsolateBaseOptions dioOption(@Named('ApiBaseUrl') String baseUrl) => BaseOptions(
         baseUrl: baseUrl,
-        connectTimeout: 2000,
-        receiveTimeout: 2000,
-        sendTimeout: 2000,
+        connectTimeout: 14000,
+        receiveTimeout: 14000,
+        sendTimeout: 14000,
         contentType: 'application/json;charset=utf-8',
         responseType: ResponseType.plain,
         headers: {'Accept': 'application/json', 'Connection': 'keep-alive'},

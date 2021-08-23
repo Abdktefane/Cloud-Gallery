@@ -16,11 +16,19 @@ class BackupMapper extends Mapper<AssetEntity, BackupsCompanion> {
 }
 
 extension AssetEntityExt on AssetEntity {
-  Future<BackupsCompanion> toEntry() async => BackupsCompanion(
-        assetId: Value(id),
-        mime: Value(mimeType ?? ''),
-        path: Value(getDiskPrefix() + relativePath! + title!),
-        thumbData: Value((await thumbData)!),
-        title: Value(title),
-      );
+  Future<BackupsCompanion> toEntry() async {
+    late final Uint8List thumpFuture;
+    try {
+      thumpFuture = (await thumbDataWithSize(50, 50, quality: 40)) ?? Uint8List(1);
+    } catch (ex) {
+      thumpFuture = Uint8List(1);
+    }
+    return BackupsCompanion(
+      assetId: Value(id),
+      mime: Value(mimeType ?? ''),
+      path: Value(getDiskPrefix() + relativePath! + title!),
+      thumbData: Value(thumpFuture),
+      title: Value(title),
+    );
+  }
 }

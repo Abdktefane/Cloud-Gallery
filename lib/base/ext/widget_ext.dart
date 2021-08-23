@@ -24,6 +24,11 @@ extension WidgetExt on Widget {
 
   Widget padding({required EdgeInsets padding}) => Padding(padding: padding, child: this);
 
+  Widget clip({BorderRadius? borderRadius}) => ClipRRect(
+        borderRadius: borderRadius,
+        child: this,
+      );
+
   Widget modifier({
     Key? key,
     AlignmentGeometry? alignment,

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:core_sdk/utils/extensions/build_context.dart';
+import 'package:core_sdk/utils/extensions/string.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:core_sdk/utils/pagination_mixin.dart';
 import 'package:core_sdk/utils/search_mixin.dart';
@@ -9,22 +10,28 @@ import 'package:core_sdk/utils/widgets/staggered_column.dart';
 import 'package:core_sdk/utils/widgets/staggered_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:get_it/get_it.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supercharged/supercharged.dart';
+
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/models/pagination_response.dart';
 import 'package:graduation_project/base/data/models/search_result_model.dart';
+import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/base/utils/image_url_provider.dart';
 import 'package:graduation_project/base/widgets/graduate_empty_widget.dart';
 import 'package:graduation_project/base/widgets/graduate_page_loader.dart';
 import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
+import 'package:graduation_project/features/backup/data/stores/tokens_store.dart';
 import 'package:graduation_project/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:graduation_project/features/home/presentation/widgets/image_tile.dart';
 import 'package:graduation_project/features/home/presentation/widgets/media_buttons.dart';
-import 'package:supercharged/supercharged.dart';
-import 'package:provider/provider.dart';
-import 'package:get_it/get_it.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -42,10 +49,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin, PaginationMixin {
   late final AppViewmodel _appViewmodel;
   final ImageUrlProvider _imageUrlProvider = GetIt.I();
+  // final PrefsRepository _prefsRepository = GetIt.I();
+  final TokensStore _tokensStore = GetIt.I();
+
+  late final Future<String?> token;
 
   @override
   void initState() {
     super.initState();
+    token = _tokensStore.getToken().then((value) => value?.token);
     initSearch();
     initPagination();
     scheduleMicrotask(() {
@@ -72,16 +84,18 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
   @override
   Widget build(BuildContext context) {
     return GraduateMobxPageLoader(
-        viewmodel: viewmodel,
-        child: Scaffold(
-          // key: viewmodel.scaffoldKey,
-          body: Column(
-            children: [
-              searchWidget(),
-              searchResult().expand(),
-            ],
-          ),
-        ));
+      viewmodel: viewmodel,
+      child: Scaffold(
+        key: viewmodel.scaffoldKey,
+        backgroundColor: WHITE,
+        body: Column(
+          children: [
+            searchWidget(),
+            searchResult().expand(),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget searchWidget() {
@@ -95,7 +109,27 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12.0),
             border: InputBorder.none,
+            // suffixIcon: AnimatedSwitcher(
+            //   duration: const Duration(milliseconds: 150),
+            //   child: searchController?.text.isNullOrEmpty == false
+            //       ? Container(
+            //           padding: const EdgeInsets.all(2.0),
+            //           decoration: const BoxDecoration(shape: BoxShape.circle, color: GREY),
+            //           child: IconButton(
+            //             padding: EdgeInsets.zero,
+            //             constraints: const BoxConstraints(),
+            //             icon: const Icon(Icons.close_rounded, color: WHITE),
+            //             iconSize: 16.0,
+            //             onPressed: () {
+            //               searchController?.clear();
+            //               viewmodel.clearSearch(text: true);
+            //             },
+            //           ),
+            //         )
+            //       : const SizedBox(),
+            // ),
           ),
+
           // expands: true,
         ).expand(),
         MediaButtons(
@@ -105,7 +139,7 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
         filterWidget(),
       ],
     ).modifier(
-      decoration: BoxDecoration(color: WHITE, border: Border.all(color: Colors.black26, width: 0.5)),
+      decoration: BoxDecoration(color: OFF_WHITE, borderRadius: BorderRadius.circular(18.0)),
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 12.0),
     );
   }
@@ -128,20 +162,83 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
   bool showMediaOptions = false;
 
   Widget searchResult() {
-    return GraduateStreamObserver<PaginationResponse<SearchResultModel>>(
-      stream: viewmodel.searchResult!,
-      onSuccess: (results) => StaggredPaginationList<SearchResultModel>(
-        key: ValueKey(results.hashCode),
-        padding: 8.0,
-        shrinkWrap: false,
-        dataList: results.data!,
-        canLoadMore: false,
-        staggeredAnimations: const [StaggeredType.SlideAnimation],
-        scrollController: scrollController,
-        emptyWidget: const GraduateEmptyWidget(),
-        cardBuilder: (image) => ImageTile(imageUrlProvider: _imageUrlProvider, serverPath: image.data!),
-        // cardBuilder: (image) => Text(image.id.toString()),
-      ),
+    return Stack(
+      children: [
+        GraduateStreamObserver<PaginationResponse<SearchResultModel>>(
+          stream: viewmodel.searchResult!,
+          onSuccess: (images) => Container(
+            key: viewmodel.listKey,
+            child: AnimationLimiter(
+              child: StaggeredGridView.countBuilder(
+                physics: const BouncingScrollPhysics(),
+                crossAxisCount: 2,
+                itemCount: images.data?.length ?? 0,
+                controller: scrollController,
+                crossAxisSpacing: 10,
+                mainAxisSpacing: 12,
+                staggeredTileBuilder: (index) => StaggeredTile.count(1, index.isEven ? 1 : 1.4),
+                itemBuilder: (BuildContext context, int index) => AnimationConfiguration.staggeredGrid(
+                  position: index,
+                  duration: const Duration(milliseconds: 375),
+                  columnCount: 2,
+                  child: ScaleAnimation(
+                    scale: 0.5,
+                    child: FadeInAnimation(
+                      child: ImageTile(
+                        imageUrlProvider: _imageUrlProvider,
+                        serverPath: images.data![index].data!,
+                        token: token,
+                        searchByImage: (id) => viewmodel.searchBySimiliraty(id),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ).padding(padding: const EdgeInsets.symmetric(horizontal: 4.0)),
+        Container(
+          decoration: const BoxDecoration(color: Colors.black26 /* , borderRadius: BorderRadius.circular(18.0) */),
+          width: context.fullWidth,
+          child: appliedFilter(),
+        ),
+      ],
+    );
+  }
+
+  Widget appliedFilter() {
+    return Observer(
+      builder: (_) {
+        late final Widget child;
+        if (viewmodel.textMode)
+          child = AppliedFilter(
+            key: const ValueKey('lbl_text_search'),
+            title: 'lbl_text_search',
+            onDelete: () {
+              searchController?.clear();
+              viewmodel.clearSearch(text: true);
+            },
+          );
+        else if (viewmodel.imageMode)
+          child = AppliedFilter(
+            key: const ValueKey('lbl_image_search'),
+            title: 'lbl_image_search',
+            onDelete: () => viewmodel.clearSearch(image: true),
+          );
+        else if (viewmodel.simMode)
+          child = AppliedFilter(
+            key: const ValueKey('lbl_sim_search'),
+            title: 'lbl_sim_search',
+            onDelete: () => viewmodel.clearSearch(sim: true),
+          );
+        else
+          child = const AppliedFilter(key: ValueKey('lbl_recommendations'), title: 'lbl_recommendations');
+        // else if (viewmodel.simMode) child = const AppliedFilter(title: 'lbl_recommendations');
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [AnimatedSwitcher(duration: 250.milliseconds, child: child)],
+        ).padding(padding: const EdgeInsets.symmetric(horizontal: 14.0));
+      },
     );
   }
 
@@ -150,4 +247,25 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
 
   @override
   void onSearch(String qurey) => viewmodel.searchByText(qurey);
+}
+
+class AppliedFilter extends StatelessWidget {
+  const AppliedFilter({
+    Key? key,
+    required this.title,
+    this.onDelete,
+  }) : super(key: key);
+
+  final String title;
+  final VoidCallback? onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    return Chip(
+      backgroundColor: ACCENT.withAlpha(200),
+      onDeleted: onDelete,
+      deleteIconColor: WHITE,
+      label: Text(context.translate(title), style: context.textTheme.bodyText1?.copyWith(color: WHITE)),
+    );
+  }
 }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:graduation_project/app/base_page.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
+import 'package:graduation_project/features/backup/data/stores/backup_store.dart';
 import 'package:graduation_project/features/backup/data/stores/tokens_store.dart';
 import 'package:graduation_project/features/login/ui/pages/login_page.dart';
 import 'package:mobx/mobx.dart';
@@ -13,6 +14,7 @@ import 'package:core_sdk/data/viewmodels/base_viewmodel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:supercharged/supercharged.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:get_it/get_it.dart';
 
 part 'splash_viewmodel.g.dart';
 
@@ -30,7 +32,7 @@ abstract class _SplashViewmodelBase extends BaseViewmodel with Store {
       2.seconds,
       () => getContext((context) async {
         // context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
-
+        await _store.moveUploadingToPending();
         if (await Permission.storage.request().isGranted) {
           // final path = await getExternalStorageDirectories(type: StorageDirectory.pictures);
           // final directory = Directory(path!.first.path + '/' + kSyncFolderName);
@@ -48,6 +50,7 @@ abstract class _SplashViewmodelBase extends BaseViewmodel with Store {
     );
   }
   final TokensStore _tokensStore;
+  final BackupsStore _store = GetIt.I();
 
   //* OBSERVERS *//
 

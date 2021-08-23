@@ -30,6 +30,14 @@ class GraduateDB extends _$GraduateDB {
 
   @override
   int get schemaVersion => databaseVersion;
+
+  Future<void> deleteEverything() {
+    return transaction(() async {
+      for (final table in allTables) {
+        await delete(table).go();
+      }
+    });
+  }
 }
 
 LazyDatabase _openConnection() {

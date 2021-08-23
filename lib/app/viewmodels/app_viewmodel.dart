@@ -10,6 +10,7 @@ import 'package:core_sdk/utils/nav_stack.dart';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/app/viewmodels/app_bar_params.dart';
 import 'package:graduation_project/app/viewmodels/graduate_viewmodel.dart';
+import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_sync_interactor.dart';
@@ -52,6 +53,7 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   NavStack<AppBarParams?> appBarHistory = NavStack<AppBarParams?>();
   final ImageSaveInteractor _imageSaveInteractor;
   final ImageUploaderInteractor _imageUploaderInteractor;
+  final GraduateDB _db = GetIt.I();
 
   String? serverPath;
 
@@ -178,7 +180,7 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   @action
   void logout({VoidCallback? onSuccess}) {
     logoutResult = futureWrapper(
-      () => _prefsRepository.clearUserData().then((_) {
+      () => _prefsRepository.clearUserData().then((value) => _db.deleteEverything()).then((_) {
         onSuccess?.call();
         return true;
       }),

@@ -4,6 +4,7 @@ import 'package:flutter_mobx/flutter_mobx.dart';
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/main.dart';
 
 class GraduateBottomNavigationBar extends StatelessWidget {
@@ -16,7 +17,7 @@ class GraduateBottomNavigationBar extends StatelessWidget {
     return Observer(
       builder: (_) {
         return BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
+          type: BottomNavigationBarType.shifting,
           elevation: 0,
           backgroundColor: WHITE,
           currentIndex: appViewModel!.pageIndex.index,
@@ -34,8 +35,8 @@ class GraduateBottomNavigationBar extends StatelessWidget {
             bottomNavigationBarTile(
               title: context.translate(getAppBarTitle(PageIndex.home)),
               index: PageIndex.home.index,
-              child: const Icon(Icons.search, size: 20.0, color: GREY),
-              activeChild: const Icon(Icons.search, size: 20.0, color: Colors.black),
+              child: const Icon(Icons.home, size: 20.0, color: GREY),
+              activeChild: const Icon(Icons.home, size: 20.0, color: Colors.black),
             ),
             if (kShowRec)
               bottomNavigationBarTile(
@@ -53,7 +54,9 @@ class GraduateBottomNavigationBar extends StatelessWidget {
           ],
         );
       },
-    );
+    )
+        .modifier(decoration: BoxDecoration(borderRadius: BorderRadius.circular(12.0)))
+        .clip(borderRadius: BorderRadius.circular(24.0));
   }
 
   BottomNavigationBarItem bottomNavigationBarTile({

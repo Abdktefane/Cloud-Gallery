@@ -37,6 +37,11 @@
   "lbl_all":"كل الصور",
   "lbl_folder":"مجلد خاص",
 
+  "lbl_text_search": "بحث نصي",
+  "lbl_image_search": "بحث صوري",
+  "lbl_sim_search": "بحث تشابهي",
+  "lbl_recommendations":"إقتراحات",
+
 
 
 
