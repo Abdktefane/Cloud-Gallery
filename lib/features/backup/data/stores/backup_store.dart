@@ -25,7 +25,11 @@ abstract class BackupsStore {
     int? limit,
   });
 
-  Future<void> addNewImages(List<BackupsCompanion> rawImages, {InsertMode insertMode = InsertMode.insertOrIgnore});
+  Future<void> addNewImages(
+    List<BackupsCompanion> rawImages, {
+    InsertMode insertMode = InsertMode.insertOrIgnore,
+    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+  });
 
   Future<void> updateBackups(List<Backup> images);
 
@@ -39,6 +43,8 @@ abstract class BackupsStore {
     required BackupModifier modifier,
     int? limit,
   });
+
+  Future<void> makeAllNeedRestore();
 }
 
 @Singleton(as: BackupsStore)
@@ -63,12 +69,14 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
   Future<void> addNewImages(
     List<BackupsCompanion> rawImages, {
     InsertMode insertMode = InsertMode.insertOrIgnore,
+    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
   }) =>
       batch(
         (batch) => batch.insertAll(
           backups,
           rawImages,
           mode: insertMode,
+          onConflict: onConflict?.call(backups),
         ),
       );
 
@@ -135,6 +143,9 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
       (update(backups)..where((t) => t.status.equals(BackupStatus.UPLOADING.index))).write(const BackupsCompanion(
         status: Value(BackupStatus.PENDING),
       ));
+
+  @override
+  Future<void> makeAllNeedRestore() => update(backups).write(const BackupsCompanion(needRestore: Value(true)));
 }
 
 // @LazySingleton(as: BackupsStore)

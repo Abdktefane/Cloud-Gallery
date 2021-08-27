@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:core_sdk/data/datasource/base_remote_data_source.dart';
 import 'package:core_sdk/utils/network_result.dart';
 import 'package:graduation_project/base/data/datasources/graduate_datasource.dart';
@@ -31,10 +33,16 @@ abstract class CommonDataSource extends GraduateDataSource {
     required String? serverPath,
   });
 
-  Future<NetworkResult<BaseResponseModel<PaginationResponse<Backup>>?>> getServerImages({
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<BackupsCompanion>>?>> getServerImages({
     required int page,
+    required int pageSize,
     required BackupModifier modifier,
     DateTime? lastSync,
+  });
+
+  Future<NetworkResult<bool?>> downloadFile({
+    required String serverPath,
+    required String localStoragePath,
   });
 }
 
@@ -48,9 +56,10 @@ class CommonDataSourceImpl extends CommonDataSource {
         endpoint: EndPoints.upload,
         mapper: BaseResponseModel.fromJson(UploadModel.fromJson),
         withAuth: true,
-        // path: images.first.path,
         formDataRows: [
-          FormDataRow(key: 'file', value: images.first.path),
+          FormDataRow(key: 'file', value: images.first.path ?? ''),
+          FormDataRow(key: 'identifier', value: images.first.id, isImage: false),
+          FormDataRow(key: 'thump', value: base64.encode(images.first.thumbData), isImage: false),
         ],
       );
 
@@ -131,40 +140,34 @@ class CommonDataSourceImpl extends CommonDataSource {
   }
 
   @override
-  Future<NetworkResult<BaseResponseModel<PaginationResponse<Backup>>?>> getServerImages({
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<BackupsCompanion>>?>> getServerImages({
     required int page,
+    required int pageSize,
     required BackupModifier modifier,
     DateTime? lastSync,
   }) {
     return request(
       method: METHOD.GET,
       endpoint: EndPoints.getServerImages,
-      mapper: BaseResponseModel.fromJsonWithPagination(BackupExt.fromJson),
-      // params: {'page': page},
+      mapper: BaseResponseModel.fromJsonWithPagination(BackupsCompanionExt.fromJson),
+      params: {
+        'page': page,
+        'size': pageSize,
+      },
     );
   }
 
-  // @override
-  // Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> searchBySimilarity({
-  //   required int page,
-  //   required BackupModifier modifier,
-  //   required String serverPath,
-  // }) async {
-  //   final res = await request(
-  //     method: METHOD.POST,
-  //     endpoint: EndPoints.getSearchResult,
-  //     mapper: BaseResponseModel.fromJson(SearchKeyModel.fromJson),
-  //     data: {
-  //       'name': serverPath,
-  //       if (modifier == BackupModifier.PUBPLIC) 'isPublic': true,
-  //     },
-  //   );
-
-  //   return _getResultByKey(
-  //     key: res.getOrThrow()!.data!.key!,
-  //     page: page,
-  //   );
-  // }
+  @override
+  Future<NetworkResult<bool?>> downloadFile({
+    required String serverPath,
+    required String localStoragePath,
+  }) =>
+      request(
+        method: METHOD.DELETE,
+        endpoint: EndPoints.upload + '/$serverPath',
+        mapper: (_) => true,
+        data: localStoragePath,
+      );
 }
 
 extension BackupExt on Backup {

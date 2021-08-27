@@ -58,8 +58,15 @@ class BackupsRepositoryImpl extends BackupsRepository {
       );
 
   @override
-  Future<void> addNewImages(List<AssetEntity> rawImages) async => _backupsStore.addNewImages(
+  Future<void> addNewImages(
+    List<AssetEntity> rawImages, {
+    InsertMode insertMode = InsertMode.insertOrIgnore,
+    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+  }) async =>
+      _backupsStore.addNewImages(
         await _backupMapper.forList(rawImages),
+        insertMode: insertMode,
+        onConflict: onConflict,
       );
 
   @override
@@ -122,12 +129,25 @@ class BackupsRepositoryImpl extends BackupsRepository {
           .whenSuccessWrapped((res) => res!.data);
 
   @override
-  Future<NetworkResult<PaginationResponse<Backup>?>> getServerImages({
+  Future<NetworkResult<PaginationResponse<BackupsCompanion>?>> getServerImages({
     required int page,
+    required int pageSize,
     required BackupModifier modifier,
     DateTime? lastSync,
   }) =>
       _commonDataSource
-          .getServerImages(page: page, modifier: modifier, lastSync: lastSync)
+          .getServerImages(
+            pageSize: pageSize,
+            page: page,
+            modifier: modifier,
+            lastSync: lastSync,
+          )
           .whenSuccessWrapped((res) => res!.data);
+
+  @override
+  Future<NetworkResult<bool?>> downloadFile({
+    required String serverPath,
+    required String localStoragePath,
+  }) =>
+      _commonDataSource.downloadFile(serverPath: serverPath, localStoragePath: localStoragePath);
 }

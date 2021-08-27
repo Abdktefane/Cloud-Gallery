@@ -20,8 +20,9 @@ class SyncServerImagesInteractor extends Interactor<void> {
   @override
   Future<void> doWork(void params) async {
     // get all images from backend
-    final PaginationResponse<Backup> serverImages = (await _backupsRepository.getServerImages(
+    final PaginationResponse<BackupsCompanion> serverImages = (await _backupsRepository.getServerImages(
       page: 1,
+      pageSize: 2000,
       modifier: BackupModifier.PRIVATE,
       lastSync: _prefsRepository.lastServerSync,
     ))
@@ -30,7 +31,7 @@ class SyncServerImagesInteractor extends Interactor<void> {
     // update last sync date
     await _prefsRepository.setLastServerSync(DateTime.now());
 
-    // TODO(abd): make all backups status NEED_RESTORE in first
+    await _backupsStore.makeAllNeedRestore();
 
     if (serverImages.data.isNullOrEmpty == true) {
       return;
@@ -38,7 +39,7 @@ class SyncServerImagesInteractor extends Interactor<void> {
 
     // TODO(abd): find solution for maping (decode json) netwrok model to backup
     return _backupsStore.addNewImages(
-      serverImages.data!.map((it) => it.toCompanion(true)).toList(),
+      serverImages.data!,
       insertMode: InsertMode.insert,
     );
   }

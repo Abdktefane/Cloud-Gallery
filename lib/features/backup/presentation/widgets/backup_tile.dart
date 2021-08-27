@@ -102,7 +102,7 @@ class _BackupTileState extends State<BackupTile> {
 
   Widget _builImage() {
     final hero = Hero(
-      tag: widget.backup.assetId,
+      tag: widget.backup.id,
       transitionOnUserGestures: true,
       child: CircleAvatar(backgroundImage: Image.memory(widget.backup.thumbData).image, radius: 24.0),
     );
@@ -115,8 +115,8 @@ class _BackupTileState extends State<BackupTile> {
 
   void openImage() {
     App.navKey.currentContext?.pushPage(HeroPhotoViewRouteWrapper(
-      imageProvider: Image.file(File(widget.backup.path)).image,
-      tag: widget.backup.assetId,
+      imageProvider: Image.file(File(widget.backup.path ?? '')).image,
+      tag: widget.backup.id,
     ));
   }
 

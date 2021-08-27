@@ -6,6 +6,7 @@ import 'package:graduation_project/base/data/models/pagination_response.dart';
 import 'package:graduation_project/base/data/models/search_result_model.dart';
 import 'package:graduation_project/base/data/models/upload_model.dart';
 import 'package:graduation_project/base/domain/repositories/base_repository.dart';
+import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 abstract class BackupsRepository extends BaseRepository {
@@ -26,7 +27,11 @@ abstract class BackupsRepository extends BaseRepository {
     int? limit,
   });
 
-  Future<void> addNewImages(List<AssetEntity> rawImages);
+  Future<void> addNewImages(
+    List<AssetEntity> rawImages, {
+    InsertMode insertMode = InsertMode.insertOrIgnore,
+    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+  });
 
   Future<LastSyncRequest?> getLastSync();
 
@@ -62,9 +67,15 @@ abstract class BackupsRepository extends BaseRepository {
     required String? serverPath,
   });
 
-  Future<NetworkResult<PaginationResponse<Backup>?>> getServerImages({
+  Future<NetworkResult<PaginationResponse<BackupsCompanion>?>> getServerImages({
+    required int pageSize,
     required int page,
     required BackupModifier modifier,
     DateTime? lastSync,
+  });
+
+  Future<NetworkResult<bool?>> downloadFile({
+    required String serverPath,
+    required String localStoragePath,
   });
 }

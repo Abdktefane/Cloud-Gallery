@@ -1,8 +1,10 @@
 import 'package:core_sdk/utils/extensions/list.dart';
+import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/repositorires/backups_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 
 const int _BUFFER_SIZE = 500;
@@ -69,33 +71,44 @@ class ImageSaveInteractor extends Interactor<bool> {
     bool canLoadMore = true;
 
     List<AssetEntity> images = [];
-
-    while (canLoadMore) {
-      try {
-        images = await folder.getAssetListPaged(page, _PAGE_SIZE);
-        if (images.isNullOrEmpty) {
-          break;
+    try {
+      while (canLoadMore) {
+        try {
+          images = await folder.getAssetListPaged(page, _PAGE_SIZE);
+          if (images.isNullOrEmpty) {
+            break;
+          }
+          imagesBuffer.addAll(images);
+          if (imagesBuffer.length >= _BUFFER_SIZE) {
+            await upsertNewImage(imagesBuffer, imagesBuffer: imagesBuffer);
+          }
+        } catch (ex, st) {
+          print('exception while save folder ex: $ex, st: $st');
+        } finally {
+          page++;
+          canLoadMore = images.length == _PAGE_SIZE;
         }
-        imagesBuffer.addAll(images);
-        if (imagesBuffer.length >= _BUFFER_SIZE) {
-          // TODO(abd): make insertMode upsert  with new status pending
-          await _backupsRepository.addNewImages(imagesBuffer);
-          imagesBuffer.clear();
-        }
-
-        if (imagesBuffer.isNotEmpty) {
-          // TODO(abd): make insertMode upsert  with new status pending
-
-          await _backupsRepository.addNewImages(imagesBuffer);
-        }
-        _backupsRepository.saveLastSync(DateTime.now());
-      } catch (ex, st) {
-        print('exception while save folder ex: $ex, st: $st');
-      } finally {
-        page++;
-        canLoadMore = images.length == _PAGE_SIZE;
       }
-    }
+      if (imagesBuffer.isNotEmpty) {
+        await upsertNewImage(imagesBuffer);
+      }
+      _backupsRepository.saveLastSync(DateTime.now());
+    } catch (ex, st) {
+      print('exception while save folder ex: $ex, st: $st');
+    } finally {}
+  }
+
+  Future<void> upsertNewImage(List<AssetEntity> images, {List<AssetEntity>? imagesBuffer}) async {
+    await _backupsRepository.addNewImages(
+      images,
+      insertMode: InsertMode.insert,
+      onConflict: (backups) => DoUpdate(
+        (old) => const BackupsCompanion(needRestore: Value(true)),
+        target: [backups.id, backups.title],
+      ),
+    );
+    imagesBuffer?.clear();
+    return;
   }
 }
 

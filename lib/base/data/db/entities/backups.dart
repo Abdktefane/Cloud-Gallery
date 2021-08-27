@@ -9,9 +9,8 @@ import '../graduate_db.dart';
 enum BackupStatus {
   UPLOADED,
   CANCELED,
-  PENDING,
   UPLOADING,
-  NEED_RESTORE,
+  PENDING,
 }
 
 enum BackupModifier { PUBPLIC, PRIVATE }
@@ -51,8 +50,8 @@ extension BackupStatusExt on BackupStatus {
       // return material.Icons.timelapse;
       case BackupStatus.UPLOADING:
         return material.Icons.circle;
-      case BackupStatus.NEED_RESTORE:
-        return material.Icons.stop;
+      // case BackupStatus.NEED_RESTORE:
+      //   return material.Icons.stop;
     }
   }
 
@@ -64,26 +63,34 @@ extension BackupStatusExt on BackupStatus {
 class Backups extends GraduateEntity {
   TextColumn get path => text().nullable()();
 
-  TextColumn get mime => text()();
+  // TextColumn get mime => text()();
 
   BlobColumn get thumbData => blob()();
 
-  TextColumn get assetId => text()();
+  TextColumn get id => text()();
 
   TextColumn get title => text().nullable()();
 
   TextColumn get serverPath => text().nullable()();
 
-  IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.NEED_RESTORE.index))();
+  IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.PENDING.index))();
 
   IntColumn get modifier => intEnum<BackupModifier>().withDefault(Constant(BackupModifier.PRIVATE.index))();
+
+  BoolColumn get needRestore => boolean().withDefault(const Constant(true))();
 
   DateTimeColumn get createdDate => dateTime().withDefault(currentDateAndTime)();
 
   @override
-  Set<Column> get primaryKey => {assetId, createdDate};
+  Set<Column> get primaryKey => {id};
 }
 
 extension BackupExtension on Backup {
-  bool get needRestore => path == null;
+  bool get pending => path == null;
+}
+
+extension BackupsCompanionExt on BackupsCompanion {
+  static BackupsCompanion fromJson(Object? json) => BackupsCompanion(
+        needRestore: Value(true),
+      );
 }

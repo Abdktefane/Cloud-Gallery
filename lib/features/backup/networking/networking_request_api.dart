@@ -82,8 +82,24 @@ Future<ResponseIsolateMessage> _proccessNetworkIsolatorRequest({
             .asNetworkMessageResponse(id);
       case METHOD.DELETE:
         return client
-            .delete(endpoint, data: data, queryParameters: params ?? {}, options: options)
+            .download(
+              endpoint,
+              data,
+              // (Headers headers) {
+              //   final String contentHeader = headers.value('content-disposition')!;
+              //   final resPath = contentHeader.substring(contentHeader.lastIndexOf('=') + 2, contentHeader.length - 1);
+              //   filePath = folderPath + '${DateTime.now().microsecondsSinceEpoch}_${resPath.trim()}';
+              //   return filePath as String;
+              // },
+              // data: data,
+              queryParameters: params ?? {},
+              options: options,
+            )
             .asNetworkMessageResponse(id);
+      // case METHOD.DELETE:
+      //   return client
+      //       .delete(endpoint, data: data, queryParameters: params ?? {}, options: options)
+      //       .asNetworkMessageResponse(id);
     }
   } catch (e) {
     logger.e('BaseRemoteDataSourceImpl => performPostRequest => $e');

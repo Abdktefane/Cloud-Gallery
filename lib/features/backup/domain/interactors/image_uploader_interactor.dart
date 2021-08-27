@@ -57,14 +57,14 @@ class ImageUploaderInteractor extends Interactor<void> {
     for (var i = 0; i < length; i++) {
       final image = images[i];
       try {
-        _logger.d('ImageUploader syncQueue try to upload ${image.assetId}');
+        _logger.d('ImageUploader syncQueue try to upload ${image.id}');
         await changeImagesStatus([image], BackupStatus.UPLOADING);
         final UploadModel res = await uploadImages([images[i]]);
-        _logger.d('ImageUploader syncQueue success upload ${image.assetId}');
+        _logger.d('ImageUploader syncQueue success upload ${image.id}');
         await changeImagesStatus([image.copyWith(serverPath: res.name)], BackupStatus.UPLOADED);
       } catch (ex, st) {
         await changeImagesStatus([image], BackupStatus.PENDING);
-        _logger.e('ImageUploader upload fail id: ${image.assetId},cause: $ex, st: $st');
+        _logger.e('ImageUploader upload fail id: ${image.id},cause: $ex, st: $st');
       }
     }
     uploadQueue.clear();

@@ -54,9 +54,9 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
 
   final PrefsRepository _prefsRepository;
   NavStack<AppBarParams?> appBarHistory = NavStack<AppBarParams?>();
+  final SyncServerImagesInteractor _syncServerImagesInteractor;
   final ImageSaveInteractor _imageSaveInteractor;
   final ImageUploaderInteractor _imageUploaderInteractor;
-  final SyncServerImagesInteractor _syncServerImagesInteractor;
   final GraduateDB _db = GetIt.I();
 
   String? serverPath;

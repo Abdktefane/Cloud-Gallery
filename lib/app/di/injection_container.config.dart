@@ -7,17 +7,17 @@
 import 'package:core_sdk/utils/Fimber/Logger.dart' as _i9;
 import 'package:get_it/get_it.dart' as _i1;
 import 'package:injectable/injectable.dart' as _i2;
-import 'package:moor/isolate.dart' as _i35;
+import 'package:moor/isolate.dart' as _i36;
 import 'package:shared_preferences/shared_preferences.dart' as _i4;
 
 import '../../base/data/datasources/common_datasource.dart' as _i11;
 import '../../base/data/db/database_transaction_runner.dart' as _i5;
-import '../../base/data/db/di/db_module.dart' as _i38;
+import '../../base/data/db/di/db_module.dart' as _i39;
 import '../../base/data/db/graduate_db.dart' as _i6;
 import '../../base/data/repositories/common_repository_impl.dart' as _i14;
 import '../../base/domain/repositories/common_repository.dart' as _i13;
 import '../../base/domain/repositories/prefs_repository.dart' as _i3;
-import '../../base/utils/image_url_provider.dart' as _i36;
+import '../../base/utils/image_url_provider.dart' as _i37;
 import '../../features/backup/data/mappers/backup_mapper.dart' as _i24;
 import '../../features/backup/data/repositories/backups_repository_impl.dart'
     as _i22;
@@ -35,14 +35,16 @@ import '../../features/backup/domain/interactors/image_sync_interactor.dart'
 import '../../features/backup/domain/interactors/image_uploader_interactor.dart'
     as _i30;
 import '../../features/backup/domain/interactors/search_observer.dart' as _i31;
+import '../../features/backup/domain/interactors/sync_server_images_interactor.dart'
+    as _i32;
 import '../../features/backup/domain/repositorires/backups_repository.dart'
     as _i21;
 import '../../features/backup/networking/dio_options_utils.dart' as _i7;
 import '../../features/backup/networking/networking_isolator.dart' as _i12;
 import '../../features/backup/presentation/viewmodels/backup_viewmodel.dart'
-    as _i33;
-import '../../features/home/presentation/viewmodels/home_viewmodel.dart'
     as _i34;
+import '../../features/home/presentation/viewmodels/home_viewmodel.dart'
+    as _i35;
 import '../../features/login/data/datasources/login_datasource.dart' as _i15;
 import '../../features/login/data/repositories/login_repository_impl.dart'
     as _i17;
@@ -53,8 +55,8 @@ import '../../features/recommend/presentation/viewmodels/recommend_viewmodel.dar
 import '../../features/register/presentation/viewmodels/register_viewmodel.dart'
     as _i20;
 import '../../features/splash/viewmodels/splash_viewmodel.dart' as _i8;
-import '../viewmodels/app_viewmodel.dart' as _i32;
-import 'injection_container.dart' as _i37;
+import '../viewmodels/app_viewmodel.dart' as _i33;
+import 'injection_container.dart' as _i38;
 
 const String _prod = 'prod';
 // ignore_for_file: unnecessary_lambdas
@@ -110,41 +112,45 @@ Future<_i1.GetIt> $inject(_i1.GetIt get,
       get<_i21.BackupsRepository>(), get<_i9.Logger>()));
   gh.factory<_i31.SearchObserver>(
       () => _i31.SearchObserver(get<_i21.BackupsRepository>()));
-  gh.factory<_i32.AppViewmodel>(() => _i32.AppViewmodel(
+  gh.factory<_i32.SyncServerImagesInteractor>(() =>
+      _i32.SyncServerImagesInteractor(get<_i3.PrefsRepository>(),
+          get<_i21.BackupsRepository>(), get<_i23.BackupsStore>()));
+  gh.factory<_i33.AppViewmodel>(() => _i33.AppViewmodel(
       get<_i9.Logger>(),
       get<_i3.PrefsRepository>(),
       get<_i29.ImageSaveInteractor>(),
-      get<_i30.ImageUploaderInteractor>()));
-  gh.factory<_i33.BackupViewmodel>(() => _i33.BackupViewmodel(
+      get<_i30.ImageUploaderInteractor>(),
+      get<_i32.SyncServerImagesInteractor>()));
+  gh.factory<_i34.BackupViewmodel>(() => _i34.BackupViewmodel(
       get<_i9.Logger>(),
       get<_i28.ImageObserver>(),
       get<_i26.BackupsRowsObserver>(),
       get<_i27.ChangeModifireInteractor>()));
-  gh.factory<_i34.HomeViewmodel>(
-      () => _i34.HomeViewmodel(get<_i9.Logger>(), get<_i31.SearchObserver>()));
+  gh.factory<_i35.HomeViewmodel>(
+      () => _i35.HomeViewmodel(get<_i9.Logger>(), get<_i31.SearchObserver>()));
   gh.singleton<_i24.BackupMapper>(_i24.BackupMapper());
   gh.singleton<_i9.Logger>(appModule.logger());
-  await gh.singletonAsync<_i35.MoorIsolate>(
+  await gh.singletonAsync<_i36.MoorIsolate>(
       () => graduateDBModule.getMoorIsolate(),
       preResolve: true);
   await gh.singletonAsync<_i4.SharedPreferences>(() => appModule.getPrefs(),
       preResolve: true);
   await gh.singletonAsync<_i6.GraduateDB>(
-      () => graduateDBModule.getDb(get<_i35.MoorIsolate>()),
+      () => graduateDBModule.getDb(get<_i36.MoorIsolate>()),
       preResolve: true);
   gh.singleton<_i25.LastSyncRequestStore>(
       _i25.LastSyncRequestStoreImpl(get<_i6.GraduateDB>()));
   gh.singleton<_i10.TokensStore>(_i10.TokensStoreImpl(get<_i6.GraduateDB>()));
   gh.singleton<_i23.BackupsStore>(_i23.BackupDao(get<_i6.GraduateDB>()));
-  gh.singleton<_i36.ImageUrlProvider>(
-      _i36.ImageUrlProvider(get<String>(instanceName: 'ApiBaseUrl')));
+  gh.singleton<_i37.ImageUrlProvider>(
+      _i37.ImageUrlProvider(get<String>(instanceName: 'ApiBaseUrl')));
   await gh.singletonAsync<_i12.NetworkIsolate>(
       () => appModule.getNetworkIsolate(get<_i7.NetworkIsolateBaseOptions>(),
-          get<_i9.Logger>(), get<_i35.MoorIsolate>()),
+          get<_i9.Logger>(), get<_i36.MoorIsolate>()),
       preResolve: true);
   return get;
 }
 
-class _$AppModule extends _i37.AppModule {}
+class _$AppModule extends _i38.AppModule {}
 
-class _$GraduateDBModule extends _i38.GraduateDBModule {}
+class _$GraduateDBModule extends _i39.GraduateDBModule {}
