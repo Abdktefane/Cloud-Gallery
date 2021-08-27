@@ -11,6 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobx/mobx.dart';
 import 'package:moor/moor.dart';
+import "package:rxdart/rxdart.dart";
+import 'package:supercharged/supercharged.dart';
 
 part 'home_viewmodel.g.dart';
 
@@ -28,7 +30,17 @@ class HomeViewmodel extends _HomeViewmodelBase with _$HomeViewmodel {
 
 abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
   _HomeViewmodelBase(Logger logger, this._searchObserver) : super(logger) {
-    searchResult = _searchObserver.asObservable();
+    // searchResult = _searchObserver.asObservable();
+    _searchObserver.observe().listen(
+      (it) {
+        if (searchResult == null) {
+          searchResult = ObservableList.of(it.data!);
+        } else {
+          searchResult?.addAll(it.data!);
+        }
+      },
+      onError: (ex, st) => showSnack(ex?.toString() ?? st.toString(), duration: 2.seconds),
+    );
     filterObserver = autorun((_) {
       logger.d('change modifire to $imageSource, text: $query, image: $path, sim: $serverPath');
       search(fresh: true);
@@ -53,8 +65,11 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
   @observable
   BackupModifier imageSource = BackupModifier.PRIVATE;
 
+  // @observable
+  // ObservableStream<PaginationResponse<SearchResultModel>>? searchResult;
+
   @observable
-  ObservableStream<PaginationResponse<SearchResultModel>>? searchResult;
+  ObservableList<SearchResultModel>? searchResult;
 
   //* COMPUTED *//
 
@@ -128,9 +143,13 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
 
   @action
   void search({fresh = false}) {
+    print('search heppen');
     if (fresh || _searchObserver.canLoadMore) {
       if (textMode && query.isNullOrEmpty) {
         return;
+      }
+      if (fresh) {
+        searchResult = null;
       }
       _searchObserver(SearchObserver.params(
         backupModifier: imageSource,
@@ -138,6 +157,7 @@ abstract class _HomeViewmodelBase extends BaseViewmodel with Store {
         path: path,
         fresh: fresh,
         serverPath: serverPath,
+        onError: (err) => showSnack(err, duration: 2.seconds),
       ));
     }
   }

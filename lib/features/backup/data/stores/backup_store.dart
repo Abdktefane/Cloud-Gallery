@@ -25,7 +25,7 @@ abstract class BackupsStore {
     int? limit,
   });
 
-  Future<void> addNewImages(List<BackupsCompanion> rawImages);
+  Future<void> addNewImages(List<BackupsCompanion> rawImages, {InsertMode insertMode = InsertMode.insertOrIgnore});
 
   Future<void> updateBackups(List<Backup> images);
 
@@ -60,11 +60,15 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
       (select(backups)..where((it) => it.status.equals(BackupStatus.UPLOADED.index))).watch();
 
   @override
-  Future<void> addNewImages(List<BackupsCompanion> rawImages) => batch(
+  Future<void> addNewImages(
+    List<BackupsCompanion> rawImages, {
+    InsertMode insertMode = InsertMode.insertOrIgnore,
+  }) =>
+      batch(
         (batch) => batch.insertAll(
           backups,
           rawImages,
-          mode: InsertMode.insertOrIgnore,
+          mode: insertMode,
         ),
       );
 

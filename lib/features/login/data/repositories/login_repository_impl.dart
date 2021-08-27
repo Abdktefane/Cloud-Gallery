@@ -36,6 +36,7 @@ class LoginRepositoryImpl extends LoginRepository {
 
   Future<bool> _saveToken(LoginResponseModel res) async {
     _tokensStore.saveToken(res.token!);
+    prefsRepository.setToken(res.token!);
     return true;
   }
 }

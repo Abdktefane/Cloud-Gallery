@@ -28,6 +28,9 @@ abstract class PrefsRepository {
   List<String>? get uploadedFiles;
   Future<bool> setUploadedFiles(List<String> uploadedFiles);
 
+  DateTime? get lastServerSync;
+  Future<bool> setLastServerSync(DateTime lastSyncDate);
+
   // ProfileModel? get profile;
   // Future<bool> setProfile(ProfileModel? profile);
 

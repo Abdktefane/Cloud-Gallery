@@ -36,6 +36,8 @@
   "lbl_image_search": "Image Search",
   "lbl_sim_search": "Similarity Search",
   "lbl_recommendations":"Recommendations",
+  "lbl_switch_language_to": "Switch Langauge To",
+  "msg_confirm_force_save_start": "Are you sure you want to force synchronize ?",
 
 
   "lbl_all":"All Images",

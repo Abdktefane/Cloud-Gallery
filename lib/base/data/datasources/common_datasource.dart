@@ -30,6 +30,12 @@ abstract class CommonDataSource extends GraduateDataSource {
     required String? path,
     required String? serverPath,
   });
+
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<Backup>>?>> getServerImages({
+    required int page,
+    required BackupModifier modifier,
+    DateTime? lastSync,
+  });
 }
 
 @LazySingleton(as: CommonDataSource)
@@ -124,6 +130,20 @@ class CommonDataSourceImpl extends CommonDataSource {
     );
   }
 
+  @override
+  Future<NetworkResult<BaseResponseModel<PaginationResponse<Backup>>?>> getServerImages({
+    required int page,
+    required BackupModifier modifier,
+    DateTime? lastSync,
+  }) {
+    return request(
+      method: METHOD.GET,
+      endpoint: EndPoints.getServerImages,
+      mapper: BaseResponseModel.fromJsonWithPagination(BackupExt.fromJson),
+      // params: {'page': page},
+    );
+  }
+
   // @override
   // Future<NetworkResult<BaseResponseModel<PaginationResponse<SearchResultModel>>?>> searchBySimilarity({
   //   required int page,
@@ -145,4 +165,8 @@ class CommonDataSourceImpl extends CommonDataSource {
   //     page: page,
   //   );
   // }
+}
+
+extension BackupExt on Backup {
+  static Backup fromJson(Object json) => Backup.fromJson(json as Map<String, dynamic>);
 }

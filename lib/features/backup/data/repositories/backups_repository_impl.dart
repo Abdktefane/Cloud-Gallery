@@ -120,4 +120,14 @@ class BackupsRepositoryImpl extends BackupsRepository {
       _commonDataSource
           .search(page: page, modifier: modifier, query: query, path: path, serverPath: serverPath)
           .whenSuccessWrapped((res) => res!.data);
+
+  @override
+  Future<NetworkResult<PaginationResponse<Backup>?>> getServerImages({
+    required int page,
+    required BackupModifier modifier,
+    DateTime? lastSync,
+  }) =>
+      _commonDataSource
+          .getServerImages(page: page, modifier: modifier, lastSync: lastSync)
+          .whenSuccessWrapped((res) => res!.data);
 }

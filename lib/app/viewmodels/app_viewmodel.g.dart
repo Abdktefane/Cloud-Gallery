@@ -133,11 +133,22 @@ mixin _$AppViewmodel on _AppViewmodelBase, Store {
       ActionController(name: '_AppViewmodelBase');
 
   @override
-  void saveImages() {
+  void _syncImages({bool fresh = false}) {
     final _$actionInfo = _$_AppViewmodelBaseActionController.startAction(
-        name: '_AppViewmodelBase.saveImages');
+        name: '_AppViewmodelBase._syncImages');
     try {
-      return super.saveImages();
+      return super._syncImages(fresh: fresh);
+    } finally {
+      _$_AppViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void startImagesSync({bool fresh = false}) {
+    final _$actionInfo = _$_AppViewmodelBaseActionController.startAction(
+        name: '_AppViewmodelBase.startImagesSync');
+    try {
+      return super.startImagesSync(fresh: fresh);
     } finally {
       _$_AppViewmodelBaseActionController.endAction(_$actionInfo);
     }

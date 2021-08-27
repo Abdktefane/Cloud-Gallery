@@ -52,7 +52,7 @@ class _BasePageState extends ProviderMobxState<BasePage, AppViewmodel> {
   void initState() {
     super.initState();
     scheduleMicrotask(() {
-      appViewmodel?.saveImages();
+      appViewmodel?.startImagesSync();
     });
     // scheduleMicrotask(() {
     //   appViewmodel = Provider.of<AppViewmodel>(context, listen: false);

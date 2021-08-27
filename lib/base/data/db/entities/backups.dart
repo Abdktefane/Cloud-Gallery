@@ -4,11 +4,14 @@ import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/base/data/db/entities/graduate_entity.dart';
 import 'package:moor/moor.dart';
 
+import '../graduate_db.dart';
+
 enum BackupStatus {
   UPLOADED,
   CANCELED,
   PENDING,
   UPLOADING,
+  NEED_RESTORE,
 }
 
 enum BackupModifier { PUBPLIC, PRIVATE }
@@ -48,6 +51,8 @@ extension BackupStatusExt on BackupStatus {
       // return material.Icons.timelapse;
       case BackupStatus.UPLOADING:
         return material.Icons.circle;
+      case BackupStatus.NEED_RESTORE:
+        return material.Icons.stop;
     }
   }
 
@@ -57,7 +62,7 @@ extension BackupStatusExt on BackupStatus {
 }
 
 class Backups extends GraduateEntity {
-  TextColumn get path => text()();
+  TextColumn get path => text().nullable()();
 
   TextColumn get mime => text()();
 
@@ -69,12 +74,16 @@ class Backups extends GraduateEntity {
 
   TextColumn get serverPath => text().nullable()();
 
-  IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.PENDING.index))();
+  IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.NEED_RESTORE.index))();
 
   IntColumn get modifier => intEnum<BackupModifier>().withDefault(Constant(BackupModifier.PRIVATE.index))();
 
   DateTimeColumn get createdDate => dateTime().withDefault(currentDateAndTime)();
 
   @override
-  Set<Column> get primaryKey => {assetId};
+  Set<Column> get primaryKey => {assetId, createdDate};
+}
+
+extension BackupExtension on Backup {
+  bool get needRestore => path == null;
 }

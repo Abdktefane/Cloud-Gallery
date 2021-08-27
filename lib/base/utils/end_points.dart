@@ -13,5 +13,8 @@ class EndPoints {
   static const String textToImage = '/search/t2im';
   static const String imageToImage = '/search/im2im';
   static const String recommendations = '/search/recommendations';
+
+  // Backup
+  static const String getServerImages = '/backup/get';
   // static const String download = '/files/:filename';
 }

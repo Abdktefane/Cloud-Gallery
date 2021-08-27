@@ -29,7 +29,7 @@ dependencies:
   core_sdk: 
     git:    
      url: https://gitlab.com/abd.ktefane.7/flutter-core.git 
-     ref: master 
+     ref: master  
 
 
   # DATA

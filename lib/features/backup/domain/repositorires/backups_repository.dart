@@ -61,4 +61,10 @@ abstract class BackupsRepository extends BaseRepository {
     required String? path,
     required String? serverPath,
   });
+
+  Future<NetworkResult<PaginationResponse<Backup>?>> getServerImages({
+    required int page,
+    required BackupModifier modifier,
+    DateTime? lastSync,
+  });
 }

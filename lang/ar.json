@@ -42,12 +42,17 @@
   "lbl_sim_search": "بحث تشابهي",
   "lbl_recommendations":"إقتراحات",
 
+  "lbl_switch_language_to": "تبديل اللغة إلى",
+
+
 
 
 
   "lbl_empty": "محتوى فارغ",
 
   "msg_confirm_save_start": "نحتاج اذن الوصول الى معرض الصور حتى يبدأ السحر الخاص بنا (لا أحد يمكنه روئية الصور اذا لم تسمح له بذلك)",
+  "msg_confirm_force_save_start": "هل أنت متأكد أنك تريد فرض المزامنة?",
+
 
 
   "msg_app_exit_confirm": "هل انت متاكد من إغلاق التطبيق ؟"

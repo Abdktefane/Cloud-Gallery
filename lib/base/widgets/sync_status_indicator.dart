@@ -36,7 +36,8 @@ class SyncStatusIndicator extends StatelessWidget {
 
   Widget _buildSavingIndecator(BuildContext context, bool isSaving) {
     return GestureDetector(
-      onTap: viewmodel.saveImages,
+      onTap: viewmodel.startImagesSync,
+      onLongPress: () => viewmodel.startImagesSync(fresh: true),
       child: Lottie.asset('assets/animations/files_sync.json', width: width, height: height, animate: isSaving),
     );
   }

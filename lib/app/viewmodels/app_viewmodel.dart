@@ -15,6 +15,7 @@ import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_sync_interactor.dart';
 import 'package:graduation_project/features/backup/domain/interactors/image_uploader_interactor.dart';
+import 'package:graduation_project/features/backup/domain/interactors/sync_server_images_interactor.dart';
 import 'package:injectable/injectable.dart';
 import 'package:mobx/mobx.dart';
 import 'package:get_it/get_it.dart';
@@ -37,7 +38,8 @@ class AppViewmodel extends _AppViewmodelBase with _$AppViewmodel {
     PrefsRepository prefsRepository,
     ImageSaveInteractor imageSyncInteractor,
     ImageUploaderInteractor imageUploaderInteractor,
-  ) : super(logger, prefsRepository, imageSyncInteractor, imageUploaderInteractor);
+    SyncServerImagesInteractor syncServerImagesInteractor,
+  ) : super(logger, prefsRepository, imageSyncInteractor, imageUploaderInteractor, syncServerImagesInteractor);
 }
 
 abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
@@ -46,6 +48,7 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
     this._prefsRepository,
     this._imageSaveInteractor,
     this._imageUploaderInteractor,
+    this._syncServerImagesInteractor,
   ) : super(logger);
   // imageUploadProgress = _imageUploaderObserver.asObservable();
 
@@ -53,6 +56,7 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   NavStack<AppBarParams?> appBarHistory = NavStack<AppBarParams?>();
   final ImageSaveInteractor _imageSaveInteractor;
   final ImageUploaderInteractor _imageUploaderInteractor;
+  final SyncServerImagesInteractor _syncServerImagesInteractor;
   final GraduateDB _db = GetIt.I();
 
   String? serverPath;
@@ -91,27 +95,64 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
 
   @computed
   bool get imageUploading => imageUploadStatus is InvokeStarted;
+
   //* ACTIONS *//
 
   @action
-  void saveImages() {
+  void _syncImages({bool fresh = false}) {
+    collect(
+      _syncServerImagesInteractor(Void)
+          .then(
+            interactor: _imageSaveInteractor,
+            params: fresh,
+            timeout: const Duration(hours: 2),
+          )
+          .then(
+            interactor: _imageUploaderInteractor,
+            // ignore: void_checks
+            params: Void,
+            timeout: const Duration(hours: 2),
+          ),
+    );
+  }
+
+  // @action
+  // void _syncImages({bool fresh = false}) {
+  //   collect(
+  //     _imageSaveInteractor(fresh, timeout: const Duration(hours: 2)),
+  //     collector: (status) {
+  //       imageSaveStatus = status;
+  //       if (status is InvokeSuccess) {
+  //         uploadImages();
+  //       }
+  //     },
+  //   );
+  // }
+
+  @action
+  void startImagesSync({bool fresh = false}) {
     if (!imageSaving) {
       logger.d('saveImages called in appviewmodel');
       scheduleMicrotask(() {
         getContext((context) {
-          showConfirmDialog(
-            context,
-            context.translate('msg_confirm_save_start'),
-            () => collect(
-              _imageSaveInteractor(Void, timeout: const Duration(hours: 2)),
-              collector: (status) {
-                imageSaveStatus = status;
-                if (status is InvokeSuccess) {
-                  uploadImages();
-                }
-              },
-            ),
-          );
+          if (fresh) {
+            showConfirmDialog(
+              context,
+              context.translate('msg_confirm_force_save_start'),
+              () => _syncImages(fresh: fresh),
+            );
+          } else {
+            _prefsRepository.deviceRegistered == true
+                ? _syncImages()
+                : showConfirmDialog(
+                    context,
+                    context.translate('msg_confirm_save_start'),
+                    () {
+                      _prefsRepository.setDeviceRegistered(true);
+                      _syncImages();
+                    },
+                  );
+          }
         });
       });
 

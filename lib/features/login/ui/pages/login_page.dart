@@ -19,9 +19,7 @@ import 'package:graduation_project/features/splash/ui/pages/splash_page.dart';
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({
-    Key? key,
-  }) : super(key: key);
+  const LoginPage({Key? key}) : super(key: key);
 
   static const String route = '/login';
 
@@ -130,7 +128,7 @@ class _LoginPageState extends MobxState<LoginPage, LoginViewmodel> {
                     onPressed: () => context.pushNamed(RegisterPage.route),
                   ),
                   Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 50),
+                    padding: const EdgeInsets.only(top: 50, bottom: 25),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [

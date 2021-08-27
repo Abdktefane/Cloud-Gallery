@@ -1,13 +1,11 @@
-// import 'dart:async';
-
 import 'dart:async';
 
-import 'package:async/async.dart';
-
-import 'package:flutter/foundation.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
+import 'package:graduation_project/features/backup/data/stores/backup_store.dart';
 import 'package:mobx/mobx.dart';
+import 'package:rxdart/rxdart.dart';
+import 'package:tuple/tuple.dart';
 import 'package:collection/collection.dart';
 
 abstract class InvokeStatus extends Equatable {
@@ -58,6 +56,52 @@ abstract class Interactor<P> {
   Future<void> executeSync(P params) async => doWork(params);
 
   static const Duration defaultTimeout = Duration(minutes: 5);
+
+  // Stream<InvokeStatus> doOnSuccess(
+  //   P params, {
+  //   required AsyncCallback onSuccss,
+  //   Duration timeout = defaultTimeout,
+  // }) =>
+  //     call(params, timeout: timeout).asyncMap((status) async {
+  //       if (status is InvokeSuccess) {
+  //         await onSuccss();
+  //       }
+  //       return status;
+  //     });
+
+  // Stream<InvokeStatus> then<T>(
+  //   P params, {
+  //   required Interactor<T> interactor,
+  //   required T interactorParams,
+  //   Duration timeout = defaultTimeout,
+  // }) =>
+  //     call(params, timeout: timeout).switchMap((status) {
+  //       if (status is InvokeSuccess) {
+  //         return interactor.call(interactorParams);
+  //       }
+  //       return Stream.fromIterable([status]);
+  //     });
+}
+
+extension InteractorStreamExt on Stream<InvokeStatus> {
+  Stream<InvokeStatus> doOnSuccess(AsyncCallback onSuccss) => asyncMap((status) async {
+        if (status is InvokeSuccess) {
+          await onSuccss();
+        }
+        return status;
+      });
+
+  Stream<InvokeStatus> then<T>({
+    required Interactor<T> interactor,
+    required T params,
+    Duration timeout = const Duration(minutes: 5),
+  }) =>
+      switchMap((status) {
+        if (status is InvokeSuccess) {
+          return interactor.call(params, timeout: timeout);
+        }
+        return Stream.fromIterable([status]);
+      });
 }
 
 abstract class ResultInteractor<P, R> {
@@ -82,7 +126,16 @@ abstract class SubjectInteractor<P, T> {
 
   ValueStream<T> observe() {
     outputStream = _controller.switchMap(
-      (P value) => createObservable(value).where((event) => event != null),
+      (P value) => createObservable(value)
+          .where((event) => event != null)
+          .doOnError((ex, st) => print('SubjectInteractor error ex:$ex, st: $st'))
+          .distinct((oldValues, newValues) {
+        if (T is List) {
+          return eq(oldValues, newValues);
+        } else {
+          return oldValues == newValues;
+        }
+      }),
     ) as ValueStream<T>;
 
     return outputStream!;

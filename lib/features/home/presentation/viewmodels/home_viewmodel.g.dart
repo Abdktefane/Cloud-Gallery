@@ -107,14 +107,13 @@ mixin _$HomeViewmodel on _HomeViewmodelBase, Store {
   final _$searchResultAtom = Atom(name: '_HomeViewmodelBase.searchResult');
 
   @override
-  ObservableStream<PaginationResponse<SearchResultModel>>? get searchResult {
+  ObservableList<SearchResultModel>? get searchResult {
     _$searchResultAtom.reportRead();
     return super.searchResult;
   }
 
   @override
-  set searchResult(
-      ObservableStream<PaginationResponse<SearchResultModel>>? value) {
+  set searchResult(ObservableList<SearchResultModel>? value) {
     _$searchResultAtom.reportWrite(value, super.searchResult, () {
       super.searchResult = value;
     });

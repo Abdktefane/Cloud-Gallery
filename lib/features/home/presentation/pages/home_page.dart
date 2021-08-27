@@ -1,37 +1,28 @@
 import 'dart:async';
 
 import 'package:core_sdk/utils/extensions/build_context.dart';
-import 'package:core_sdk/utils/extensions/string.dart';
 import 'package:core_sdk/utils/mobx/mobx_state.dart';
 import 'package:core_sdk/utils/pagination_mixin.dart';
 import 'package:core_sdk/utils/search_mixin.dart';
-import 'package:core_sdk/utils/widgets/pagination_list.dart';
-import 'package:core_sdk/utils/widgets/staggered_column.dart';
-import 'package:core_sdk/utils/widgets/staggered_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_mobx/flutter_mobx.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:get_it/get_it.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supercharged/supercharged.dart';
-
 import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/app/viewmodels/app_viewmodel.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
-import 'package:graduation_project/base/data/models/pagination_response.dart';
 import 'package:graduation_project/base/data/models/search_result_model.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/base/utils/image_url_provider.dart';
-import 'package:graduation_project/base/widgets/graduate_empty_widget.dart';
 import 'package:graduation_project/base/widgets/graduate_page_loader.dart';
 import 'package:graduation_project/base/widgets/graduate_stream_observer.dart';
-import 'package:graduation_project/features/backup/data/stores/tokens_store.dart';
 import 'package:graduation_project/features/home/presentation/viewmodels/home_viewmodel.dart';
 import 'package:graduation_project/features/home/presentation/widgets/image_tile.dart';
 import 'package:graduation_project/features/home/presentation/widgets/media_buttons.dart';
-import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
-import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:provider/provider.dart';
+import 'package:supercharged/supercharged.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({
@@ -49,15 +40,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin, PaginationMixin {
   late final AppViewmodel _appViewmodel;
   final ImageUrlProvider _imageUrlProvider = GetIt.I();
-  // final PrefsRepository _prefsRepository = GetIt.I();
-  final TokensStore _tokensStore = GetIt.I();
+  final PrefsRepository _prefsRepository = GetIt.I();
 
-  late final Future<String?> token;
+  late final String token;
 
   @override
   void initState() {
     super.initState();
-    token = _tokensStore.getToken().then((value) => value?.token);
+    token = _prefsRepository.token ?? '';
     initSearch();
     initPagination();
     scheduleMicrotask(() {
@@ -164,39 +154,41 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
   Widget searchResult() {
     return Stack(
       children: [
-        GraduateStreamObserver<PaginationResponse<SearchResultModel>>(
-          stream: viewmodel.searchResult!,
-          onSuccess: (images) => Container(
-            key: viewmodel.listKey,
-            child: AnimationLimiter(
-              child: StaggeredGridView.countBuilder(
-                physics: const BouncingScrollPhysics(),
-                crossAxisCount: 2,
-                itemCount: images.data?.length ?? 0,
-                controller: scrollController,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 12,
-                staggeredTileBuilder: (index) => StaggeredTile.count(1, index.isEven ? 1 : 1.4),
-                itemBuilder: (BuildContext context, int index) => AnimationConfiguration.staggeredGrid(
-                  position: index,
-                  duration: const Duration(milliseconds: 375),
-                  columnCount: 2,
-                  child: ScaleAnimation(
-                    scale: 0.5,
-                    child: FadeInAnimation(
-                      child: ImageTile(
-                        imageUrlProvider: _imageUrlProvider,
-                        serverPath: images.data![index].data!,
-                        token: token,
-                        searchByImage: (id) => viewmodel.searchBySimiliraty(id),
+        Observer(
+          builder: (_) => GraduateListObserver<SearchResultModel>(
+            list: viewmodel.searchResult,
+            onSuccess: (images) => Container(
+              key: viewmodel.listKey,
+              child: AnimationLimiter(
+                child: StaggeredGridView.countBuilder(
+                  physics: const BouncingScrollPhysics(),
+                  crossAxisCount: 2,
+                  itemCount: images.length,
+                  controller: scrollController,
+                  crossAxisSpacing: 10,
+                  mainAxisSpacing: 12,
+                  staggeredTileBuilder: (index) => StaggeredTile.count(1, index.isEven ? 1 : 1.4),
+                  itemBuilder: (BuildContext context, int index) => AnimationConfiguration.staggeredGrid(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    columnCount: 2,
+                    child: ScaleAnimation(
+                      scale: 0.5,
+                      child: FadeInAnimation(
+                        child: ImageTile(
+                          imageUrlProvider: _imageUrlProvider,
+                          serverPath: images[index].data!,
+                          token: token,
+                          searchByImage: (id) => viewmodel.searchBySimiliraty(id),
+                        ),
                       ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ).padding(padding: const EdgeInsets.symmetric(horizontal: 4.0)),
+          ).padding(padding: const EdgeInsets.symmetric(horizontal: 4.0)),
+        ),
         Container(
           decoration: const BoxDecoration(color: Colors.black26 /* , borderRadius: BorderRadius.circular(18.0) */),
           width: context.fullWidth,
@@ -246,7 +238,11 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
   void onLoadMore() => viewmodel.search();
 
   @override
-  void onSearch(String qurey) => viewmodel.searchByText(qurey);
+  void onSearch(String qurey) {
+    if (qurey.isNotEmpty) {
+      viewmodel.searchByText(qurey);
+    }
+  }
 }
 
 class AppliedFilter extends StatelessWidget {

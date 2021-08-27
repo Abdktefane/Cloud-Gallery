@@ -63,6 +63,18 @@ class PrefsRepositoryImpl implements PrefsRepository {
   @override
   Future<bool> setImageFileSource(ImageFileSource imageFileSource) =>
       _prefs.setInt(_IMAGE_FILE_SOURCE, imageFileSource.index);
+  @override
+  DateTime? get lastServerSync {
+    final milliSeconds = _prefs.getInt(_LAST_SERVER_SYNC_DATE);
+    if (milliSeconds != null) {
+      return DateTime.fromMillisecondsSinceEpoch(milliSeconds);
+    }
+    return null;
+  }
+
+  @override
+  Future<bool> setLastServerSync(DateTime lastSyncDate) =>
+      _prefs.setInt(_LAST_SERVER_SYNC_DATE, lastSyncDate.millisecondsSinceEpoch);
 
   // @override
   // Future<bool> setProfile(ProfileModel? profile) =>
@@ -90,3 +102,4 @@ class PrefsRepositoryImpl implements PrefsRepository {
 
 const String _UPLOADED_FILES_KEY = 'graduate_uploaded_files_key';
 const String _IMAGE_FILE_SOURCE = 'image_file_source';
+const String _LAST_SERVER_SYNC_DATE = 'last_server_sync_date';

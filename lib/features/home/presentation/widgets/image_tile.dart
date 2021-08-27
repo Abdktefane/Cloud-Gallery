@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:core_sdk/utils/extensions/build_context.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:graduation_project/app/app.dart';
-import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
 import 'package:graduation_project/base/utils/image_url_provider.dart';
 import 'package:graduation_project/features/backup/presentation/widgets/backup_tile.dart';
@@ -12,18 +9,18 @@ import 'package:graduation_project/features/backup/presentation/widgets/hero_pho
 import 'package:transparent_image/transparent_image.dart';
 
 class ImageTile extends StatefulWidget {
-  ImageTile({
+  const ImageTile({
     Key? key,
     required this.imageUrlProvider,
     required this.serverPath,
     required this.token,
     required this.searchByImage,
-  }) : super(key: key) {}
+  }) : super(key: key);
 
   final ImageUrlProvider imageUrlProvider;
   final String serverPath;
-  final Future<String?> token;
-  ValueChanged<String> searchByImage;
+  final String token;
+  final ValueChanged<String> searchByImage;
 
   @override
   _ImageTileState createState() => _ImageTileState();
@@ -74,19 +71,14 @@ class _ImageTileState extends State<ImageTile> {
       arrowSize: 18.0,
       horizontalMargin: 0,
       verticalMargin: 0,
-      child: FutureBuilder(
-        future: widget.token,
-        builder: (_, snapShot) => snapShot.connectionState == ConnectionState.done
-            ? FadeInImage(
-                placeholder: MemoryImage(kTransparentImage),
-                image: NetworkImage(
-                  widget.imageUrlProvider.get(widget.serverPath),
-                  headers: {'Authorization': (snapShot.data as String?) ?? ''},
-                ),
-                fit: BoxFit.cover,
-              ).clip(borderRadius: const BorderRadius.all(Radius.circular(15)))
-            : const SizedBox(),
-      ),
+      child: FadeInImage(
+        placeholder: MemoryImage(kTransparentImage),
+        image: NetworkImage(
+          widget.imageUrlProvider.get(widget.serverPath),
+          headers: {'Authorization': widget.token},
+        ),
+        fit: BoxFit.cover,
+      ).clip(borderRadius: const BorderRadius.all(Radius.circular(15))),
     );
   }
 
@@ -94,7 +86,7 @@ class _ImageTileState extends State<ImageTile> {
     App.navKey.currentContext?.pushPage(HeroPhotoViewRouteWrapper(
       imageProvider: Image.network(
         widget.imageUrlProvider.get(widget.serverPath),
-        headers: {'Authorization': await widget.token ?? ''},
+        headers: {'Authorization': widget.token},
       ).image,
       tag: widget.serverPath,
     ));

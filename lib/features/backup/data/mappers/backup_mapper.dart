@@ -1,3 +1,4 @@
+import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/data/mappers/mappers.dart';
 import 'package:moor/moor.dart';
@@ -29,6 +30,8 @@ extension AssetEntityExt on AssetEntity {
       path: Value(getDiskPrefix() + relativePath! + title!),
       thumbData: Value(thumpFuture),
       title: Value(title),
+      createdDate: Value(createDateTime),
+      status: const Value(BackupStatus.PENDING),
     );
   }
 }
