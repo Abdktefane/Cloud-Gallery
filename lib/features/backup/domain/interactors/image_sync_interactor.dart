@@ -1,4 +1,5 @@
 import 'package:core_sdk/utils/extensions/list.dart';
+import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/domain/interactors/interactors.dart';
 import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
@@ -9,6 +10,8 @@ import 'package:photo_manager/photo_manager.dart';
 
 const int _BUFFER_SIZE = 500;
 const int _PAGE_SIZE = 100;
+
+AssetPathEntity? globalAssetPathEntity;
 
 @injectable
 class ImageSaveInteractor extends Interactor<bool> {
@@ -21,6 +24,11 @@ class ImageSaveInteractor extends Interactor<bool> {
   Future<void> doWork(bool params) async {
     try {
       if (await _backupsRepository.canStartSaveBackup() || params) {
+        // await PhotoManager.clearFileCache();
+        // PhotoManager.editor.saveImageWithPath(path);
+
+        // PhotoManager.addChangeCallback(changeNotify);
+
         final permission = await PhotoManager.requestPermissionExtend();
         if (permission.isAuth) {
           late List<AssetPathEntity> gallery;
@@ -31,9 +39,7 @@ class ImageSaveInteractor extends Interactor<bool> {
               onlyAll: true,
             );
           } else {
-            gallery = await PhotoManager.getAssetPathList(
-              type: RequestType.image,
-            );
+            gallery = await PhotoManager.getAssetPathList(type: RequestType.image);
             int i = 0;
             gallery = gallery.where((it) => it.name == kSyncFolderName).toList();
           }
@@ -65,6 +71,10 @@ class ImageSaveInteractor extends Interactor<bool> {
 
   // TODO(abd): Hint don't change folder source while uploading
   Future<void> _saveFolder(AssetPathEntity folder) async {
+    globalAssetPathEntity = folder;
+    // await folder.refreshPathProperties();
+    // await PhotoManager.clearFileCache();
+
     print('sync folder:${folder.name},count:${folder.assetCount}');
     final List<AssetEntity> imagesBuffer = [];
     int page = 0;
@@ -101,11 +111,21 @@ class ImageSaveInteractor extends Interactor<bool> {
   Future<void> upsertNewImage(List<AssetEntity> images, {List<AssetEntity>? imagesBuffer}) async {
     await _backupsRepository.addNewImages(
       images,
-      insertMode: InsertMode.insert,
-      onConflict: (backups) => DoUpdate(
-        (old) => const BackupsCompanion(needRestore: Value(true)),
-        target: [backups.id, backups.title],
+      insertMode: InsertMode.insertOrReplace,
+      onConflict: (backup) => BackupsCompanion(
+        needRestore: const Value(false),
+        status: const Value(BackupStatus.UPLOADED),
+        path: backup.path,
+        createdDate: backup.createdDate,
+        title: backup.title,
+        // title: backup.title,
       ),
+      // onConflict: (backups) => DoUpdate(
+      //   (old) => const BackupsCompanion(
+      //     needRestore: Value(false),
+      //     status: Value(BackupStatus.UPLOADED),
+      //   ),
+      // ),
     );
     imagesBuffer?.clear();
     return;

@@ -99,25 +99,6 @@ class _HomePageState extends MobxState<HomePage, HomeViewmodel> with SearchMixin
             floatingLabelBehavior: FloatingLabelBehavior.auto,
             contentPadding: const EdgeInsets.symmetric(horizontal: 12.0),
             border: InputBorder.none,
-            // suffixIcon: AnimatedSwitcher(
-            //   duration: const Duration(milliseconds: 150),
-            //   child: searchController?.text.isNullOrEmpty == false
-            //       ? Container(
-            //           padding: const EdgeInsets.all(2.0),
-            //           decoration: const BoxDecoration(shape: BoxShape.circle, color: GREY),
-            //           child: IconButton(
-            //             padding: EdgeInsets.zero,
-            //             constraints: const BoxConstraints(),
-            //             icon: const Icon(Icons.close_rounded, color: WHITE),
-            //             iconSize: 16.0,
-            //             onPressed: () {
-            //               searchController?.clear();
-            //               viewmodel.clearSearch(text: true);
-            //             },
-            //           ),
-            //         )
-            //       : const SizedBox(),
-            // ),
           ),
 
           // expands: true,

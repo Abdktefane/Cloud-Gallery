@@ -18,29 +18,48 @@ class RestoreImageInteractor extends Interactor<Backup> {
 
   @override
   Future<void> doWork(Backup params) async {
-    final localStorage = await getLocalStoragePath();
+    final localStorage = await getApplicationPath();
     if (localStorage != null) {
       final result = await _backupsRepository.downloadFile(
         localStoragePath: localStorage + '/${params.serverPath!}',
         serverPath: params.serverPath!,
       );
+
       if (result.isSuccess) {
-        await _backupsStore.updateBackups([params.copyWith(needRestore: false, status: BackupStatus.UPLOADED)]);
+        await _backupsStore.updateBackups([
+          params.copyWith(
+            needRestore: false,
+            status: BackupStatus.UPLOADED,
+            path: localStorage + '/${params.serverPath!}',
+            title: params.serverPath,
+          )
+        ]);
       }
+
+      // if (result.isSuccess) {
+      //   await _backupsStore.updateBackups([
+      //     params.copyWith(
+      //       needRestore: false,
+      //       status: BackupStatus.UPLOADED,
+      //       path: localStorage + '/${params.serverPath!}',
+      //       title: params.serverPath,
+      //     )
+      //   ]);
+      // }
     }
   }
 
-  Future<String?> getLocalStoragePath() async {
-    if (await Permission.storage.request().isGranted) {
-      // final path = await getExternalStorageDirectories(type: StorageDirectory.pictures);
-      // final directory = Directory(path!.first.path + '/' + kSyncFolderName);
-      final path = 'storage/emulated/0/Android/media/$kSyncFolderName';
-      final directory = Directory(path);
-      if (!directory.existsSync()) {
-        await directory.create(recursive: true);
-      }
-      return path;
-    }
-    return null;
-  }
+  // Future<String?> getLocalStoragePath() async {
+  //   if (await Permission.storage.request().isGranted) {
+  //     // final path = await getExternalStorageDirectories(type: StorageDirectory.pictures);
+  //     // final directory = Directory(path!.first.path + '/' + kSyncFolderName);
+  //     // final path = 'storage/emulated/0/Android/media/$kSyncFolderName';
+  //     final directory = Directory(applicationDir());
+  //     if (!directory.existsSync()) {
+  //       await directory.create(recursive: true);
+  //     }
+  //     return applicationDir();
+  //   }
+  //   return null;
+  // }
 }

@@ -15,7 +15,11 @@ import 'package:graduation_project/features/backup/networking/networking_message
 extension NetworkingExt<T> on Future<Response<T>> {
   Future<ResponseIsolateMessage> asNetworkMessageResponse(int id) => then((res) {
         if (res.statusCode == STATUS_OK) {
-          return ResponseIsolateMessage.success(id, jsonDecode(res.data as String));
+          print('res is ${res.data}');
+          return ResponseIsolateMessage.success(
+            id,
+            res.data is String ? jsonDecode(res.data as String) : {'sucess': true},
+          );
         } else {
           return ResponseIsolateMessage.error(id, ServerException('msg_http_exception'));
         }

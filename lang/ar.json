@@ -21,6 +21,11 @@
   "lbl_settings":"الإعدادات",
   "lbl_logout":"تسجبل الخروج",
   "lbl_db_viewer": "مستعرض قاعدة البيانات",
+  "lbl_need_restore": "صور للإسترجاع",
+
+  "lbl_restore": "إسترجاع",
+
+
 
   "lbl_canceled":"ملغية",
   "lbl_uploaded":"تم الرفع",

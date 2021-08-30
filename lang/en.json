@@ -20,6 +20,8 @@
   "lbl_logout":"Logout",
   "lbl_db_viewer": "Data Base Viewer",
   "lbl_total_images": "Images Count",
+  "lbl_need_restore": "Need Restore",
+  "lbl_restore": "Restore",
 
   "lbl_canceled":"Canceled",
   "lbl_uploaded":"Uploaded",

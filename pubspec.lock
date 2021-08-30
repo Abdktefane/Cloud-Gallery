@@ -358,6 +358,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "7.1.0"
+  flutter_downloader:
+    dependency: "direct main"
+    description:
+      name: flutter_downloader
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "1.6.1"
   flutter_isolate:
     dependency: "direct dev"
     description:
@@ -597,6 +604,15 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "0.12.10"
+  media_store:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: master
+      resolved-ref: "9b48929e8f1b854caa827c35c9b6cb56c16894fb"
+      url: "https://github.com/Abdktefane/media_store.git"
+    source: git
+    version: "1.0.0"
   meta:
     dependency: transitive
     description:

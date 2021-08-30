@@ -21,9 +21,14 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends MobxState<RegisterPage, RegisterViewmodel> {
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
+  // final TextEditingController _confirmPasswordController = TextEditingController();
+  // final TextEditingController _emailController = TextEditingController();
+  // final TextEditingController _passwordController = TextEditingController();
+
+  final TextEditingController _emailController = TextEditingController(text: 'test2@t.com');
+  final TextEditingController _passwordController = TextEditingController(text: '123123');
+  final TextEditingController _confirmPasswordController = TextEditingController(text: '123123');
+
   final _formKey = GlobalKey<FormState>();
 
   @override

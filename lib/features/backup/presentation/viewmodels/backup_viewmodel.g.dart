@@ -49,13 +49,13 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
   final _$filterAtom = Atom(name: '_BackupViewmodelBase.filter');
 
   @override
-  BackupStatus get filter {
+  BackupStatusUi get filter {
     _$filterAtom.reportRead();
     return super.filter;
   }
 
   @override
-  set filter(BackupStatus value) {
+  set filter(BackupStatusUi value) {
     _$filterAtom.reportWrite(value, super.filter, () {
       super.filter = value;
     });
@@ -79,7 +79,7 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
   final _$_BackupViewmodelBaseActionController = ActionController(name: '_BackupViewmodelBase');
 
   @override
-  void changeFilter(BackupStatus filter) {
+  void changeFilter(BackupStatusUi filter) {
     final _$actionInfo = _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.changeFilter');
     try {
       return super.changeFilter(filter);
@@ -126,6 +126,16 @@ mixin _$BackupViewmodel on _BackupViewmodelBase, Store {
         _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.toggleBackupModifire');
     try {
       return super.toggleBackupModifire(backup);
+    } finally {
+      _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
+    }
+  }
+
+  @override
+  void restoreImage(dynamic backup) {
+    final _$actionInfo = _$_BackupViewmodelBaseActionController.startAction(name: '_BackupViewmodelBase.restoreImage');
+    try {
+      return super.restoreImage(backup);
     } finally {
       _$_BackupViewmodelBaseActionController.endAction(_$actionInfo);
     }

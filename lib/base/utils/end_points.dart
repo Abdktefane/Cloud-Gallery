@@ -5,7 +5,6 @@ class EndPoints {
 
   // Files
   static const String upload = '/files';
-  static const String changeModifire = '/files/edit';
 
   // Search
   static const String getSimilar = '/search/sims';
@@ -15,6 +14,6 @@ class EndPoints {
   static const String recommendations = '/search/recommendations';
 
   // Backup
-  static const String getServerImages = '/backup/get';
+  static const String getServerImages = '/files';
   // static const String download = '/files/:filename';
 }

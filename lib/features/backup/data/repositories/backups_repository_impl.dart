@@ -35,20 +35,21 @@ class BackupsRepositoryImpl extends BackupsRepository {
 
   final CommonDataSource _commonDataSource;
 
-  @override
-  Stream<List<Backup>> observeActiveBackups() => _backupsStore.observeActiveBackups();
+  // @override
+  // Stream<List<Backup>> observeActiveBackups() => _backupsStore.observeActiveBackups();
 
-  @override
-  Stream<List<Backup>> observePendingBackup() => _backupsStore.observePendingBackup();
+  // @override
+  // Stream<List<Backup>> observePendingBackup() => _backupsStore.observePendingBackup();
 
-  @override
-  Stream<List<Backup>> observeUploadedBackup() => _backupsStore.observeUploadedBackup();
+  // @override
+  // Stream<List<Backup>> observeUploadedBackup() => _backupsStore.observeUploadedBackup();
   @override
   Stream<List<Backup>> observeBackupsByStatus({
     required BackupStatus status,
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
   }) =>
       _backupsStore.observeBackupsByStatus(
         asc: asc,
@@ -61,7 +62,9 @@ class BackupsRepositoryImpl extends BackupsRepository {
   Future<void> addNewImages(
     List<AssetEntity> rawImages, {
     InsertMode insertMode = InsertMode.insertOrIgnore,
-    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+    BackupsCompanion Function(BackupsCompanion backup)? onConflict,
+
+    // UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
   }) async =>
       _backupsStore.addNewImages(
         await _backupMapper.forList(rawImages),
@@ -99,13 +102,38 @@ class BackupsRepositoryImpl extends BackupsRepository {
       _backupsStore.observeBackupsRows(status: status, modifier: modifier);
 
   @override
+  Stream<int> observePendingBackupsRows({required BackupModifier modifier}) =>
+      _backupsStore.observePendingBackupsRows(modifier: modifier);
+
+  @override
   Future<List<Backup>> getBackupsByStatus({
     required BackupStatus status,
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
   }) =>
-      _backupsStore.getBackupsByStatus(status: status, asc: asc, modifier: modifier, limit: limit);
+      _backupsStore.getBackupsByStatus(
+        status: status,
+        asc: asc,
+        modifier: modifier,
+        limit: limit,
+        withNeedRestore: withNeedRestore,
+      );
+
+  @override
+  Future<List<Backup>> getPendingImages({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+    bool withNeedRestore = false,
+  }) =>
+      _backupsStore.getPendingImages(
+        withNeedRestore: withNeedRestore,
+        asc: asc,
+        modifier: modifier,
+        limit: limit,
+      );
 
   @override
   Future<NetworkResult<UploadModel?>> changeModifire({

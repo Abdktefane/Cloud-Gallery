@@ -27,10 +27,10 @@ class ImageUploaderInteractor extends Interactor<void> {
       _logger.d('ImageUploader Started ...');
 
       // producer
-      moveToQueue(await _backupsRepository.getBackupsByStatus(
-        status: BackupStatus.PENDING,
+      moveToQueue(await _backupsRepository.getPendingImages(
         modifier: BackupModifier.PRIVATE,
         asc: false,
+        withNeedRestore: false,
       ));
 
       // consumer
@@ -63,7 +63,7 @@ class ImageUploaderInteractor extends Interactor<void> {
         _logger.d('ImageUploader syncQueue success upload ${image.id}');
         await changeImagesStatus([image.copyWith(serverPath: res.name)], BackupStatus.UPLOADED);
       } catch (ex, st) {
-        await changeImagesStatus([image], BackupStatus.PENDING);
+        await changeImagesStatus([image], null);
         _logger.e('ImageUploader upload fail id: ${image.id},cause: $ex, st: $st');
       }
     }
@@ -73,6 +73,6 @@ class ImageUploaderInteractor extends Interactor<void> {
   Future<UploadModel> uploadImages(List<Backup> images) =>
       _backupsRepository.uploadImages(images).whenSuccess((res) => res!);
 
-  Future<void> changeImagesStatus(List<Backup> images, BackupStatus status) =>
+  Future<void> changeImagesStatus(List<Backup> images, BackupStatus? status) =>
       _backupsRepository.updateBackups(images.map((it) => it.copyWith(status: status)).toList());
 }

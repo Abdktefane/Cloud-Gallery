@@ -12,39 +12,68 @@ Function eq = const ListEquality().equals;
 abstract class BackupsStore {
   const BackupsStore();
 
-  Stream<List<Backup>> observeActiveBackups();
+  // Stream<List<Backup>> observeActiveBackups();
 
-  Stream<List<Backup>> observePendingBackup();
+  // Stream<List<Backup>> observePendingBackup();
 
-  Stream<List<Backup>> observeUploadedBackup();
+  // Stream<List<Backup>> observeUploadedBackup();
 
   Stream<List<Backup>> observeBackupsByStatus({
     required BackupStatus status,
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
+  });
+
+  Stream<List<Backup>> observePendingBackups({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+    bool withNeedRestore = false,
   });
 
   Future<void> addNewImages(
     List<BackupsCompanion> rawImages, {
     InsertMode insertMode = InsertMode.insertOrIgnore,
-    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+    BackupsCompanion Function(BackupsCompanion backup)? onConflict,
+    // UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
   });
 
   Future<void> updateBackups(List<Backup> images);
 
-  Future<void> moveUploadingToPending();
+  Future<List<Backup>> getAll();
+
+  // Future<void> moveUploadingToPending();
 
   Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
+
+  Stream<int> observePendingBackupsRows({required BackupModifier modifier});
+
+  Stream<int> observeNeedRestoreBackupsRows({required BackupModifier modifier});
 
   Future<List<Backup>> getBackupsByStatus({
     required BackupStatus status,
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
   });
 
   Future<void> makeAllNeedRestore();
+
+  Future<List<Backup>> getPendingImages({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+    bool withNeedRestore = false,
+  });
+
+  Stream<List<Backup>> observeNeedRestoreBackups({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  });
 }
 
 @Singleton(as: BackupsStore)
@@ -53,32 +82,42 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
   BackupDao(GraduateDB db) : super(db, db.backups);
 
   @override
-  Stream<List<Backup>> observeActiveBackups() => (select(backups)
-        ..where((it) => it.status.equals(BackupStatus.PENDING.index) | it.status.equals(BackupStatus.UPLOADING.index)))
-      .watch();
-
-  @override
-  Stream<List<Backup>> observePendingBackup() =>
-      (select(backups)..where((it) => it.status.equals(BackupStatus.PENDING.index))).watch();
-
-  @override
-  Stream<List<Backup>> observeUploadedBackup() =>
-      (select(backups)..where((it) => it.status.equals(BackupStatus.UPLOADED.index))).watch();
+  Future<List<Backup>> getAll() => super.getAll();
 
   @override
   Future<void> addNewImages(
     List<BackupsCompanion> rawImages, {
     InsertMode insertMode = InsertMode.insertOrIgnore,
-    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
-  }) =>
-      batch(
-        (batch) => batch.insertAll(
+    BackupsCompanion Function(BackupsCompanion backup)? onConflict,
+    // UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+  }) async {
+    // print('android db rows');
+    // print(rawImages);
+    await batch((batch) {
+      for (final row in rawImages) {
+        batch.insert(
           backups,
-          rawImages,
+          row,
           mode: insertMode,
-          onConflict: onConflict?.call(backups),
-        ),
-      );
+          onConflict: onConflict == null
+              ? null
+              : UpsertMultiple([
+                  DoUpdate((_) => onConflict(row)),
+                  DoUpdate((_) => onConflict(row), target: [backups.title]),
+                ]),
+        );
+      }
+    });
+    print('after insert new images from android db');
+    // print(await getAll());
+  }
+  //   (batch) => batch.insertAll(
+  //     backups,
+  //     rawImages,
+  //     mode: insertMode,
+  //     onConflict: onConflict?.call(backups),
+  //   ),
+  // );
 
   @override
   Stream<List<Backup>> observeBackupsByStatus({
@@ -86,9 +125,67 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
   }) {
     final query = select(backups)
-      ..where((it) => it.status.equals(status.index) & it.modifier.equals(modifier.index))
+      ..where(
+        (it) =>
+            it.status.equals(status.index) &
+            it.modifier.equals(modifier.index) &
+            // it.needRestore.equals(withNeedRestore) &
+            it.serverPath.isNotNull(),
+      )
+      ..orderBy(
+        [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
+      );
+    // ..limit(limit!);
+
+    if (limit != null && limit != 0) {
+      query.limit(limit);
+    }
+
+    return query.watch().distinct((oldImages, newImages) {
+      final result = eq(oldImages, newImages);
+      return result;
+    });
+  }
+
+  @override
+  Stream<List<Backup>> observePendingBackups({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+    bool withNeedRestore = false,
+  }) {
+    final query = select(backups)
+      ..where(
+        (it) => it.serverPath.isNull() & it.modifier.equals(modifier.index) & it.needRestore.equals(withNeedRestore),
+      )
+      ..orderBy(
+        [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
+      );
+    // ..limit(limit!);
+
+    if (limit != null && limit != 0) {
+      query.limit(limit);
+    }
+
+    return query.watch().distinct((oldImages, newImages) {
+      final result = eq(oldImages, newImages);
+      return result;
+    });
+  }
+
+  @override
+  Stream<List<Backup>> observeNeedRestoreBackups({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+  }) {
+    final query = select(backups)
+      ..where(
+        (it) => it.needRestore.equals(true) & it.modifier.equals(modifier.index) & it.serverPath.isNotNull(),
+      )
       ..orderBy(
         [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
       );
@@ -110,13 +207,40 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
   }) {
     final query = select(backups)
-      ..where((it) => it.status.equals(status.index) & it.modifier.equals(modifier.index))
+      ..where(
+        (it) =>
+            it.status.equals(status.index) &
+            it.modifier.equals(modifier.index) &
+            it.needRestore.equals(withNeedRestore),
+      )
       ..orderBy(
         [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
       );
-    // ..limit(limit!);
+
+    if (limit != null && limit != 0) {
+      query.limit(limit);
+    }
+
+    return query.get();
+  }
+
+  @override
+  Future<List<Backup>> getPendingImages({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+    bool withNeedRestore = false,
+  }) {
+    final query = select(backups)
+      ..where(
+        (it) => it.serverPath.isNull() & it.modifier.equals(modifier.index) & it.needRestore.equals(withNeedRestore),
+      )
+      ..orderBy(
+        [(it) => OrderingTerm(expression: it.createdDate, mode: asc ? OrderingMode.asc : OrderingMode.desc)],
+      );
 
     if (limit != null && limit != 0) {
       query.limit(limit);
@@ -130,7 +254,26 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
     required BackupStatus status,
     required BackupModifier modifier,
   }) {
-    final countExpr = countAll(filter: backups.status.equals(status.index) & backups.modifier.equals(modifier.index));
+    final countExpr = countAll(
+      filter: backups.status.equals(status.index) &
+          backups.modifier.equals(modifier.index) &
+          backups.serverPath.isNotNull(),
+    );
+    return (selectOnly(backups)..addColumns([countExpr])).map((it) => it.read(countExpr)).watchSingle();
+  }
+
+  @override
+  Stream<int> observePendingBackupsRows({required BackupModifier modifier}) {
+    final countExpr = countAll(filter: backups.serverPath.isNull() & backups.modifier.equals(modifier.index));
+    return (selectOnly(backups)..addColumns([countExpr])).map((it) => it.read(countExpr)).watchSingle();
+  }
+
+  @override
+  Stream<int> observeNeedRestoreBackupsRows({required BackupModifier modifier}) {
+    final countExpr = countAll(
+      filter:
+          backups.needRestore.equals(true) & backups.modifier.equals(modifier.index) & backups.serverPath.isNotNull(),
+    );
     return (selectOnly(backups)..addColumns([countExpr])).map((it) => it.read(countExpr)).watchSingle();
   }
 
@@ -139,31 +282,5 @@ class BackupDao extends EntityDao<Backups, Backup, GraduateDB> with _$BackupDaoM
       batch((Batch batch) => batch.insertAllOnConflictUpdate(backups, images));
 
   @override
-  Future<void> moveUploadingToPending() =>
-      (update(backups)..where((t) => t.status.equals(BackupStatus.UPLOADING.index))).write(const BackupsCompanion(
-        status: Value(BackupStatus.PENDING),
-      ));
-
-  @override
   Future<void> makeAllNeedRestore() => update(backups).write(const BackupsCompanion(needRestore: Value(true)));
 }
-
-// @LazySingleton(as: BackupsStore)
-// class BackupsStoreImpl extends BackupsStore {
-//   const BackupsStoreImpl(this._dao);
-
-//   final BackupDao _dao;
-
-//   @override
-//   Stream<List<Backup>> observeActiveBackups() => _dao.observeActiveBackups();
-
-//   @override
-//   Stream<List<Backup>> observePendingBackup() => _dao.observePendingBackup();
-
-//   @override
-//   Stream<List<Backup>> observeUploadedBackup() => _dao.observeUploadedBackup();
-
-//   @override
-//   Future<void> addNewImages(List<BackupsCompanion> rawImages) => _dao.addNewImages(rawImages);
-// }
-

@@ -1,6 +1,7 @@
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/data/mappers/mappers.dart';
+import 'package:graduation_project/base/domain/repositories/prefs_repository.dart';
 import 'package:moor/moor.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:injectable/injectable.dart';
@@ -13,12 +14,16 @@ String getDiskPrefix() {
 
 @singleton
 class BackupMapper extends Mapper<AssetEntity, BackupsCompanion> {
+  BackupMapper(this._prefsRepository);
+
+  final PrefsRepository _prefsRepository;
+
   @override
-  Future<BackupsCompanion> map(AssetEntity from) => Future.value(from.toEntry());
+  Future<BackupsCompanion> map(AssetEntity from) => Future.value(from.toEntry(_prefsRepository.siteId!));
 }
 
 extension AssetEntityExt on AssetEntity {
-  Future<BackupsCompanion> toEntry() async {
+  Future<BackupsCompanion> toEntry(int userId) async {
     late final Uint8List thumpFuture;
     try {
       thumpFuture = (await thumbData) ?? Uint8List(1);
@@ -28,13 +33,12 @@ extension AssetEntityExt on AssetEntity {
     }
     final deviceInfo = await DeviceInfoPlugin().androidInfo;
     return BackupsCompanion(
-      id: Value((deviceInfo.androidId ?? '') + id),
-      mime: Value(mimeType ?? ''),
+      id: Value((deviceInfo.androidId ?? '') + id + userId.toString()),
       path: Value(getDiskPrefix() + relativePath! + title!),
       thumbData: Value(thumpFuture),
       title: Value(title),
       createdDate: Value(createDateTime),
-      status: const Value(BackupStatus.PENDING),
+      // status: const Value(BackupStatus.PENDING),
       needRestore: const Value(false),
     );
   }

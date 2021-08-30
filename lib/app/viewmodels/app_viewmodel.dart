@@ -101,10 +101,10 @@ abstract class _AppViewmodelBase extends GraduateViewmodel with Store {
   @action
   void _syncImages({bool fresh = false}) {
     collect(
-      _syncServerImagesInteractor(Void)
+      _syncServerImagesInteractor(fresh)
           .then(
-            interactor: _imageSaveInteractor,
             params: fresh,
+            interactor: _imageSaveInteractor,
             timeout: const Duration(hours: 2),
           )
           .then(

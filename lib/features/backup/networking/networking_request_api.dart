@@ -72,7 +72,12 @@ Future<ResponseIsolateMessage> _proccessNetworkIsolatorRequest({
     switch (method) {
       case METHOD.POST:
         return client
-            .post(endpoint, data: data, queryParameters: params ?? {}, options: options)
+            .post(
+              endpoint,
+              data: data,
+              queryParameters: params ?? {},
+              options: options,
+            )
             .asNetworkMessageResponse(id);
       case METHOD.GET:
         return client.get(endpoint, queryParameters: params ?? {}, options: options).asNetworkMessageResponse(id);

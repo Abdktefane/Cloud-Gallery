@@ -97,6 +97,7 @@ class PrefsRepositoryImpl implements PrefsRepository {
     await _prefs.remove(PreferencesKeys.FB_USER_TOKEN);
     await _prefs.remove(_UPLOADED_FILES_KEY);
     await _prefs.remove(_IMAGE_FILE_SOURCE);
+    await _prefs.remove(_LAST_SERVER_SYNC_DATE);
   }
 }
 

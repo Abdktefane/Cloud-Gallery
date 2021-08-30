@@ -35,8 +35,9 @@ class LoginRepositoryImpl extends LoginRepository {
       loginDataSource.register(email: email, password: password).whenSuccessWrapped((res) => _saveToken(res!.data!));
 
   Future<bool> _saveToken(LoginResponseModel res) async {
-    _tokensStore.saveToken(res.token!);
-    prefsRepository.setToken(res.token!);
+    await _tokensStore.saveToken(res.token!);
+    await prefsRepository.setToken(res.token!);
+    await prefsRepository.setSiteId(res.id!);
     return true;
   }
 }

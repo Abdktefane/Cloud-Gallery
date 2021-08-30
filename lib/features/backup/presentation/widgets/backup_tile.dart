@@ -7,6 +7,7 @@ import 'package:graduation_project/app/theme/colors.dart';
 import 'package:graduation_project/base/data/db/entities/backups.dart';
 import 'package:graduation_project/base/data/db/graduate_db.dart';
 import 'package:graduation_project/base/ext/widget_ext.dart';
+import 'package:graduation_project/base/utils/image_url_provider.dart';
 import 'package:graduation_project/features/backup/presentation/widgets/hero_photo_view.dart';
 import 'package:custom_pop_up_menu/custom_pop_up_menu.dart';
 
@@ -16,10 +17,16 @@ class BackupTile extends StatefulWidget {
     required this.backup,
     required this.toggleModifier,
     required this.searchByImage,
+    required this.restoreImage,
+    required this.imageUrlProvider,
+    required this.token,
   }) : super(key: key);
   final Backup backup;
   final ValueChanged<BackupModifier> toggleModifier;
   final ValueChanged<String> searchByImage;
+  final VoidCallback restoreImage;
+  final ImageUrlProvider imageUrlProvider;
+  final String token;
 
   @override
   _BackupTileState createState() => _BackupTileState();
@@ -30,6 +37,7 @@ class _BackupTileState extends State<BackupTile> {
   Backup get backup => widget.backup;
 
   late final List<ItemModel> menuItems;
+
   final CustomPopupMenuController _menuController = CustomPopupMenuController();
   ValueChanged<String> get searchByImage => widget.searchByImage;
 
@@ -51,22 +59,33 @@ class _BackupTileState extends State<BackupTile> {
           _menuController.hideMenu();
         },
       ),
-      ItemModel(
-        icon: Icons.toggle_on_rounded,
-        title: 'lbl_toggle',
-        onPress: () {
-          widget.toggleModifier(backup.modifier);
-          _menuController.hideMenu();
-        },
-      ),
-      ItemModel(
-        icon: Icons.search,
-        title: 'lbl_search',
-        onPress: () {
-          widget.searchByImage(backup.serverPath!);
-          _menuController.hideMenu();
-        },
-      ),
+      if (backup.serverPath != null) ...{
+        ItemModel(
+          icon: Icons.toggle_on_rounded,
+          title: 'lbl_toggle',
+          onPress: () {
+            widget.toggleModifier(backup.modifier);
+            _menuController.hideMenu();
+          },
+        ),
+        ItemModel(
+          icon: Icons.search,
+          title: 'lbl_search',
+          onPress: () {
+            widget.searchByImage(backup.serverPath!);
+            _menuController.hideMenu();
+          },
+        ),
+      },
+      if (backup.needRestore == true && backup.serverPath != null)
+        ItemModel(
+          icon: Icons.download,
+          title: 'lbl_restore',
+          onPress: () {
+            widget.restoreImage();
+            _menuController.hideMenu();
+          },
+        ),
     ];
   }
 
@@ -78,10 +97,11 @@ class _BackupTileState extends State<BackupTile> {
         shaderCallback: (Rect bounds) => linearGradient,
         child: Icon(widget.backup.status.icon, color: PRIMARY),
       ),
-      title: Text(widget.backup.title ?? ''),
+      title: Text(widget.backup.title ?? widget.backup.serverPath ?? widget.backup.path ?? ''),
+
       onTap: showModifireActions ? () => _menuController.showMenu() : openImage,
       // onTap: () => _menuController.showMenu(),
-    ).modifier(decoration: const BoxDecoration(color: WHITE));
+    ).modifier(decoration: BoxDecoration(color: backup.needRestore ? LIGHT_ACCENT.withOpacity(0.1) : WHITE));
 
     if (!showModifireActions) {
       return child;
@@ -114,8 +134,18 @@ class _BackupTileState extends State<BackupTile> {
   }
 
   void openImage() {
+    late final ImageProvider image;
+    if (File(widget.backup.path ?? '').existsSync()) {
+      image = Image.file(File(widget.backup.path ?? '')).image;
+    } else {
+      image = Image.network(
+        widget.imageUrlProvider.get(backup.serverPath ?? ''),
+        headers: {'Authorization': widget.token},
+      ).image;
+    }
     App.navKey.currentContext?.pushPage(HeroPhotoViewRouteWrapper(
-      imageProvider: Image.file(File(widget.backup.path ?? '')).image,
+      // imageProvider: Image.file(File(widget.backup.path ?? '')).image,
+      imageProvider: image,
       tag: widget.backup.id,
     ));
   }
@@ -124,7 +154,7 @@ class _BackupTileState extends State<BackupTile> {
     return ClipRRect(
       borderRadius: BorderRadius.circular(5),
       child: Container(
-        width: 150,
+        width: 180,
         color: const Color(0xFF4C4C4C),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,

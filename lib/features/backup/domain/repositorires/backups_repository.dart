@@ -14,23 +14,19 @@ abstract class BackupsRepository extends BaseRepository {
     CommonDataSource backupsDataSource,
   ) : super(backupsDataSource);
 
-  Stream<List<Backup>> observeActiveBackups();
-
-  Stream<List<Backup>> observePendingBackup();
-
-  Stream<List<Backup>> observeUploadedBackup();
-
   Stream<List<Backup>> observeBackupsByStatus({
     required BackupStatus status,
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
   });
 
   Future<void> addNewImages(
     List<AssetEntity> rawImages, {
     InsertMode insertMode = InsertMode.insertOrIgnore,
-    UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
+    BackupsCompanion Function(BackupsCompanion backup)? onConflict,
+    // UpsertClause<Table, Backup> Function($BackupsTable)? onConflict,
   });
 
   Future<LastSyncRequest?> getLastSync();
@@ -47,11 +43,21 @@ abstract class BackupsRepository extends BaseRepository {
 
   Stream<int> observeBackupsRows({required BackupStatus status, required BackupModifier modifier});
 
+  Stream<int> observePendingBackupsRows({required BackupModifier modifier});
+
   Future<List<Backup>> getBackupsByStatus({
     required BackupStatus status,
     required bool asc,
     required BackupModifier modifier,
     int? limit,
+    bool withNeedRestore = false,
+  });
+
+  Future<List<Backup>> getPendingImages({
+    required bool asc,
+    required BackupModifier modifier,
+    int? limit,
+    bool withNeedRestore = false,
   });
 
   Future<NetworkResult<UploadModel?>> changeModifire({

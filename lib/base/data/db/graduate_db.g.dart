@@ -9,7 +9,6 @@ part of 'graduate_db.dart';
 // ignore_for_file: unnecessary_brace_in_string_interps, unnecessary_this
 class Backup extends DataClass implements Insertable<Backup> {
   final String? path;
-  final String mime;
   final Uint8List thumbData;
   final String id;
   final String? title;
@@ -20,7 +19,6 @@ class Backup extends DataClass implements Insertable<Backup> {
   final DateTime createdDate;
   Backup(
       {this.path,
-      required this.mime,
       required this.thumbData,
       required this.id,
       this.title,
@@ -29,30 +27,20 @@ class Backup extends DataClass implements Insertable<Backup> {
       required this.modifier,
       required this.needRestore,
       required this.createdDate});
-  factory Backup.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory Backup.fromData(Map<String, dynamic> data, GeneratedDatabase db, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return Backup(
-      path: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}path']),
-      mime: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}mime'])!,
-      thumbData: const BlobType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}thumb_data'])!,
-      id: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      title: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}title']),
-      serverPath: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}server_path']),
-      status: $BackupsTable.$converter0.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
-      modifier: $BackupsTable.$converter1.mapToDart(const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}modifier']))!,
-      needRestore: const BoolType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}need_restore'])!,
-      createdDate: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}created_date'])!,
+      path: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}path']),
+      thumbData: const BlobType().mapFromDatabaseResponse(data['${effectivePrefix}thumb_data'])!,
+      id: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      title: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}title']),
+      serverPath: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}server_path']),
+      status: $BackupsTable.$converter0
+          .mapToDart(const IntType().mapFromDatabaseResponse(data['${effectivePrefix}status']))!,
+      modifier: $BackupsTable.$converter1
+          .mapToDart(const IntType().mapFromDatabaseResponse(data['${effectivePrefix}modifier']))!,
+      needRestore: const BoolType().mapFromDatabaseResponse(data['${effectivePrefix}need_restore'])!,
+      createdDate: const DateTimeType().mapFromDatabaseResponse(data['${effectivePrefix}created_date'])!,
     );
   }
   @override
@@ -61,7 +49,6 @@ class Backup extends DataClass implements Insertable<Backup> {
     if (!nullToAbsent || path != null) {
       map['path'] = Variable<String?>(path);
     }
-    map['mime'] = Variable<String>(mime);
     map['thumb_data'] = Variable<Uint8List>(thumbData);
     map['id'] = Variable<String>(id);
     if (!nullToAbsent || title != null) {
@@ -86,14 +73,10 @@ class Backup extends DataClass implements Insertable<Backup> {
   BackupsCompanion toCompanion(bool nullToAbsent) {
     return BackupsCompanion(
       path: path == null && nullToAbsent ? const Value.absent() : Value(path),
-      mime: Value(mime),
       thumbData: Value(thumbData),
       id: Value(id),
-      title:
-          title == null && nullToAbsent ? const Value.absent() : Value(title),
-      serverPath: serverPath == null && nullToAbsent
-          ? const Value.absent()
-          : Value(serverPath),
+      title: title == null && nullToAbsent ? const Value.absent() : Value(title),
+      serverPath: serverPath == null && nullToAbsent ? const Value.absent() : Value(serverPath),
       status: Value(status),
       modifier: Value(modifier),
       needRestore: Value(needRestore),
@@ -101,12 +84,10 @@ class Backup extends DataClass implements Insertable<Backup> {
     );
   }
 
-  factory Backup.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Backup.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return Backup(
       path: serializer.fromJson<String?>(json['path']),
-      mime: serializer.fromJson<String>(json['mime']),
       thumbData: serializer.fromJson<Uint8List>(json['thumbData']),
       id: serializer.fromJson<String>(json['id']),
       title: serializer.fromJson<String?>(json['title']),
@@ -122,7 +103,6 @@ class Backup extends DataClass implements Insertable<Backup> {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'path': serializer.toJson<String?>(path),
-      'mime': serializer.toJson<String>(mime),
       'thumbData': serializer.toJson<Uint8List>(thumbData),
       'id': serializer.toJson<String>(id),
       'title': serializer.toJson<String?>(title),
@@ -136,7 +116,6 @@ class Backup extends DataClass implements Insertable<Backup> {
 
   Backup copyWith(
           {String? path,
-          String? mime,
           Uint8List? thumbData,
           String? id,
           String? title,
@@ -147,7 +126,6 @@ class Backup extends DataClass implements Insertable<Backup> {
           DateTime? createdDate}) =>
       Backup(
         path: path ?? this.path,
-        mime: mime ?? this.mime,
         thumbData: thumbData ?? this.thumbData,
         id: id ?? this.id,
         title: title ?? this.title,
@@ -161,7 +139,6 @@ class Backup extends DataClass implements Insertable<Backup> {
   String toString() {
     return (StringBuffer('Backup(')
           ..write('path: $path, ')
-          ..write('mime: $mime, ')
           ..write('thumbData: $thumbData, ')
           ..write('id: $id, ')
           ..write('title: $title, ')
@@ -178,28 +155,21 @@ class Backup extends DataClass implements Insertable<Backup> {
   int get hashCode => $mrjf($mrjc(
       path.hashCode,
       $mrjc(
-          mime.hashCode,
+          thumbData.hashCode,
           $mrjc(
-              thumbData.hashCode,
+              id.hashCode,
               $mrjc(
-                  id.hashCode,
+                  title.hashCode,
                   $mrjc(
-                      title.hashCode,
-                      $mrjc(
-                          serverPath.hashCode,
-                          $mrjc(
-                              status.hashCode,
-                              $mrjc(
-                                  modifier.hashCode,
-                                  $mrjc(needRestore.hashCode,
-                                      createdDate.hashCode))))))))));
+                      serverPath.hashCode,
+                      $mrjc(status.hashCode,
+                          $mrjc(modifier.hashCode, $mrjc(needRestore.hashCode, createdDate.hashCode)))))))));
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is Backup &&
           other.path == this.path &&
-          other.mime == this.mime &&
-          other.thumbData == this.thumbData &&
+          // other.thumbData == this.thumbData &&
           other.id == this.id &&
           other.title == this.title &&
           other.serverPath == this.serverPath &&
@@ -211,7 +181,6 @@ class Backup extends DataClass implements Insertable<Backup> {
 
 class BackupsCompanion extends UpdateCompanion<Backup> {
   final Value<String?> path;
-  final Value<String> mime;
   final Value<Uint8List> thumbData;
   final Value<String> id;
   final Value<String?> title;
@@ -222,7 +191,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
   final Value<DateTime> createdDate;
   const BackupsCompanion({
     this.path = const Value.absent(),
-    this.mime = const Value.absent(),
     this.thumbData = const Value.absent(),
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -234,7 +202,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
   });
   BackupsCompanion.insert({
     this.path = const Value.absent(),
-    required String mime,
     required Uint8List thumbData,
     required String id,
     this.title = const Value.absent(),
@@ -243,12 +210,10 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     this.modifier = const Value.absent(),
     this.needRestore = const Value.absent(),
     this.createdDate = const Value.absent(),
-  })  : mime = Value(mime),
-        thumbData = Value(thumbData),
+  })  : thumbData = Value(thumbData),
         id = Value(id);
   static Insertable<Backup> custom({
     Expression<String?>? path,
-    Expression<String>? mime,
     Expression<Uint8List>? thumbData,
     Expression<String>? id,
     Expression<String?>? title,
@@ -260,7 +225,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
   }) {
     return RawValuesInsertable({
       if (path != null) 'path': path,
-      if (mime != null) 'mime': mime,
       if (thumbData != null) 'thumb_data': thumbData,
       if (id != null) 'id': id,
       if (title != null) 'title': title,
@@ -274,7 +238,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
 
   BackupsCompanion copyWith(
       {Value<String?>? path,
-      Value<String>? mime,
       Value<Uint8List>? thumbData,
       Value<String>? id,
       Value<String?>? title,
@@ -285,7 +248,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
       Value<DateTime>? createdDate}) {
     return BackupsCompanion(
       path: path ?? this.path,
-      mime: mime ?? this.mime,
       thumbData: thumbData ?? this.thumbData,
       id: id ?? this.id,
       title: title ?? this.title,
@@ -302,9 +264,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
     final map = <String, Expression>{};
     if (path.present) {
       map['path'] = Variable<String?>(path.value);
-    }
-    if (mime.present) {
-      map['mime'] = Variable<String>(mime.value);
     }
     if (thumbData.present) {
       map['thumb_data'] = Variable<Uint8List>(thumbData.value);
@@ -339,7 +298,6 @@ class BackupsCompanion extends UpdateCompanion<Backup> {
   String toString() {
     return (StringBuffer('BackupsCompanion(')
           ..write('path: $path, ')
-          ..write('mime: $mime, ')
           ..write('thumbData: $thumbData, ')
           ..write('id: $id, ')
           ..write('title: $title, ')
@@ -358,93 +316,55 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
   final String? _alias;
   $BackupsTable(this._db, [this._alias]);
   final VerificationMeta _pathMeta = const VerificationMeta('path');
-  late final GeneratedColumn<String?> path = GeneratedColumn<String?>(
-      'path', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
-  final VerificationMeta _mimeMeta = const VerificationMeta('mime');
-  late final GeneratedColumn<String?> mime = GeneratedColumn<String?>(
-      'mime', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+  late final GeneratedColumn<String?> path =
+      GeneratedColumn<String?>('path', aliasedName, true, typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _thumbDataMeta = const VerificationMeta('thumbData');
   late final GeneratedColumn<Uint8List?> thumbData =
-      GeneratedColumn<Uint8List?>('thumb_data', aliasedName, false,
-          typeName: 'BLOB', requiredDuringInsert: true);
+      GeneratedColumn<Uint8List?>('thumb_data', aliasedName, false, typeName: 'BLOB', requiredDuringInsert: true);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedColumn<String?> id = GeneratedColumn<String?>(
-      'id', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+  late final GeneratedColumn<String?> id =
+      GeneratedColumn<String?>('id', aliasedName, false, typeName: 'TEXT', requiredDuringInsert: true);
   final VerificationMeta _titleMeta = const VerificationMeta('title');
-  late final GeneratedColumn<String?> title = GeneratedColumn<String?>(
-      'title', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
+  late final GeneratedColumn<String?> title = GeneratedColumn<String?>('title', aliasedName, true,
+      typeName: 'TEXT', requiredDuringInsert: false, $customConstraints: 'UNIQUE');
   final VerificationMeta _serverPathMeta = const VerificationMeta('serverPath');
-  late final GeneratedColumn<String?> serverPath = GeneratedColumn<String?>(
-      'server_path', aliasedName, true,
-      typeName: 'TEXT', requiredDuringInsert: false);
+  late final GeneratedColumn<String?> serverPath =
+      GeneratedColumn<String?>('server_path', aliasedName, true, typeName: 'TEXT', requiredDuringInsert: false);
   final VerificationMeta _statusMeta = const VerificationMeta('status');
-  late final GeneratedColumnWithTypeConverter<BackupStatus, int?> status =
-      GeneratedColumn<int?>('status', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: false,
-              defaultValue: Constant(BackupStatus.PENDING.index))
-          .withConverter<BackupStatus>($BackupsTable.$converter0);
+  late final GeneratedColumnWithTypeConverter<BackupStatus, int?> status = GeneratedColumn<int?>(
+          'status', aliasedName, false,
+          typeName: 'INTEGER', requiredDuringInsert: false, defaultValue: Constant(BackupStatus.UPLOADED.index))
+      .withConverter<BackupStatus>($BackupsTable.$converter0);
   final VerificationMeta _modifierMeta = const VerificationMeta('modifier');
-  late final GeneratedColumnWithTypeConverter<BackupModifier, int?> modifier =
-      GeneratedColumn<int?>('modifier', aliasedName, false,
-              typeName: 'INTEGER',
-              requiredDuringInsert: false,
-              defaultValue: Constant(BackupModifier.PRIVATE.index))
-          .withConverter<BackupModifier>($BackupsTable.$converter1);
-  final VerificationMeta _needRestoreMeta =
-      const VerificationMeta('needRestore');
-  late final GeneratedColumn<bool?> needRestore = GeneratedColumn<bool?>(
-      'need_restore', aliasedName, false,
+  late final GeneratedColumnWithTypeConverter<BackupModifier, int?> modifier = GeneratedColumn<int?>(
+          'modifier', aliasedName, false,
+          typeName: 'INTEGER', requiredDuringInsert: false, defaultValue: Constant(BackupModifier.PRIVATE.index))
+      .withConverter<BackupModifier>($BackupsTable.$converter1);
+  final VerificationMeta _needRestoreMeta = const VerificationMeta('needRestore');
+  late final GeneratedColumn<bool?> needRestore = GeneratedColumn<bool?>('need_restore', aliasedName, false,
       typeName: 'INTEGER',
       requiredDuringInsert: false,
       defaultConstraints: 'CHECK (need_restore IN (0, 1))',
       defaultValue: const Constant(true));
-  final VerificationMeta _createdDateMeta =
-      const VerificationMeta('createdDate');
-  late final GeneratedColumn<DateTime?> createdDate =
-      GeneratedColumn<DateTime?>('created_date', aliasedName, false,
-          typeName: 'INTEGER',
-          requiredDuringInsert: false,
-          defaultValue: currentDateAndTime);
+  final VerificationMeta _createdDateMeta = const VerificationMeta('createdDate');
+  late final GeneratedColumn<DateTime?> createdDate = GeneratedColumn<DateTime?>('created_date', aliasedName, false,
+      typeName: 'INTEGER', requiredDuringInsert: false, defaultValue: currentDateAndTime);
   @override
-  List<GeneratedColumn> get $columns => [
-        path,
-        mime,
-        thumbData,
-        id,
-        title,
-        serverPath,
-        status,
-        modifier,
-        needRestore,
-        createdDate
-      ];
+  List<GeneratedColumn> get $columns =>
+      [path, thumbData, id, title, serverPath, status, modifier, needRestore, createdDate];
   @override
   String get aliasedName => _alias ?? 'backups';
   @override
   String get actualTableName => 'backups';
   @override
-  VerificationContext validateIntegrity(Insertable<Backup> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<Backup> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('path')) {
-      context.handle(
-          _pathMeta, path.isAcceptableOrUnknown(data['path']!, _pathMeta));
-    }
-    if (data.containsKey('mime')) {
-      context.handle(
-          _mimeMeta, mime.isAcceptableOrUnknown(data['mime']!, _mimeMeta));
-    } else if (isInserting) {
-      context.missing(_mimeMeta);
+      context.handle(_pathMeta, path.isAcceptableOrUnknown(data['path']!, _pathMeta));
     }
     if (data.containsKey('thumb_data')) {
-      context.handle(_thumbDataMeta,
-          thumbData.isAcceptableOrUnknown(data['thumb_data']!, _thumbDataMeta));
+      context.handle(_thumbDataMeta, thumbData.isAcceptableOrUnknown(data['thumb_data']!, _thumbDataMeta));
     } else if (isInserting) {
       context.missing(_thumbDataMeta);
     }
@@ -454,28 +374,18 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
       context.missing(_idMeta);
     }
     if (data.containsKey('title')) {
-      context.handle(
-          _titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
+      context.handle(_titleMeta, title.isAcceptableOrUnknown(data['title']!, _titleMeta));
     }
     if (data.containsKey('server_path')) {
-      context.handle(
-          _serverPathMeta,
-          serverPath.isAcceptableOrUnknown(
-              data['server_path']!, _serverPathMeta));
+      context.handle(_serverPathMeta, serverPath.isAcceptableOrUnknown(data['server_path']!, _serverPathMeta));
     }
     context.handle(_statusMeta, const VerificationResult.success());
     context.handle(_modifierMeta, const VerificationResult.success());
     if (data.containsKey('need_restore')) {
-      context.handle(
-          _needRestoreMeta,
-          needRestore.isAcceptableOrUnknown(
-              data['need_restore']!, _needRestoreMeta));
+      context.handle(_needRestoreMeta, needRestore.isAcceptableOrUnknown(data['need_restore']!, _needRestoreMeta));
     }
     if (data.containsKey('created_date')) {
-      context.handle(
-          _createdDateMeta,
-          createdDate.isAcceptableOrUnknown(
-              data['created_date']!, _createdDateMeta));
+      context.handle(_createdDateMeta, createdDate.isAcceptableOrUnknown(data['created_date']!, _createdDateMeta));
     }
     return context;
   }
@@ -484,8 +394,7 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Backup map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Backup.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    return Backup.fromData(data, _db, prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -493,8 +402,7 @@ class $BackupsTable extends Backups with TableInfo<$BackupsTable, Backup> {
     return $BackupsTable(_db, alias);
   }
 
-  static TypeConverter<BackupStatus, int> $converter0 =
-      const EnumIndexConverter<BackupStatus>(BackupStatus.values);
+  static TypeConverter<BackupStatus, int> $converter0 = const EnumIndexConverter<BackupStatus>(BackupStatus.values);
   static TypeConverter<BackupModifier, int> $converter1 =
       const EnumIndexConverter<BackupModifier>(BackupModifier.values);
 }
@@ -503,15 +411,11 @@ class LastSyncRequest extends DataClass implements Insertable<LastSyncRequest> {
   final int id;
   final DateTime? lastSyncDate;
   LastSyncRequest({required this.id, this.lastSyncDate});
-  factory LastSyncRequest.fromData(
-      Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory LastSyncRequest.fromData(Map<String, dynamic> data, GeneratedDatabase db, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return LastSyncRequest(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      lastSyncDate: const DateTimeType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}last_sync_date']),
+      id: const IntType().mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      lastSyncDate: const DateTimeType().mapFromDatabaseResponse(data['${effectivePrefix}last_sync_date']),
     );
   }
   @override
@@ -527,14 +431,11 @@ class LastSyncRequest extends DataClass implements Insertable<LastSyncRequest> {
   LastSyncRequestsCompanion toCompanion(bool nullToAbsent) {
     return LastSyncRequestsCompanion(
       id: Value(id),
-      lastSyncDate: lastSyncDate == null && nullToAbsent
-          ? const Value.absent()
-          : Value(lastSyncDate),
+      lastSyncDate: lastSyncDate == null && nullToAbsent ? const Value.absent() : Value(lastSyncDate),
     );
   }
 
-  factory LastSyncRequest.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory LastSyncRequest.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return LastSyncRequest(
       id: serializer.fromJson<int>(json['id']),
@@ -550,17 +451,13 @@ class LastSyncRequest extends DataClass implements Insertable<LastSyncRequest> {
     };
   }
 
-  LastSyncRequest copyWith({int? id, DateTime? lastSyncDate}) =>
-      LastSyncRequest(
+  LastSyncRequest copyWith({int? id, DateTime? lastSyncDate}) => LastSyncRequest(
         id: id ?? this.id,
         lastSyncDate: lastSyncDate ?? this.lastSyncDate,
       );
   @override
   String toString() {
-    return (StringBuffer('LastSyncRequest(')
-          ..write('id: $id, ')
-          ..write('lastSyncDate: $lastSyncDate')
-          ..write(')'))
+    return (StringBuffer('LastSyncRequest(')..write('id: $id, ')..write('lastSyncDate: $lastSyncDate')..write(')'))
         .toString();
   }
 
@@ -569,9 +466,7 @@ class LastSyncRequest extends DataClass implements Insertable<LastSyncRequest> {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is LastSyncRequest &&
-          other.id == this.id &&
-          other.lastSyncDate == this.lastSyncDate);
+      (other is LastSyncRequest && other.id == this.id && other.lastSyncDate == this.lastSyncDate);
 }
 
 class LastSyncRequestsCompanion extends UpdateCompanion<LastSyncRequest> {
@@ -595,8 +490,7 @@ class LastSyncRequestsCompanion extends UpdateCompanion<LastSyncRequest> {
     });
   }
 
-  LastSyncRequestsCompanion copyWith(
-      {Value<int>? id, Value<DateTime?>? lastSyncDate}) {
+  LastSyncRequestsCompanion copyWith({Value<int>? id, Value<DateTime?>? lastSyncDate}) {
     return LastSyncRequestsCompanion(
       id: id ?? this.id,
       lastSyncDate: lastSyncDate ?? this.lastSyncDate,
@@ -625,23 +519,19 @@ class LastSyncRequestsCompanion extends UpdateCompanion<LastSyncRequest> {
   }
 }
 
-class $LastSyncRequestsTable extends LastSyncRequests
-    with TableInfo<$LastSyncRequestsTable, LastSyncRequest> {
+class $LastSyncRequestsTable extends LastSyncRequests with TableInfo<$LastSyncRequestsTable, LastSyncRequest> {
   final GeneratedDatabase _db;
   final String? _alias;
   $LastSyncRequestsTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
-      'id', aliasedName, false,
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>('id', aliasedName, false,
       typeName: 'INTEGER',
       requiredDuringInsert: false,
       defaultConstraints: 'PRIMARY KEY AUTOINCREMENT',
       defaultValue: const Constant(0));
-  final VerificationMeta _lastSyncDateMeta =
-      const VerificationMeta('lastSyncDate');
+  final VerificationMeta _lastSyncDateMeta = const VerificationMeta('lastSyncDate');
   late final GeneratedColumn<DateTime?> lastSyncDate =
-      GeneratedColumn<DateTime?>('last_sync_date', aliasedName, true,
-          typeName: 'INTEGER', requiredDuringInsert: false);
+      GeneratedColumn<DateTime?>('last_sync_date', aliasedName, true, typeName: 'INTEGER', requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [id, lastSyncDate];
   @override
@@ -649,18 +539,14 @@ class $LastSyncRequestsTable extends LastSyncRequests
   @override
   String get actualTableName => 'last_sync_requests';
   @override
-  VerificationContext validateIntegrity(Insertable<LastSyncRequest> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<LastSyncRequest> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('last_sync_date')) {
-      context.handle(
-          _lastSyncDateMeta,
-          lastSyncDate.isAcceptableOrUnknown(
-              data['last_sync_date']!, _lastSyncDateMeta));
+      context.handle(_lastSyncDateMeta, lastSyncDate.isAcceptableOrUnknown(data['last_sync_date']!, _lastSyncDateMeta));
     }
     return context;
   }
@@ -669,8 +555,7 @@ class $LastSyncRequestsTable extends LastSyncRequests
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   LastSyncRequest map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return LastSyncRequest.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    return LastSyncRequest.fromData(data, _db, prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -683,14 +568,11 @@ class Token extends DataClass implements Insertable<Token> {
   final int id;
   final String token;
   Token({required this.id, required this.token});
-  factory Token.fromData(Map<String, dynamic> data, GeneratedDatabase db,
-      {String? prefix}) {
+  factory Token.fromData(Map<String, dynamic> data, GeneratedDatabase db, {String? prefix}) {
     final effectivePrefix = prefix ?? '';
     return Token(
-      id: const IntType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
-      token: const StringType()
-          .mapFromDatabaseResponse(data['${effectivePrefix}token'])!,
+      id: const IntType().mapFromDatabaseResponse(data['${effectivePrefix}id'])!,
+      token: const StringType().mapFromDatabaseResponse(data['${effectivePrefix}token'])!,
     );
   }
   @override
@@ -708,8 +590,7 @@ class Token extends DataClass implements Insertable<Token> {
     );
   }
 
-  factory Token.fromJson(Map<String, dynamic> json,
-      {ValueSerializer? serializer}) {
+  factory Token.fromJson(Map<String, dynamic> json, {ValueSerializer? serializer}) {
     serializer ??= moorRuntimeOptions.defaultSerializer;
     return Token(
       id: serializer.fromJson<int>(json['id']),
@@ -731,19 +612,14 @@ class Token extends DataClass implements Insertable<Token> {
       );
   @override
   String toString() {
-    return (StringBuffer('Token(')
-          ..write('id: $id, ')
-          ..write('token: $token')
-          ..write(')'))
-        .toString();
+    return (StringBuffer('Token(')..write('id: $id, ')..write('token: $token')..write(')')).toString();
   }
 
   @override
   int get hashCode => $mrjf($mrjc(id.hashCode, token.hashCode));
   @override
   bool operator ==(Object other) =>
-      identical(this, other) ||
-      (other is Token && other.id == this.id && other.token == this.token);
+      identical(this, other) || (other is Token && other.id == this.id && other.token == this.token);
 }
 
 class TokensCompanion extends UpdateCompanion<Token> {
@@ -788,11 +664,7 @@ class TokensCompanion extends UpdateCompanion<Token> {
 
   @override
   String toString() {
-    return (StringBuffer('TokensCompanion(')
-          ..write('id: $id, ')
-          ..write('token: $token')
-          ..write(')'))
-        .toString();
+    return (StringBuffer('TokensCompanion(')..write('id: $id, ')..write('token: $token')..write(')')).toString();
   }
 }
 
@@ -801,16 +673,14 @@ class $TokensTable extends Tokens with TableInfo<$TokensTable, Token> {
   final String? _alias;
   $TokensTable(this._db, [this._alias]);
   final VerificationMeta _idMeta = const VerificationMeta('id');
-  late final GeneratedColumn<int?> id = GeneratedColumn<int?>(
-      'id', aliasedName, false,
+  late final GeneratedColumn<int?> id = GeneratedColumn<int?>('id', aliasedName, false,
       typeName: 'INTEGER',
       requiredDuringInsert: false,
       defaultConstraints: 'PRIMARY KEY AUTOINCREMENT',
       defaultValue: const Constant(0));
   final VerificationMeta _tokenMeta = const VerificationMeta('token');
-  late final GeneratedColumn<String?> token = GeneratedColumn<String?>(
-      'token', aliasedName, false,
-      typeName: 'TEXT', requiredDuringInsert: true);
+  late final GeneratedColumn<String?> token =
+      GeneratedColumn<String?>('token', aliasedName, false, typeName: 'TEXT', requiredDuringInsert: true);
   @override
   List<GeneratedColumn> get $columns => [id, token];
   @override
@@ -818,16 +688,14 @@ class $TokensTable extends Tokens with TableInfo<$TokensTable, Token> {
   @override
   String get actualTableName => 'tokens';
   @override
-  VerificationContext validateIntegrity(Insertable<Token> instance,
-      {bool isInserting = false}) {
+  VerificationContext validateIntegrity(Insertable<Token> instance, {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
     if (data.containsKey('token')) {
-      context.handle(
-          _tokenMeta, token.isAcceptableOrUnknown(data['token']!, _tokenMeta));
+      context.handle(_tokenMeta, token.isAcceptableOrUnknown(data['token']!, _tokenMeta));
     } else if (isInserting) {
       context.missing(_tokenMeta);
     }
@@ -838,8 +706,7 @@ class $TokensTable extends Tokens with TableInfo<$TokensTable, Token> {
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
   Token map(Map<String, dynamic> data, {String? tablePrefix}) {
-    return Token.fromData(data, _db,
-        prefix: tablePrefix != null ? '$tablePrefix.' : null);
+    return Token.fromData(data, _db, prefix: tablePrefix != null ? '$tablePrefix.' : null);
   }
 
   @override
@@ -852,12 +719,10 @@ abstract class _$GraduateDB extends GeneratedDatabase {
   _$GraduateDB(QueryExecutor e) : super(SqlTypeSystem.defaultInstance, e);
   _$GraduateDB.connect(DatabaseConnection c) : super.connect(c);
   late final $BackupsTable backups = $BackupsTable(this);
-  late final $LastSyncRequestsTable lastSyncRequests =
-      $LastSyncRequestsTable(this);
+  late final $LastSyncRequestsTable lastSyncRequests = $LastSyncRequestsTable(this);
   late final $TokensTable tokens = $TokensTable(this);
   @override
   Iterable<TableInfo> get allTables => allSchemaEntities.whereType<TableInfo>();
   @override
-  List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [backups, lastSyncRequests, tokens];
+  List<DatabaseSchemaEntity> get allSchemaEntities => [backups, lastSyncRequests, tokens];
 }

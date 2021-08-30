@@ -1,4 +1,10 @@
+import 'dart:async';
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
+import 'package:graduation_project/features/backup/data/mappers/backup_mapper.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 abstract class PrefsRepository {
   String? get token;
@@ -46,3 +52,43 @@ extension ImageFileSourceExt on ImageFileSource {
   static ImageFileSource fromIndex(int? index) =>
       index == null || index == 1 ? ImageFileSource.FOLDER : ImageFileSource.ALL;
 }
+
+// String applicationDir() => getDiskPrefix() + ' Download/' + kSyncFolderName;
+
+Future<String> getApplicationPath() async {
+  try {
+    if (await Permission.storage.request().isGranted) {
+      final path = await findLocalPath(forDownload: true);
+      // final path = (await findLocalPath(forDownload: true)) + '/$kSyncFolderName/';
+      final savedDir = Directory(path);
+      if (!savedDir.existsSync()) {
+        savedDir.create();
+      }
+      return path;
+    } else
+      throw Exception('Error: Unable to get STORAGE permission!');
+  } catch (e) {
+    print(e);
+    throw Exception('Error: Unable to get STORAGE permission!');
+  }
+}
+
+Future<String> findLocalPath({bool forDownload = false}) async {
+  return '/storage/emulated/0/$kSyncFolderName';
+  // return '/storage/emulated/0/Pictures/$kSyncFolderName';
+  final directory = Platform.isAndroid
+      ? forDownload
+          ? Directory('/storage/emulated/0/Download')
+          : await (getExternalStorageDirectory() as FutureOr<Directory>)
+      : await getApplicationDocumentsDirectory();
+  return directory.path;
+}
+
+// Future<String> findLocalPath({bool forDownload = false}) async {
+//   final directory = Platform.isAndroid
+//       ? forDownload
+//           ? Directory('/storage/emulated/0/Download')
+//           : await (getExternalStorageDirectory() as FutureOr<Directory>)
+//       : await getApplicationDocumentsDirectory();
+//   return directory.path;
+// }

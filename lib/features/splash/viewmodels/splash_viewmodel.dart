@@ -32,16 +32,9 @@ abstract class _SplashViewmodelBase extends BaseViewmodel with Store {
       2.seconds,
       () => getContext((context) async {
         // context.pushNamedAndRemoveUntil(BasePage.route, (_) => false);
-        await _store.moveUploadingToPending();
-        if (await Permission.storage.request().isGranted) {
-          // final path = await getExternalStorageDirectories(type: StorageDirectory.pictures);
-          // final directory = Directory(path!.first.path + '/' + kSyncFolderName);
-          final path = 'storage/emulated/0/Android/media/$kSyncFolderName';
-          final directory = Directory(path);
-          if (!directory.existsSync()) {
-            await directory.create(recursive: true);
-          }
-        }
+        // TODO(abd): must move every thing to pending
+        // await _store.moveUploadingToPending();
+        await getApplicationPath();
         final token = (await _tokensStore.getToken())?.token;
         token.isNullOrEmpty
             ? context.pushNamedAndRemoveUntil(LoginPage.route, (_) => false)

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' as material;
 import 'package:graduation_project/app/theme/colors.dart';
@@ -10,7 +12,7 @@ enum BackupStatus {
   UPLOADED,
   CANCELED,
   UPLOADING,
-  PENDING,
+  // PENDING,
 }
 
 enum BackupModifier { PUBPLIC, PRIVATE }
@@ -45,8 +47,8 @@ extension BackupStatusExt on BackupStatus {
         return material.Icons.done;
       case BackupStatus.CANCELED:
         return material.Icons.cancel;
-      case BackupStatus.PENDING:
-        return material.Icons.timelapse;
+      // case BackupStatus.PENDING:
+      //   return material.Icons.timelapse;
       // return material.Icons.timelapse;
       case BackupStatus.UPLOADING:
         return material.Icons.circle;
@@ -63,17 +65,16 @@ extension BackupStatusExt on BackupStatus {
 class Backups extends GraduateEntity {
   TextColumn get path => text().nullable()();
 
-  // TextColumn get mime => text()();
-
   BlobColumn get thumbData => blob()();
 
   TextColumn get id => text()();
 
-  TextColumn get title => text().nullable()();
+  // TextColumn get title => text().nullable()();
+  TextColumn get title => text().nullable().customConstraint('UNIQUE')();
 
   TextColumn get serverPath => text().nullable()();
 
-  IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.PENDING.index))();
+  IntColumn get status => intEnum<BackupStatus>().withDefault(Constant(BackupStatus.UPLOADED.index))();
 
   IntColumn get modifier => intEnum<BackupModifier>().withDefault(Constant(BackupModifier.PRIVATE.index))();
 
@@ -90,7 +91,18 @@ extension BackupExtension on Backup {
 }
 
 extension BackupsCompanionExt on BackupsCompanion {
-  static BackupsCompanion fromJson(Object? json) => BackupsCompanion(
-        needRestore: Value(true),
-      );
+  static BackupsCompanion fromJson(Object? json) {
+    json as Map<String, dynamic>;
+
+    return BackupsCompanion(
+      // created date + path + title
+      serverPath: Value(json['name']),
+      title: Value(json['name']),
+      id: Value(json['identifier']),
+      modifier: Value(json['isPublic'] == true ? BackupModifier.PUBPLIC : BackupModifier.PRIVATE),
+      thumbData: Value(base64.decode(json['thump'])),
+      needRestore: const Value(true),
+      status: const Value(BackupStatus.UPLOADED),
+    );
+  }
 }
