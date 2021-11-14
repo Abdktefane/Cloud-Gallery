@@ -1,0 +1,65 @@
+{
+  "lbl_welcome": "مرحباً ",
+  "lbl_ok": "موافق",
+  "lbl_cancel": "إلغاء",
+
+
+  
+  "lbl_search":"البحث",
+  "lbl_base_screen": "الرئيسية",
+  "lbl_total_images":"عدد الصور",
+
+  "lbl_reco":"الإقتراحات",
+  "lbl_backup":"النسخ الاحتياطي",
+  "lbl_email":"البريد الإلكتروني",
+  "lbl_password":"كلمة السر",
+  "lbl_login":"تسجيل الدخول",
+  "lbl_sign_up":"إنشاء حساب",
+  "lbl_confirm_password":"تأكيد كلمة السر",
+  "lbl_change_language":"تغيير اللغة",
+  "lbl_language":"اللغات",
+  "lbl_settings":"الإعدادات",
+  "lbl_logout":"تسجبل الخروج",
+  "lbl_db_viewer": "مستعرض قاعدة البيانات",
+  "lbl_need_restore": "صور للإسترجاع",
+
+  "lbl_restore": "إسترجاع",
+
+
+
+  "lbl_canceled":"ملغية",
+  "lbl_uploaded":"تم الرفع",
+  "lbl_uploading":"جاري الرفع",
+  "lbl_pending":"قيد الانتظار",
+
+  "lbl_show_image":"عرض",
+  "lbl_toggle":"تبديل",
+
+  "lbl_control_panel":"لوحة التحكم",
+  "lbl_base_url":"العنوان الرئيسي",
+
+
+  "lbl_all":"كل الصور",
+  "lbl_folder":"مجلد خاص",
+
+  "lbl_text_search": "بحث نصي",
+  "lbl_image_search": "بحث صوري",
+  "lbl_sim_search": "بحث تشابهي",
+  "lbl_recommendations":"إقتراحات",
+
+  "lbl_switch_language_to": "تبديل اللغة إلى",
+
+
+
+
+
+  "lbl_empty": "محتوى فارغ",
+
+  "msg_confirm_save_start": "نحتاج اذن الوصول الى معرض الصور حتى يبدأ السحر الخاص بنا (لا أحد يمكنه روئية الصور اذا لم تسمح له بذلك)",
+  "msg_confirm_force_save_start": "هل أنت متأكد أنك تريد فرض المزامنة?",
+
+
+
+  "msg_app_exit_confirm": "هل انت متاكد من إغلاق التطبيق ؟"
+
+}

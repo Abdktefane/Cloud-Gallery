@@ -1,0 +1,54 @@
+{
+  "lbl_welcome": "Welcome!",
+  "lbl_ok": "ok",
+  "lbl_cancel": "cancel",
+
+
+  "lbl_search":"Search",
+  "lbl_base_screen": "Home",
+  "lbl_reco":"Recommendation",
+  "lbl_backup":"Backup",
+  "lbl_email":"Email",
+  "lbl_password":"Password",
+  "lbl_login":"Login",
+  "lbl_sign_up":"Signup",
+  "lbl_confirm_password":"Confirm Password",
+  "lbl_change_language":"Change Language",
+  "lbl_control_panel":"Control Panel",
+  "lbl_language":"Languages",
+  "lbl_settings":"Settings",
+  "lbl_logout":"Logout",
+  "lbl_db_viewer": "Data Base Viewer",
+  "lbl_total_images": "Images Count",
+  "lbl_need_restore": "Need Restore",
+  "lbl_restore": "Restore",
+
+  "lbl_canceled":"Canceled",
+  "lbl_uploaded":"Uploaded",
+  "lbl_uploading":"Uploading",
+  "lbl_pending":"Pending",
+
+  "lbl_empty": "Empty Content",
+
+  "lbl_show_image":"ِShow",
+  "lbl_toggle":"Toggle",
+  "lbl_base_url":"Base Url",
+
+  "lbl_text_search": "Text Search",
+  "lbl_image_search": "Image Search",
+  "lbl_sim_search": "Similarity Search",
+  "lbl_recommendations":"Recommendations",
+  "lbl_switch_language_to": "Switch Langauge To",
+  "msg_confirm_force_save_start": "Are you sure you want to force synchronize ?",
+
+
+  "lbl_all":"All Images",
+  "lbl_folder":"Special Folder",
+  
+
+
+
+  "msg_confirm_save_start": "We need access to the gallery for our magic to start (no one can see the photos if you don't let them)",
+
+  "msg_app_exit_confirm": "Are you sure you want exit ?"
+}
