@@ -1,4 +1,4 @@
-<img src="https://github.com/Abdktefane/Cloud-Gallery/blob/cdc91c815522114644d3a37d7322790a301c5fcf/assets/icons/ic_logo.svg" width="100%" alt="logo" />
+<img src="https://github.com/Abdktefane/Cloud-Gallery/blob/c1d5f3b8b7a451b0601a375cc25c1405f7197225/logo.jpg" width="100%" alt="logo" />
 <h2 align="center">
   Artificial Intelligence-Powered Gallery
 </h2>
