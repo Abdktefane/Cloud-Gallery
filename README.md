@@ -1,16 +1,30 @@
-# graduation_project
+<img src="https://github.com/Abdktefane/Cloud-Gallery/blob/cdc91c815522114644d3a37d7322790a301c5fcf/assets/icons/ic_logo.svg" width="100%" alt="logo" />
+<h2 align="center">
+  Artificial Intelligence-Powered Gallery
+</h2>
 
-A new Flutter project.
+## Overview
 
-## Getting Started
+##### Gallery with thousands of photos, no time to organize, no way to look, not enough space, These are problems everyone faces **_Cloud Gallery_** to rescue.
 
-This project is a starting point for a Flutter application.
+## Table of contents
 
-A few resources to get you started if this is your first Flutter project:
+- [Features](#features)
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
+- [Results](#results)
 
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Features
+- **Content based image search**: image/text to image search.
+- **Cloud Backup**: regular daily backup with restore ability, take in consideration battery and internet status.
+- **Social Image Platform** : all images is private, but users can make them public so all community can watch.
+- **Recommendations System**: system provide personalized recommendations based on community images.
+
+## Results
+![query1](https://github.com/Abdktefane/Cloud-Gallery/blob/cdc91c815522114644d3a37d7322790a301c5fcf/result1.png)
+---
+![query2](https://github.com/Abdktefane/Cloud-Gallery/blob/cdc91c815522114644d3a37d7322790a301c5fcf/result2.png)
+---
+![query3](https://github.com/Abdktefane/Cloud-Gallery/blob/cdc91c815522114644d3a37d7322790a301c5fcf/result3.png)
+---
+![query4](https://github.com/Abdktefane/Cloud-Gallery/blob/cdc91c815522114644d3a37d7322790a301c5fcf/result4.png)
+---
