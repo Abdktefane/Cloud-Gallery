@@ -4,8 +4,7 @@
 </h2>
 
 ## Overview
-
-##### Gallery with thousands of photos, no time to organize, no way to look, not enough space, These are problems everyone faces **_Cloud Gallery_** to rescue.
+##### Gallery with thousands of photos, no time to organize, no way to search and not enough space; these are problems everyone faces **_Cloud Gallery_** is the solution.
 
 ## Table of contents
 
